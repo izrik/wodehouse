@@ -1,0 +1,22 @@
+// File saved at 10/23/2014 5:06:16 PM
+
+expr = ( subexpr | item-access );
+
+subexpr = ( name | number | string | list | function-call );
+
+item-access = subexpr ( '[' expr:index ']' | '.' name )+;
+
+<token> name = [\l!#$%&*+-:<=>?@^_~] [\l\d!#$%&*+-:<=>?@^_~]*;
+
+<token> number = ( [\d]+ ( '.' [\d]* )? | '.' [\d]+ );
+
+<token> string = ( '\'' ( '"' | string-char )* '\'' | '"' ( '\'' | string-char )* '"' );
+
+list = '{' expr+ '}';
+
+function-call = '(' expr:function ( expr:arg )* ')';
+
+<subtoken> string-char = ( [^"'\\] | '\\' ["'\\nrt] | unicode-char );
+
+<subtoken, ignore case> unicode-char = '\\x' [\dabcdef] [\dabcdef] [\dabcdef] [\dabcdef];
+
