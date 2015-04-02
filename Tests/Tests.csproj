@@ -40,4 +40,10 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\wodehouse.csproj">
+      <Project>{96FFBB58-B878-4F70-976E-095E1D26C46B}</Project>
+      <Name>wodehouse</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
