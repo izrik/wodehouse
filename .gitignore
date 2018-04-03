@@ -188,3 +188,6 @@ FakesAssemblies/
 # JetBrains
 .idea/
 *.iml
+
+# virtualenv
+.venv/
