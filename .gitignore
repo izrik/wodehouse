@@ -185,3 +185,6 @@ FakesAssemblies/
 # MonoDevelop
 *.userprefs
 
+# JetBrains
+.idea/
+*.iml
