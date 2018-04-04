@@ -42,7 +42,7 @@ def read_expr(s):
     if ch in string.digits:
         return read_integer_literal(s)
     if ch in '+-*/' or ch in string.ascii_letters:
-        return read_varref(s)
+        return read_symbol(s)
     raise Exception('Unknown starting character "{}" in read_expr'.format(ch))
 
 
@@ -50,21 +50,21 @@ class WObject(object):
     pass
 
 
-class Varref(WObject):
+class Symbol(WObject):
     def __init__(self, name):
         self.name = name
 
     def __str__(self):
-        return 'Varref({})'.format(self.name)
+        return 'Symbol({})'.format(self.name)
 
 
-def read_varref(s):
+def read_symbol(s):
     ch = s.peek()
     if ch in string.ascii_letters:
         return read_name(s)
     if ch in '+-*/':
         s.get_next_char()
-        return Varref(ch)
+        return Symbol(ch)
 
 
 def read_name(s):
@@ -72,7 +72,7 @@ def read_name(s):
     while s.has_chars() and s.peek() in string.ascii_letters:
         chs.append(s.get_next_char())
     name = ''.join(chs)
-    return Varref(name)
+    return Symbol(name)
 
 
 class Number(WObject):
@@ -144,7 +144,7 @@ def apply_expr(expr, state):
             args = exprs[1:]
         args = [apply_expr(arg, state) for arg in args]
         return callee(*args)
-    if isinstance(expr, Varref):
+    if isinstance(expr, Symbol):
         if expr.name not in state:
             raise NameError(
                 'No object found by the name of "{}"'.format(expr.name))
@@ -209,12 +209,12 @@ class Let(Macro):
     def __init__(self):
         super(Let, self).__init__()
 
-    def __call__(self, varref, value, *exprs, state=None, **kwargs):
+    def __call__(self, symbol, value, *exprs, state=None, **kwargs):
         if state is None:
             state = {}
         _state = state
         state = ChainMap({}, _state)
-        state[varref.name] = apply_expr(value, _state)
+        state[symbol.name] = apply_expr(value, _state)
         return exprs, state
 
 
