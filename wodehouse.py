@@ -248,9 +248,31 @@ class WList(WObject):
             return None
         return self.values[0]
 
+    @property
+    def remaining(self):
+        if not self.values:
+            return WList()
+        return WList(*self.values[1:])
+
 
 def list_func(*args):
     return WList(*args)
+
+
+def car(first, *args):
+    if args:
+        raise Exception('Too many arguments given to car')
+    if not isinstance(first, WList):
+        raise TypeError('{} is not a list'.format(str(first)))
+    return first.head
+
+
+def cdr(first, *args):
+    if args:
+        raise Exception('Too many arguments given to cdr')
+    if not isinstance(first, WList):
+        raise TypeError('{} is not a list'.format(str(first)))
+    return first.remaining
 
 
 def repl(prompt=None):
@@ -264,6 +286,8 @@ def repl(prompt=None):
         'let': Let(),
         'apply': Apply(),
         'list': list_func,
+        'car': car,
+        'cdr': cdr,
     }
     while True:
         try:
