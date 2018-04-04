@@ -235,6 +235,24 @@ class Quote(Macro):
         return args, state
 
 
+class WList(WObject):
+    def __init__(self, *values):
+        self.values = list(values)
+
+    def __str__(self):
+        return '({})'.format(' '.join(str(value) for value in self.values))
+
+    @property
+    def head(self):
+        if not self.values:
+            return None
+        return self.values[0]
+
+
+def list_func(*args):
+    return WList(*args)
+
+
 def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
@@ -245,6 +263,7 @@ def repl(prompt=None):
         '/': div,
         'let': Let(),
         'apply': Apply(),
+        'list': list_func,
     }
     while True:
         try:
