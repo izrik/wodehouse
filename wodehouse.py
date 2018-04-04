@@ -275,6 +275,18 @@ def cdr(first, *args):
     return first.remaining
 
 
+def atom(arg):
+    return not isinstance(arg, WList)
+
+
+def eq(a, b):
+    if not atom(a):
+        return False
+    if not atom(b):
+        return False
+    return a == b()
+
+
 def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
@@ -288,6 +300,8 @@ def repl(prompt=None):
         'list': list_func,
         'car': car,
         'cdr': cdr,
+        'atom': atom,
+        'eq': eq,
     }
     while True:
         try:
