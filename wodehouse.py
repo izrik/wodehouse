@@ -78,7 +78,7 @@ def read_expr(s):
     if ch == '\'':
         s.get_next_char()
         expr = read_expr(s)
-        return WList(Symbols.quote, expr)
+        return WList(WSymbols.quote, expr)
     raise Exception('Unknown starting character "{}" in read_expr'.format(ch))
 
 
@@ -144,11 +144,11 @@ __symbols__ = {}
 
 def get_symbol(name):
     if name not in __symbols__:
-        __symbols__[name] = Symbol(name)
+        __symbols__[name] = WSymbol(name)
     return __symbols__[name]
 
 
-class Symbol(WObject):
+class WSymbol(WObject):
     def __init__(self, name):
         self.name = name
 
@@ -162,7 +162,7 @@ class Symbol(WObject):
         return self is other
 
 
-class Symbols:
+class WSymbols:
     nil = get_symbol('nil')
     quote = get_symbol('quote')
     atom = get_symbol('atom')
@@ -248,7 +248,7 @@ def w_eval(expr, state):
         return expr
     if isinstance(expr, WList):
         head = expr.head
-        if head is Symbols.quote:
+        if head is WSymbols.quote:
             return expr.second
         callee = w_eval(expr.head, state)
         args = expr.remaining
@@ -260,7 +260,7 @@ def w_eval(expr, state):
             args = exprs[1:]
         args = [w_eval(arg, state) for arg in args]
         return callee(*args)
-    if isinstance(expr, Symbol):
+    if isinstance(expr, WSymbol):
         if expr.name not in state:
             raise NameError(
                 'No object found by the name of "{}"'.format(expr.name))
