@@ -39,7 +39,7 @@ import traceback
 from collections import ChainMap
 
 
-class Stream(object):
+class WStream(object):
     def __init__(self, s):
         self.s = s
         self.i = 0
@@ -450,7 +450,7 @@ def repl_print(x):
 
 
 def eval_str(input_s, state=None):
-    stream = Stream(input_s)
+    stream = WStream(input_s)
     expr = parse(stream)
     value = w_eval(expr, state)
     return value
@@ -497,7 +497,7 @@ def repl(prompt=None):
 if __name__ == '__main__':
     for arg in sys.argv[1:]:
         print('{} -->'.format(arg))
-        s = Stream(arg)
+        s = WStream(arg)
         print('  {}'.format(parse(s)))
     if len(sys.argv) < 2:
         repl()
