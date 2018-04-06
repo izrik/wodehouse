@@ -10,10 +10,25 @@ requires:
     function call
 
 (print "Hello, world!")
-requires
+requires:
     a `print` function
     function call
     a string type
+
+(quote 1) --> 1
+requires:
+    quote symbol
+    quote machinery in w_eval --> either macro or special code in w_eval
+
+(quote (1)) --> (1)
+requires
+    quote a list
+    proper list type, esp. comparing `WList` to python built-in `list`
+
+'(1) --> (1)
+requires
+    syntax change: squote not allowed when delimiting strings, only dquote
+    syntax change: read_expr("'(1)") --> WList(1)
 
 """
 
@@ -53,7 +68,7 @@ def parse(s):
 def read_expr(s):
     ch = s.peek()
     if ch == '(':
-        return read_call(s)
+        return read_list(s)
     if ch in string.digits:
         return read_integer_literal(s)
     if ch in '+-*/' or ch in string.ascii_letters:
@@ -103,6 +118,9 @@ class Symbol(WObject):
     def __str__(self):
         return 'Symbol({})'.format(self.name)
 
+    def __eq__(self, other):
+        return self is other
+
 
 class Symbols:
     nil = get_symbol('nil')
@@ -123,7 +141,7 @@ def read_symbol(s):
         return read_name(s)
     if ch in '+-*/':
         s.get_next_char()
-        return Symbol(ch)
+        return get_symbol(ch)
 
 
 def read_name(s):
@@ -131,7 +149,7 @@ def read_name(s):
     while s.has_chars() and s.peek() in string.ascii_letters:
         chs.append(s.get_next_char())
     name = ''.join(chs)
-    return Symbol(name)
+    return get_symbol(name)
 
 
 class Number(WObject):
@@ -140,6 +158,13 @@ class Number(WObject):
 
     def __str__(self):
         return 'Number("{}")'.format(self.value)
+
+    def __eq__(self, other):
+        if isinstance(other, int):
+            return self.value == other
+        if isinstance(other, Number):
+            return self.value == other.value
+        return False
 
 
 def read_integer_literal(s):
@@ -150,25 +175,7 @@ def read_integer_literal(s):
     return Number(int(_s))
 
 
-class Call(WObject):
-    def __init__(self, exprs):
-        self.exprs = exprs
-
-    def __str__(self):
-        return 'Call({})'.format(', '.join(str(x) for x in self.exprs))
-
-    @property
-    def callee(self):
-        if self.exprs:
-            return self.exprs[0]
-
-    @property
-    def arguments(self):
-        if self.exprs:
-            return self.exprs[1:]
-
-
-def read_call(s):
+def read_list(s):
     assert s.peek() == '('
     exprs = []
     s.get_next_char()
@@ -176,7 +183,7 @@ def read_call(s):
         while True:
             if not s.has_chars():
                 raise Exception(
-                    'Ran out of characters before call was finished.')
+                    'Ran out of characters before list was finished.')
             ch = s.peek()
             if ch not in string.whitespace:
                 break
@@ -186,7 +193,7 @@ def read_call(s):
             break
         expr = read_expr(s)
         exprs.append(expr)
-    return Call(exprs)
+    return WList(*exprs)
 
 
 def w_eval(expr, state):
@@ -196,9 +203,12 @@ def w_eval(expr, state):
         return expr
     if isinstance(expr, str):
         return expr
-    if isinstance(expr, Call):
-        callee = w_eval(expr.callee, state)
-        args = expr.arguments
+    if isinstance(expr, WList):
+        head = expr.head
+        if head is Symbols.quote:
+            return expr.second
+        callee = w_eval(expr.head, state)
+        args = expr.remaining
         while isinstance(callee, Macro):
             exprs, state = callee(*args, state=state)
             if len(exprs) < 1:
@@ -305,11 +315,28 @@ class WList(WObject):
     def __str__(self):
         return '({})'.format(' '.join(str(value) for value in self.values))
 
+    def __eq__(self, other):
+        if isinstance(other, WList):
+            return self.values == other.values
+        if isinstance(other, list):
+            return self.values == other
+        if isinstance(other, tuple):
+            return self.values == list(other)
+        return False
+
+    def __iter__(self):
+        return self.values.__iter__()
+
     @property
     def head(self):
         if not self.values:
             return None
         return self.values[0]
+
+    @property
+    def second(self):
+        if self.values and len(self.values) > 1:
+            return self.values[1]
 
     @property
     def remaining(self):

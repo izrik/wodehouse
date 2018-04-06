@@ -61,6 +61,12 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual("Hello, world!", result)
 
+    def test_quotes_integer(self):
+        # when
+        result = eval_str('(quote 123)')
+        # then
+        self.assertEqual(123, result)
+
 
 if __name__ == '__main__':
     unittest.main()
