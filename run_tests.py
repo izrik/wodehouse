@@ -67,6 +67,12 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual(123, result)
 
+    def test_quotes_string(self):
+        # when
+        result = eval_str('(quote "asdf")')
+        # then
+        self.assertEqual("asdf", result)
+
 
 if __name__ == '__main__':
     unittest.main()

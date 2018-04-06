@@ -78,6 +78,39 @@ def read_expr(s):
     raise Exception('Unknown starting character "{}" in read_expr'.format(ch))
 
 
+class WObject(object):
+    pass
+
+
+class WString(WObject):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return 'WString("{}")'.format(self.escaped())
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.value == other
+        if isinstance(other, WString):
+            return self.value == other.value
+        return False
+
+    def escaped(self):
+        def escape_char(_ch):
+            if _ch == '\n':
+                return '\\n'
+            if _ch == '\r':
+                return '\\r'
+            if _ch == '\t':
+                return '\\t'
+            if _ch in '"\'\\':
+                return '\\' + _ch
+            return _ch
+
+        return ''.join(escape_char(ch) for ch in self.value)
+
+
 def read_string(s):
     delim = s.get_next_char()
     chs = []
@@ -85,7 +118,7 @@ def read_string(s):
         ch = s.get_next_char()
         if ch == delim:
             value = ''.join(chs)
-            return value
+            return WString(value)
         if ch == '\\':
             ch = s.get_next_char()
             if ch == 'n':
@@ -96,10 +129,6 @@ def read_string(s):
                 ch = '\t'
         chs.append(ch)
     raise Exception('Ran out of characters before string was finished.')
-
-
-class WObject(object):
-    pass
 
 
 __symbols__ = {}
@@ -225,8 +254,8 @@ def w_eval(expr, state):
         # while isinstance(value, WodehouseObject):
         #     value = apply_expr(value, state)
         return value
-    if isinstance(expr, Number):
-        return expr.value
+    if isinstance(expr, (Number, WString)):
+        return expr
     # if isinstance(expr, Macro):
     #     return expr
     raise Exception('Unknown object type: "{}" ({})'.format(expr, type(expr)))
@@ -379,6 +408,8 @@ def eq(a, b):
 
 def w_print(x):
     if isinstance(x, Number):
+        print(x.value)
+    elif isinstance(x, WString):
         print(x.value)
     else:
         print(x)
