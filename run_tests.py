@@ -31,20 +31,8 @@ class WodehouseTest(unittest.TestCase):
     def test_evals_strings_dquote(self):
         self.assertEqual('str', eval_str('"str"'))
 
-    def test_evals_strings_squote(self):
-        self.assertEqual('str', eval_str("'str'"))
-
-    def test_evals_strings_dquote_in_squote(self):
-        self.assertEqual('str"str', eval_str('\'str"str\''))
-
     def test_evals_strings_dquote_in_dquote(self):
         self.assertEqual('str"str', eval_str('"str\\"str"'))
-
-    def test_evals_strings_squote_in_dquote(self):
-        self.assertEqual("str'str", eval_str('"str\'str"'))
-
-    def test_evals_strings_squote_in_squote(self):
-        self.assertEqual("str'str", eval_str('\'str\\\'str\''))
 
     def test_evals_strings_newline(self):
         self.assertEqual("\n", eval_str('"\\n"'))
@@ -128,9 +116,21 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual(123, result)
 
+    def test_quotes_integer_short_form(self):
+        # when
+        result = eval_str('(quote 123)')
+        # then
+        self.assertEqual(123, result)
+
     def test_quotes_string(self):
         # when
         result = eval_str('(quote "asdf")')
+        # then
+        self.assertEqual("asdf", result)
+
+    def test_quotes_string_short_form(self):
+        # when
+        result = eval_str('\'"asdf"')
         # then
         self.assertEqual("asdf", result)
 
@@ -141,9 +141,22 @@ class WodehouseTest(unittest.TestCase):
         self.assertEqual([], result)
         self.assertEqual(WList(), result)
 
+    def test_quotes_empty_list_short_form(self):
+        # when
+        result = eval_str('\'()')
+        # then
+        self.assertEqual([], result)
+        self.assertEqual(WList(), result)
+
     def test_quotes_list(self):
         # when
         result = eval_str('(quote (1 2 "three"))')
+        # then
+        self.assertEqual([1, 2, "three"], result)
+
+    def test_quotes_list_short_form(self):
+        # when
+        result = eval_str('\'(1 2 "three")')
         # then
         self.assertEqual([1, 2, "three"], result)
 

@@ -73,8 +73,12 @@ def read_expr(s):
         return read_integer_literal(s)
     if ch in '+-*/' or ch in string.ascii_letters:
         return read_symbol(s)
-    if ch in '\'"':
+    if ch == '"':
         return read_string(s)
+    if ch == '\'':
+        s.get_next_char()
+        expr = read_expr(s)
+        return WList(Symbols.quote, expr)
     raise Exception('Unknown starting character "{}" in read_expr'.format(ch))
 
 
@@ -116,6 +120,7 @@ class WString(WObject):
 
 def read_string(s):
     delim = s.get_next_char()
+    assert delim == '"'
     chs = []
     while s.has_chars():
         ch = s.get_next_char()
