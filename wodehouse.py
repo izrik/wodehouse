@@ -416,6 +416,18 @@ def w_print(x):
     return x
 
 
+def repl_print(x):
+    if isinstance(x, Number):
+        print(x.value)
+    elif isinstance(x, WString):
+        print('"{}"'.format(x.escaped()))
+    elif isinstance(x, WList):
+        print()
+    else:
+        print(x)
+    return x
+
+
 def eval_str(input_s, state=None):
     stream = Stream(input_s)
     expr = parse(stream)
@@ -454,7 +466,7 @@ def repl(prompt=None):
             if input_s.strip() == '':
                 continue
             value = eval_str(input_s, state)
-            w_print(value)
+            repl_print(value)
         except Exception as ex:
             print('Caught the following exception: {}'.format(ex))
             print(line for line in
