@@ -316,10 +316,8 @@ def eval_str(input_s, state):
     return value
 
 
-def repl(prompt=None):
-    if prompt is None:
-        prompt = '>>> '
-    state = {
+def create_default_state():
+    return {
         '+': add,
         '-': sub,
         '*': mult,
@@ -332,6 +330,12 @@ def repl(prompt=None):
         'atom': atom,
         'eq': eq,
     }
+
+
+def repl(prompt=None):
+    if prompt is None:
+        prompt = '>>> '
+    state = create_default_state()
     while True:
         try:
             input_s = input(prompt)
