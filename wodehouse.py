@@ -378,7 +378,10 @@ def eq(a, b):
 
 
 def w_print(x):
-    print(x)
+    if isinstance(x, Number):
+        print(x.value)
+    else:
+        print(x)
     return x
 
 
@@ -420,7 +423,7 @@ def repl(prompt=None):
             if input_s.strip() == '':
                 continue
             value = eval_str(input_s, state)
-            print(value)
+            w_print(value)
         except Exception as ex:
             print('Caught the following exception: {}'.format(ex))
             print(line for line in
