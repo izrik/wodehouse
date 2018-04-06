@@ -346,10 +346,6 @@ class Apply(Macro):
 #     def __call__(self, name, arglist, *body, state=None, **kwargs):
 #         pass
 
-class Quote(Macro):
-    def __call__(self, *args, state=None, **kwargs):
-        return args, state
-
 
 class WList(WObject):
     def __init__(self, *values):
