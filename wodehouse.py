@@ -50,12 +50,34 @@ class WObject(object):
     pass
 
 
+__symbols__ = {}
+
+
+def get_symbol(name):
+    if name not in __symbols__:
+        __symbols__[name] = Symbol(name)
+    return __symbols__[name]
+
+
 class Symbol(WObject):
     def __init__(self, name):
         self.name = name
 
     def __str__(self):
         return 'Symbol({})'.format(self.name)
+
+
+class Symbols:
+    nil = get_symbol('nil')
+    quote = get_symbol('quote')
+    atom = get_symbol('atom')
+    eq = get_symbol('eq')
+    cond = get_symbol('cond')
+    car = get_symbol('car')
+    cdr = get_symbol('cdr')
+    cons = get_symbol('cons')
+    label = get_symbol('label')
+    lambda_ = get_symbol('lambda')
 
 
 def read_symbol(s):
