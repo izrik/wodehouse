@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import Mock
 
-from wodehouse import eval_str, create_default_state, w_print
+from wodehouse import eval_str, create_default_state, w_print, WList
 
 
 class WodehouseTest(unittest.TestCase):
@@ -74,6 +74,7 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str('(print 123)', state)
         # then
         printer.assert_called_once_with(123)
+        self.assertEqual(123, result)
 
     def test_prints_string(self):
         # given
@@ -84,6 +85,7 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str('(print "Hello, world!")', state)
         # then
         printer.assert_called_once_with('Hello, world!')
+        self.assertEqual('Hello, world!', result)
 
     def test_prints_escaped_chars_correctly(self):
         # given
@@ -94,6 +96,20 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str('(print "newline\\ncreturn\\rtab\\t")', state)
         # then
         printer.assert_called_once_with('newline\ncreturn\rtab\t')
+        self.assertEqual('newline\ncreturn\rtab\t', result)
+
+    def test_prints_empty_list(self):
+        # given
+        printer = Mock()
+        state = create_default_state()
+        state['print'] = lambda x: w_print(x, printer=printer)
+        # when
+        result = eval_str('(print (quote ()))', state)
+        # then
+        printer.assert_called_once_with([])
+        printer.assert_called_once_with(WList())
+        self.assertEqual(result, [])
+        self.assertEqual(result, WList())
 
     def test_quotes_integer(self):
         # when
@@ -106,6 +122,13 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str('(quote "asdf")')
         # then
         self.assertEqual("asdf", result)
+
+    def test_quotes_empty_list(self):
+        # when
+        result = eval_str('(quote ())')
+        # then
+        self.assertEqual([], result)
+        self.assertEqual(WList(), result)
 
 
 if __name__ == '__main__':
