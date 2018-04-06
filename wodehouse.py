@@ -309,6 +309,13 @@ def eq(a, b):
     return a == b()
 
 
+def eval_str(input_s, state):
+    stream = Stream(input_s)
+    expr = parse(stream)
+    value = w_eval(expr, state)
+    return value
+
+
 def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
@@ -334,9 +341,7 @@ def repl(prompt=None):
                 break
             if input_s.strip() == '':
                 continue
-            stream = Stream(input_s)
-            expr = parse(stream)
-            value = w_eval(expr, state)
+            value = eval_str(input_s, state)
             print(value)
         except Exception as ex:
             print('Caught the following exception: {}'.format(ex))
