@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 import unittest
-from wodehouse import eval_str, create_default_state
+from unittest.mock import Mock
+
+from wodehouse import eval_str, create_default_state, w_print
 
 
 class WodehouseTest(unittest.TestCase):
@@ -54,12 +56,44 @@ class WodehouseTest(unittest.TestCase):
         self.assertEqual("\t", eval_str('"\\t"'))
 
     def test_print_function(self):
-        # TODO: test the print function without actually writing to stdout
-        #       maybe use something like `patch`.
+        # given
+        printer = Mock()
+        state = create_default_state()
+        state['print'] = lambda x: w_print(x, printer=printer)
         # when
-        result = eval_str('(print "Hello, world!")', create_default_state())
+        result = eval_str('(print "Hello, world!")', state)
         # then
         self.assertEqual("Hello, world!", result)
+
+    def test_prints_integer(self):
+        # given
+        printer = Mock()
+        state = create_default_state()
+        state['print'] = lambda x: w_print(x, printer=printer)
+        # when
+        result = eval_str('(print 123)', state)
+        # then
+        printer.assert_called_once_with(123)
+
+    def test_prints_string(self):
+        # given
+        printer = Mock()
+        state = create_default_state()
+        state['print'] = lambda x: w_print(x, printer=printer)
+        # when
+        result = eval_str('(print "Hello, world!")', state)
+        # then
+        printer.assert_called_once_with('Hello, world!')
+
+    def test_prints_escaped_chars_correctly(self):
+        # given
+        printer = Mock()
+        state = create_default_state()
+        state['print'] = lambda x: w_print(x, printer=printer)
+        # when
+        result = eval_str('(print "newline\\ncreturn\\rtab\\t")', state)
+        # then
+        printer.assert_called_once_with('newline\ncreturn\rtab\t')
 
     def test_quotes_integer(self):
         # when

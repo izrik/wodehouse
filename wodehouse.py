@@ -406,13 +406,16 @@ def eq(a, b):
     return a == b()
 
 
-def w_print(x):
+def w_print(x, printer=None):
+    if printer is None:
+        printer = print
+
     if isinstance(x, Number):
-        print(x.value)
+        printer(x.value)
     elif isinstance(x, WString):
-        print(x.value)
+        printer(x.value)
     else:
-        print(x)
+        printer(x)
     return x
 
 
