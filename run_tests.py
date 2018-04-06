@@ -111,6 +111,17 @@ class WodehouseTest(unittest.TestCase):
         self.assertEqual(result, [])
         self.assertEqual(result, WList())
 
+    def test_prints_list(self):
+        # given
+        printer = Mock()
+        state = create_default_state()
+        state['print'] = lambda x: w_print(x, printer=printer)
+        # when
+        result = eval_str('(print (quote (1 2 "three")))', state)
+        # then
+        printer.assert_called_once_with([1, 2, "three"])
+        self.assertEqual(result, [1, 2, "three"])
+
     def test_quotes_integer(self):
         # when
         result = eval_str('(quote 123)')
@@ -129,6 +140,12 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual([], result)
         self.assertEqual(WList(), result)
+
+    def test_quotes_list(self):
+        # when
+        result = eval_str('(quote (1 2 "three"))')
+        # then
+        self.assertEqual([1, 2, "three"], result)
 
 
 if __name__ == '__main__':
