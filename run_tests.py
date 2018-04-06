@@ -26,6 +26,24 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual(123, result)
 
+    def test_evals_strings_dquote(self):
+        self.assertEqual('str', eval_str('"str"'))
+
+    def test_evals_strings_squote(self):
+        self.assertEqual('str', eval_str("'str'"))
+
+    def test_evals_strings_dquote_in_squote(self):
+        self.assertEqual('str"str', eval_str('\'str"str\''))
+
+    def test_evals_strings_dquote_in_dquote(self):
+        self.assertEqual('str"str', eval_str('"str\\"str"'))
+
+    def test_evals_strings_squote_in_dquote(self):
+        self.assertEqual("str'str", eval_str('"str\'str"'))
+
+    def test_evals_strings_squote_in_squote(self):
+        self.assertEqual("str'str", eval_str('\'str\\\'str\''))
+
 
 if __name__ == '__main__':
     unittest.main()

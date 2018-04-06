@@ -58,7 +58,24 @@ def read_expr(s):
         return read_integer_literal(s)
     if ch in '+-*/' or ch in string.ascii_letters:
         return read_symbol(s)
+    if ch in '\'"':
+        return read_string(s)
     raise Exception('Unknown starting character "{}" in read_expr'.format(ch))
+
+
+def read_string(s):
+    delim = s.get_next_char()
+    chs = []
+    while s.has_chars():
+        ch = s.get_next_char()
+        if ch == delim:
+            s.get_next_char()
+            value = ''.join(chs)
+            return value
+        if ch == '\\':
+            ch = s.get_next_char()
+        chs.append(ch)
+    raise Exception('Ran out of characters before string was finished.')
 
 
 class WObject(object):
@@ -168,7 +185,11 @@ def read_call(s):
 
 
 def w_eval(expr, state):
+    if state is None:
+        state = {}
     if isinstance(expr, int):
+        return expr
+    if isinstance(expr, str):
         return expr
     if isinstance(expr, Call):
         callee = w_eval(expr.callee, state)
@@ -324,7 +345,7 @@ def eq(a, b):
     return a == b()
 
 
-def eval_str(input_s, state):
+def eval_str(input_s, state=None):
     stream = Stream(input_s)
     expr = parse(stream)
     value = w_eval(expr, state)
