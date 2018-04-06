@@ -152,19 +152,19 @@ def read_call(s):
     return Call(exprs)
 
 
-def apply_expr(expr, state):
+def w_eval(expr, state):
     if isinstance(expr, int):
         return expr
     if isinstance(expr, Call):
-        callee = apply_expr(expr.callee, state)
+        callee = w_eval(expr.callee, state)
         args = expr.arguments
         while isinstance(callee, Macro):
             exprs, state = callee(*args, state=state)
             if len(exprs) < 1:
                 raise Exception('Ran out of arguments')
-            callee = apply_expr(exprs[0], state=state)
+            callee = w_eval(exprs[0], state=state)
             args = exprs[1:]
-        args = [apply_expr(arg, state) for arg in args]
+        args = [w_eval(arg, state) for arg in args]
         return callee(*args)
     if isinstance(expr, Symbol):
         if expr.name not in state:
@@ -236,7 +236,7 @@ class Let(Macro):
             state = {}
         _state = state
         state = ChainMap({}, _state)
-        state[symbol.name] = apply_expr(value, _state)
+        state[symbol.name] = w_eval(value, _state)
         return exprs, state
 
 
@@ -336,7 +336,7 @@ def repl(prompt=None):
                 continue
             stream = Stream(input_s)
             expr = parse(stream)
-            value = apply_expr(expr, state)
+            value = w_eval(expr, state)
             print(value)
         except Exception as ex:
             print('Caught the following exception: {}'.format(ex))
