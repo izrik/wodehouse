@@ -1,6 +1,21 @@
 #!/usr/bin/env python
 
-"""Wodehouse: An Object-oriented Functional Programming Language"""
+"""
+Wodehouse: An Object-oriented Functional Programming Language
+
+(+ 1 2 3)
+requires:
+    integer literals
+    '+' as a reference to a function
+    function call
+
+(print "Hello, world!")
+requires
+    a `print` function
+    function call
+    a string type
+
+"""
 
 import string
 
