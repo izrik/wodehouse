@@ -86,8 +86,11 @@ class WString(WObject):
     def __init__(self, value):
         self.value = value
 
-    def __str__(self):
+    def __repr__(self):
         return 'WString("{}")'.format(self.escaped())
+
+    def __str__(self):
+        return '"{}"'.format(self.escaped())
 
     def __eq__(self, other):
         if isinstance(other, str):
@@ -144,8 +147,11 @@ class Symbol(WObject):
     def __init__(self, name):
         self.name = name
 
-    def __str__(self):
+    def __repr__(self):
         return 'Symbol({})'.format(self.name)
+
+    def __str__(self):
+        return self.name
 
     def __eq__(self, other):
         return self is other
@@ -185,8 +191,11 @@ class Number(WObject):
     def __init__(self, value):
         self.value = value
 
+    def __repr__(self):
+        return 'Number({})'.format(self.value)
+
     def __str__(self):
-        return 'Number("{}")'.format(self.value)
+        return str(self.value)
 
     def __eq__(self, other):
         if isinstance(other, int):
@@ -341,6 +350,10 @@ class WList(WObject):
     def __init__(self, *values):
         self.values = list(values)
 
+    def __repr__(self):
+        return 'WList({})'.format(
+            ' '.join(repr(value) for value in self.values))
+
     def __str__(self):
         return '({})'.format(' '.join(str(value) for value in self.values))
 
@@ -406,7 +419,7 @@ def eq(a, b):
     return a == b()
 
 
-def w_print(x, printer=None):
+def w_print(x, *, printer=None):
     if printer is None:
         printer = print
 
@@ -423,9 +436,9 @@ def repl_print(x):
     if isinstance(x, Number):
         print(x.value)
     elif isinstance(x, WString):
-        print('"{}"'.format(x.escaped()))
+        print(str(x))
     elif isinstance(x, WList):
-        print()
+        print(str(x))
     else:
         print(x)
     return x
