@@ -6,10 +6,14 @@ from wodehouse import eval_str
 
 class WodehouseTest(unittest.TestCase):
     def test_evals_integers(self):
-        # given
-        input_s = '123'
         # when
         result = eval_str('123', {})
+        # then
+        self.assertEqual(123, result)
+
+    def test_evals_variables(self):
+        # when
+        result = eval_str('abc', {'abc': 123})
         # then
         self.assertEqual(123, result)
 
