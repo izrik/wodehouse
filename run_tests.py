@@ -53,6 +53,14 @@ class WodehouseTest(unittest.TestCase):
     def test_evals_strings_tab(self):
         self.assertEqual("\t", eval_str('"\\t"'))
 
+    def test_print_function(self):
+        # TODO: test the print function without actually writing to stdout
+        #       maybe use something like `patch`.
+        # when
+        result = eval_str('(print "Hello, world!")', create_default_state())
+        # then
+        self.assertEqual("Hello, world!", result)
+
 
 if __name__ == '__main__':
     unittest.main()

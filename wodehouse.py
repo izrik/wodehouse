@@ -69,7 +69,6 @@ def read_string(s):
     while s.has_chars():
         ch = s.get_next_char()
         if ch == delim:
-            s.get_next_char()
             value = ''.join(chs)
             return value
         if ch == '\\':
@@ -351,6 +350,11 @@ def eq(a, b):
     return a == b()
 
 
+def w_print(x):
+    print(x)
+    return x
+
+
 def eval_str(input_s, state=None):
     stream = Stream(input_s)
     expr = parse(stream)
@@ -371,6 +375,7 @@ def create_default_state():
         'cdr': cdr,
         'atom': atom,
         'eq': eq,
+        'print': w_print,
     }
 
 
