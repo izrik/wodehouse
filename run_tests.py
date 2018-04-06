@@ -44,6 +44,15 @@ class WodehouseTest(unittest.TestCase):
     def test_evals_strings_squote_in_squote(self):
         self.assertEqual("str'str", eval_str('\'str\\\'str\''))
 
+    def test_evals_strings_newline(self):
+        self.assertEqual("\n", eval_str('"\\n"'))
+
+    def test_evals_strings_carriage_return(self):
+        self.assertEqual("\r", eval_str('"\\r"'))
+
+    def test_evals_strings_tab(self):
+        self.assertEqual("\t", eval_str('"\\t"'))
+
 
 if __name__ == '__main__':
     unittest.main()

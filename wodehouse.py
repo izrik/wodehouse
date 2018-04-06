@@ -74,6 +74,12 @@ def read_string(s):
             return value
         if ch == '\\':
             ch = s.get_next_char()
+            if ch == 'n':
+                ch = '\n'
+            if ch == 'r':
+                ch = '\r'
+            if ch == 't':
+                ch = '\t'
         chs.append(ch)
     raise Exception('Ran out of characters before string was finished.')
 
