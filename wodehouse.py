@@ -192,7 +192,7 @@ def read_name(s):
     return get_symbol(name)
 
 
-class Number(WObject):
+class WNumber(WObject):
     def __init__(self, value):
         self.value = value
 
@@ -205,7 +205,7 @@ class Number(WObject):
     def __eq__(self, other):
         if isinstance(other, int):
             return self.value == other
-        if isinstance(other, Number):
+        if isinstance(other, WNumber):
             return self.value == other.value
         return False
 
@@ -215,7 +215,7 @@ def read_integer_literal(s):
     while s.has_chars() and s.peek() in string.digits:
         chs.append(s.get_next_char())
     _s = ''.join(chs)
-    return Number(int(_s))
+    return WNumber(int(_s))
 
 
 def read_list(s):
@@ -268,7 +268,7 @@ def w_eval(expr, state):
         # while isinstance(value, WodehouseObject):
         #     value = apply_expr(value, state)
         return value
-    if isinstance(expr, (Number, WString)):
+    if isinstance(expr, (WNumber, WString)):
         return expr
     # if isinstance(expr, Macro):
     #     return expr
@@ -428,7 +428,7 @@ def w_print(x, *, printer=None):
     if printer is None:
         printer = print
 
-    if isinstance(x, Number):
+    if isinstance(x, WNumber):
         printer(x.value)
     elif isinstance(x, WString):
         printer(x.value)
@@ -438,7 +438,7 @@ def w_print(x, *, printer=None):
 
 
 def repl_print(x):
-    if isinstance(x, Number):
+    if isinstance(x, WNumber):
         print(x.value)
     elif isinstance(x, WString):
         print(str(x))
