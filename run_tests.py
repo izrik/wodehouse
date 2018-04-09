@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import Mock
 
-from wodehouse import eval_str, create_default_state, w_print, WList
+from wodehouse import eval_str, create_default_state, w_print, WList, get_symbol
 
 
 class WodehouseTest(unittest.TestCase):
@@ -159,6 +159,30 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str('\'(1 2 "three")')
         # then
         self.assertEqual([1, 2, "three"], result)
+
+    def test_gets_type_of_number(self):
+        # when
+        result = eval_str("(type 123)", create_default_state())
+        # then
+        self.assertIs(get_symbol("Number"), result)
+
+    def test_gets_type_of_string(self):
+        # when
+        result = eval_str("(type \"abc\")", create_default_state())
+        # then
+        self.assertIs(get_symbol("String"), result)
+
+    def test_gets_type_of_symbol(self):
+        # when
+        result = eval_str("(type 'a)", create_default_state())
+        # then
+        self.assertIs(get_symbol("Symbol"), result)
+
+    def test_gets_type_of_list(self):
+        # when
+        result = eval_str("(type '())", create_default_state())
+        # then
+        self.assertIs(get_symbol("List"), result)
 
 
 if __name__ == '__main__':

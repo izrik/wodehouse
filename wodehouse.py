@@ -197,7 +197,7 @@ class WNumber(WObject):
         self.value = value
 
     def __repr__(self):
-        return 'Number({})'.format(self.value)
+        return 'WNumber({})'.format(self.value)
 
     def __str__(self):
         return str(self.value)
@@ -237,6 +237,18 @@ def read_list(s):
         expr = read_expr(s)
         exprs.append(expr)
     return WList(*exprs)
+
+
+def get_type(arg):
+    if isinstance(arg, WNumber):
+        return get_symbol('Number')
+    if isinstance(arg, WString):
+        return get_symbol('String')
+    if isinstance(arg, WSymbol):
+        return get_symbol('Symbol')
+    if isinstance(arg, WList):
+        return get_symbol('List')
+    raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 
 def w_eval(expr, state):
@@ -464,6 +476,7 @@ def create_default_state():
         'atom': atom,
         'eq': eq,
         'print': w_print,
+        'type': get_type,
     }
 
 
