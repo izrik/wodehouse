@@ -242,10 +242,8 @@ def read_list(s):
 def w_eval(expr, state):
     if state is None:
         state = {}
-    if isinstance(expr, int):
-        return expr
-    if isinstance(expr, str):
-        return expr
+    if isinstance(expr, (int, str)):
+        raise Exception('Non-domain value escaped from containment!')
     if isinstance(expr, WList):
         head = expr.head
         if head is WSymbols.quote:
