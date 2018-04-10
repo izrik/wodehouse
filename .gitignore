@@ -194,3 +194,5 @@ FakesAssemblies/
 
 # Python
 __pycache__/
+.coverage
+htmlcov/

@@ -1,4 +1,5 @@
 #!/bin/sh
 
-python ./run_tests.py
-flake8 *.py
+coverage run --source=wodehouse ./run_tests.py && \
+    coverage html && \
+    flake8 *.py
