@@ -287,38 +287,38 @@ def w_eval(expr, state):
 
 def add(*operands):
     if not operands:
-        return 0
+        return WNumber(0)
     x = 0
     for operand in operands:
-        x += operand
-    return x
+        x += operand.value
+    return WNumber(x)
 
 
 def sub(*operands):
     if not operands:
-        return 0
+        return WNumber(0)
     x = 0
     for operand in operands:
-        x -= operand
-    return x
+        x -= operand.value
+    return WNumber(x)
 
 
 def mult(*operands):
     if not operands:
-        return 1
+        return WNumber(1)
     x = 1
     for operand in operands:
-        x *= operand
-    return x
+        x *= operand.value
+    return WNumber(x)
 
 
 def div(*operands):
     if not operands:
-        return 1
+        return WNumber(1)
     x = 1
     for operand in operands:
-        x /= operand
-    return x
+        x /= operand.value
+    return WNumber(x)
 
 
 class Macro(WObject):
