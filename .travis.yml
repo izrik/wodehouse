@@ -4,3 +4,5 @@ python:
 sudo: false
 script:
     - ./run_tests.sh
+after_success:
+    - coveralls
