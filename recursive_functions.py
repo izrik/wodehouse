@@ -9,7 +9,6 @@ Machine, Part I", by John McCarthy 1960
 
 import string
 
-import sys
 import traceback
 from collections import ChainMap
 
