@@ -78,7 +78,7 @@ def read_expr(s):
     if ch == '\'':
         s.get_next_char()
         expr = read_expr(s)
-        return WList(WSymbols.quote, expr)
+        return WList(WSymbol.get('quote'), expr)
     raise Exception('Unknown starting character "{}" in read_expr'.format(ch))
 
 
@@ -139,15 +139,6 @@ def read_string(s):
     raise Exception('Ran out of characters before string was finished.')
 
 
-__symbols__ = {}
-
-
-def get_symbol(name):
-    if name not in __symbols__:
-        __symbols__[name] = WSymbol(name)
-    return __symbols__[name]
-
-
 class WSymbol(WObject):
     def __init__(self, name):
         self.name = name
@@ -161,18 +152,16 @@ class WSymbol(WObject):
     def __eq__(self, other):
         return self is other
 
+    def __hash__(self):
+        return hash((WSymbol, self.name))
 
-class WSymbols:
-    nil = get_symbol('nil')
-    quote = get_symbol('quote')
-    atom = get_symbol('atom')
-    eq = get_symbol('eq')
-    cond = get_symbol('cond')
-    car = get_symbol('car')
-    cdr = get_symbol('cdr')
-    cons = get_symbol('cons')
-    label = get_symbol('label')
-    lambda_ = get_symbol('lambda')
+    __symbol_cache__ = {}
+
+    @staticmethod
+    def get(name):
+        if name not in WSymbol.__symbol_cache__:
+            WSymbol.__symbol_cache__[name] = WSymbol(name)
+        return WSymbol.__symbol_cache__[name]
 
 
 def read_symbol(s):
@@ -181,7 +170,7 @@ def read_symbol(s):
         return read_name(s)
     if ch in '+-*/':
         s.get_next_char()
-        return get_symbol(ch)
+        return WSymbol.get(ch)
 
 
 def read_name(s):
@@ -189,7 +178,7 @@ def read_name(s):
     while s.has_chars() and s.peek() in string.ascii_letters:
         chs.append(s.get_next_char())
     name = ''.join(chs)
-    return get_symbol(name)
+    return WSymbol.get(name)
 
 
 class WNumber(WObject):
@@ -241,13 +230,13 @@ def read_list(s):
 
 def get_type(arg):
     if isinstance(arg, WNumber):
-        return get_symbol('Number')
+        return WSymbol.get('Number')
     if isinstance(arg, WString):
-        return get_symbol('String')
+        return WSymbol.get('String')
     if isinstance(arg, WSymbol):
-        return get_symbol('Symbol')
+        return WSymbol.get('Symbol')
     if isinstance(arg, WList):
-        return get_symbol('List')
+        return WSymbol.get('List')
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 
@@ -258,7 +247,7 @@ def w_eval(expr, state):
         raise Exception('Non-domain value escaped from containment!')
     if isinstance(expr, WList):
         head = expr.head
-        if head is WSymbols.quote:
+        if head is WSymbol.get('quote'):
             return expr.second
         callee = w_eval(expr.head, state)
         args = expr.remaining
@@ -271,10 +260,10 @@ def w_eval(expr, state):
         args = [w_eval(arg, state) for arg in args]
         return callee(*args)
     if isinstance(expr, WSymbol):
-        if expr.name not in state:
+        if expr not in state:
             raise NameError(
                 'No object found by the name of "{}"'.format(expr.name))
-        value = state[expr.name]
+        value = state[expr]
         # while isinstance(value, WodehouseObject):
         #     value = apply_expr(value, state)
         return value
@@ -464,19 +453,19 @@ def eval_str(input_s, state=None):
 
 def create_default_state():
     return {
-        '+': add,
-        '-': sub,
-        '*': mult,
-        '/': div,
-        'let': Let(),
-        'apply': Apply(),
-        'list': list_func,
-        'car': car,
-        'cdr': cdr,
-        'atom': atom,
-        'eq': eq,
-        'print': w_print,
-        'type': get_type,
+        WSymbol.get('+'): add,
+        WSymbol.get('-'): sub,
+        WSymbol.get('*'): mult,
+        WSymbol.get('/'): div,
+        WSymbol.get('let'): Let(),
+        WSymbol.get('apply'): Apply(),
+        WSymbol.get('list'): list_func,
+        WSymbol.get('car'): car,
+        WSymbol.get('cdr'): cdr,
+        WSymbol.get('atom'): atom,
+        WSymbol.get('eq'): eq,
+        WSymbol.get('print'): w_print,
+        WSymbol.get('type'): get_type,
     }
 
 

@@ -3,8 +3,7 @@
 import unittest
 from unittest.mock import Mock
 
-from wodehouse import eval_str, create_default_state, w_print, WList, get_symbol
-
+from wodehouse import eval_str, create_default_state, w_print, WList, WSymbol
 
 class WodehouseTest(unittest.TestCase):
     def test_evals_integers(self):
@@ -15,14 +14,14 @@ class WodehouseTest(unittest.TestCase):
 
     def test_evals_variables(self):
         # when
-        result = eval_str('abc', {'abc': 123})
+        result = eval_str('abc', {WSymbol.get('abc'): 123})
         # then
         self.assertEqual(123, result)
 
     def test_calls_functions(self):
         # given
         state = create_default_state()
-        state['onetwothree'] = lambda *args: 123
+        state[WSymbol.get('onetwothree')] = lambda *args: 123
         # when
         result = eval_str('(onetwothree)', state)
         # then
@@ -47,7 +46,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print "Hello, world!")', state)
         # then
@@ -57,7 +56,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print 123)', state)
         # then
@@ -68,7 +67,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print "Hello, world!")', state)
         # then
@@ -79,7 +78,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print "newline\\ncreturn\\rtab\\t")', state)
         # then
@@ -90,7 +89,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print (quote ()))', state)
         # then
@@ -103,7 +102,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print (quote (1 2 "three")))', state)
         # then
@@ -164,25 +163,25 @@ class WodehouseTest(unittest.TestCase):
         # when
         result = eval_str("(type 123)", create_default_state())
         # then
-        self.assertIs(get_symbol("Number"), result)
+        self.assertIs(WSymbol.get("Number"), result)
 
     def test_gets_type_of_string(self):
         # when
         result = eval_str("(type \"abc\")", create_default_state())
         # then
-        self.assertIs(get_symbol("String"), result)
+        self.assertIs(WSymbol.get("String"), result)
 
     def test_gets_type_of_symbol(self):
         # when
         result = eval_str("(type 'a)", create_default_state())
         # then
-        self.assertIs(get_symbol("Symbol"), result)
+        self.assertIs(WSymbol.get("Symbol"), result)
 
     def test_gets_type_of_list(self):
         # when
         result = eval_str("(type '())", create_default_state())
         # then
-        self.assertIs(get_symbol("List"), result)
+        self.assertIs(WSymbol.get("List"), result)
 
 
 if __name__ == '__main__':
