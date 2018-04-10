@@ -5,6 +5,7 @@ from unittest.mock import Mock
 
 from wodehouse import eval_str, create_default_state, w_print, WList, WSymbol
 
+
 class WodehouseTest(unittest.TestCase):
     def test_evals_integers(self):
         # when
