@@ -36,7 +36,6 @@ import string
 
 import sys
 import traceback
-from collections import ChainMap
 
 
 class WStream(object):
@@ -242,7 +241,9 @@ def get_type(arg):
 
 def w_eval(expr, state):
     if state is None:
-        state = {}
+        state = WState()
+    elif not isinstance(state, WState):
+        state = WState(state)
     if isinstance(expr, (int, str)):
         raise Exception('Non-domain value escaped from containment!')
     if isinstance(expr, WList):
@@ -328,7 +329,7 @@ class Let(Macro):
         if state is None:
             state = {}
         _state = state
-        state = ChainMap({}, _state)
+        state = WState(prototype=_state)
         state[symbol.name] = w_eval(value, _state)
         return exprs, state
 
@@ -451,8 +452,53 @@ def eval_str(input_s, state=None):
     return value
 
 
+class WState:
+    def __init__(self, values=None, prototype=None):
+        if values is None:
+            values = {}
+        self.prototype = prototype
+        self.dict = {self.normalize_key(key): value
+                     for key, value in values.items()}
+        self.deleted = set()
+
+    @staticmethod
+    def normalize_key(key):
+        if isinstance(key, WSymbol):
+            return key
+        return WSymbol.get(str(key))
+
+    def __getitem__(self, item):
+        item = self.normalize_key(str(item))
+        if item in self.deleted:
+            raise KeyError
+        if item in self.dict:
+            return self.dict.get(item)
+        if self.prototype is not None:
+            return self.prototype[item]
+        raise KeyError
+
+    def __setitem__(self, key, value):
+        key = self.normalize_key(str(key))
+        self.dict[key] = value
+        self.deleted.discard(key)
+
+    def __contains__(self, item):
+        item = self.normalize_key(str(item))
+        if item in self.deleted:
+            return False
+        if item in self.dict:
+            return True
+        if self.prototype is not None:
+            return item in self.prototype
+        return False
+
+    def __delitem__(self, key):
+        key = self.normalize_key(key)
+        self.deleted.add(key)
+
+
 def create_default_state():
-    return {
+    return WState({
         WSymbol.get('+'): add,
         WSymbol.get('-'): sub,
         WSymbol.get('*'): mult,
@@ -466,7 +512,7 @@ def create_default_state():
         WSymbol.get('eq'): eq,
         WSymbol.get('print'): w_print,
         WSymbol.get('type'): get_type,
-    }
+    })
 
 
 def repl(prompt=None):

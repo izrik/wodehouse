@@ -15,14 +15,14 @@ class WodehouseTest(unittest.TestCase):
 
     def test_evals_variables(self):
         # when
-        result = eval_str('abc', {WSymbol.get('abc'): 123})
+        result = eval_str('abc', {'abc': 123})
         # then
         self.assertEqual(123, result)
 
     def test_calls_functions(self):
         # given
         state = create_default_state()
-        state[WSymbol.get('onetwothree')] = lambda *args: 123
+        state['onetwothree'] = lambda *args: 123
         # when
         result = eval_str('(onetwothree)', state)
         # then
@@ -47,7 +47,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
+        state['print'] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print "Hello, world!")', state)
         # then
@@ -57,7 +57,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
+        state['print'] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print 123)', state)
         # then
@@ -68,7 +68,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
+        state['print'] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print "Hello, world!")', state)
         # then
@@ -79,7 +79,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
+        state['print'] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print "newline\\ncreturn\\rtab\\t")', state)
         # then
@@ -90,7 +90,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
+        state['print'] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print (quote ()))', state)
         # then
@@ -103,7 +103,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state[WSymbol.get('print')] = lambda x: w_print(x, printer=printer)
+        state['print'] = lambda x: w_print(x, printer=printer)
         # when
         result = eval_str('(print (quote (1 2 "three")))', state)
         # then
