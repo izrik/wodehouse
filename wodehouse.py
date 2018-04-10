@@ -499,19 +499,19 @@ class WState:
 
 def create_default_state():
     return WState({
-        WSymbol.get('+'): add,
-        WSymbol.get('-'): sub,
-        WSymbol.get('*'): mult,
-        WSymbol.get('/'): div,
-        WSymbol.get('let'): Let(),
-        WSymbol.get('apply'): Apply(),
-        WSymbol.get('list'): list_func,
-        WSymbol.get('car'): car,
-        WSymbol.get('cdr'): cdr,
-        WSymbol.get('atom'): atom,
-        WSymbol.get('eq'): eq,
-        WSymbol.get('print'): w_print,
-        WSymbol.get('type'): get_type,
+        '+': add,
+        '-': sub,
+        '*': mult,
+        '/': div,
+        'let': Let(),
+        'apply': Apply(),
+        'list': list_func,
+        'car': car,
+        'cdr': cdr,
+        'atom': atom,
+        'eq': eq,
+        'print': w_print,
+        'type': get_type,
     })
 
 
