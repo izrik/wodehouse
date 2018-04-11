@@ -530,6 +530,12 @@ def repl(prompt=None):
                 continue
             value = eval_str(input_s, state)
             repl_print(value)
+        except EOFError:
+            print('')
+            break
+        except KeyboardInterrupt:
+            print('')
+            continue
         except Exception as ex:
             print('Caught the following exception:')
             tb = traceback.format_exception(type(ex), ex, ex.__traceback__)
