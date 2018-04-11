@@ -531,9 +531,10 @@ def repl(prompt=None):
             value = eval_str(input_s, state)
             repl_print(value)
         except Exception as ex:
-            print('Caught the following exception: {}'.format(ex))
-            print(line for line in
-                  traceback.format_exception(type(ex), ex, ex.__traceback__))
+            print('Caught the following exception:')
+            tb = traceback.format_exception(type(ex), ex, ex.__traceback__)
+            for line in tb:
+                print('  ' + line, end='')
 
 
 if __name__ == '__main__':
