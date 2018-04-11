@@ -537,10 +537,14 @@ def repl(prompt=None):
                 print('  ' + line, end='')
 
 
-if __name__ == '__main__':
+def main():
     for arg in sys.argv[1:]:
         print('{} -->'.format(arg))
         s = WStream(arg)
         print('  {}'.format(parse(s)))
     if len(sys.argv) < 2:
         repl()
+
+
+if __name__ == '__main__':
+    main()
