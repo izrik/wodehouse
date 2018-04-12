@@ -118,6 +118,27 @@ class WString(WObject):
         return ''.join(escape_char(ch) for ch in self.value)
 
 
+def w_str(arg):
+    if isinstance(arg, WString):
+        return arg
+    if isinstance(arg, WNumber):
+        return WString(str(arg.value))
+    if isinstance(arg, WSymbol):
+        return WString(str(arg.name))
+    if isinstance(arg, WList):
+        return WString(str(arg))
+    if isinstance(arg, WFunction):
+        if isinstance(arg, WMagicFunction):
+            return WString(str(arg))
+        q = WSymbol.get('quote')
+        return w_str(
+            WList(
+                WSymbol.get('lambda'),
+                WList(q, arg.args),
+                WList(q, arg.expr)))
+    raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
+
+
 def read_string(s):
     delim = s.get_next_char()
     assert delim == '"'
@@ -410,6 +431,8 @@ class WList(WObject):
             ' '.join(repr(value) for value in self.values))
 
     def __str__(self):
+        if len(self) == 2 and self.head == WSymbol.get('quote'):
+            return "'{}".format(str(self.values[1]))
         return '({})'.format(' '.join(str(value) for value in self.values))
 
     def __eq__(self, other):
@@ -570,6 +593,7 @@ def create_default_state():
         'print': WMagicFunction(w_print),
         'type': WMagicFunction(get_type),
         'lambda': WMagicFunction(w_lambda),
+        'str': WMagicFunction(w_str),
     })
 
 

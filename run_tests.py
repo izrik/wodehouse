@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import Mock
 
 from wodehouse import eval_str, create_default_state, w_print, WList, \
-    WSymbol, WFunction, WMagicFunction
+    WSymbol, WFunction, WMagicFunction, WString
 
 
 class WodehouseTest(unittest.TestCase):
@@ -210,6 +210,57 @@ class WodehouseTest(unittest.TestCase):
         # expect
         self.assertEqual(25, eval_str("(sqr 5)", state))
         self.assertEqual(81, eval_str("(sqr 9)", state))
+
+    def test_str_stringifies_numbers(self):
+        # when
+        result = eval_str("(str 123)", create_default_state())
+        # then
+        self.assertEqual("123", result)
+
+    def test_str_strings_are_unchanged(self):
+        # when
+        result = eval_str("(str \"123\")", create_default_state())
+        # then
+        self.assertEqual("123", result)
+
+    def test_str_stringifies_lists(self):
+        # when
+        result = eval_str("(str (list 1 2 3))", create_default_state())
+        # then
+        self.assertEqual("(1 2 3)", result)
+
+    def test_str_stringifies_quoted_lists(self):
+        # when
+        result = eval_str("(str '(1 2 3))", create_default_state())
+        # then
+        self.assertEqual("(1 2 3)", result)
+
+    def test_str_stringifies_symbols(self):
+        # when
+        result = eval_str("(str 'asdf)", create_default_state())
+        # then
+        self.assertEqual("asdf", result)
+
+    def test_str_stringifies_quoted_symbols(self):
+        # when
+        result = eval_str("(str ''asdf)", create_default_state())
+        # then
+        self.assertEqual("'asdf", result)
+
+    def test_str_stringifies_lambdas(self):
+        # when
+        result = eval_str("(str (lambda '(x) '(* x x)))",
+                          create_default_state())
+        # then
+        self.assertEqual("(lambda '(x) '(* x x))", result)
+
+    def test_str_stringifies_magic_functions(self):
+        # when
+        result = eval_str("(str str)", create_default_state())
+        # then
+        self.assertIsInstance(result, WString)
+        self.assertTrue(result.value.startswith(
+            "<wodehouse.WMagicFunction object at 0x"))
 
 
 if __name__ == '__main__':
