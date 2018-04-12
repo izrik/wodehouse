@@ -111,7 +111,7 @@ class WString(WObject):
                 return '\\r'
             if _ch == '\t':
                 return '\\t'
-            if _ch in '"\'\\':
+            if _ch in '"\\':
                 return '\\' + _ch
             return _ch
 
