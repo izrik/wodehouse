@@ -136,6 +136,8 @@ def w_str(arg):
                 WSymbol.get('lambda'),
                 WList(q, arg.args),
                 WList(q, arg.expr)))
+    if isinstance(arg, WBoolean):
+        return WString(str(arg))
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 
@@ -220,6 +222,39 @@ class WNumber(WObject):
         return False
 
 
+class WBoolean(WObject):
+    true = None
+    false = None
+
+    def __init__(self, value):
+        self.value = not not value
+
+    def __repr__(self):
+        return 'WBoolean({})'.format(str(self))
+
+    def __str__(self):
+        return 'true' if self.value else 'false'
+
+    def __eq__(self, other):
+        if isinstance(other, bool):
+            return self.value == other
+        if isinstance(other, WBoolean):
+            return self.value == other.value
+        return False
+
+
+WBoolean.true = WBoolean(True)
+WBoolean.false = WBoolean(False)
+
+
+def w_not(arg):
+    if arg is WBoolean.true:
+        return WBoolean.false
+    if arg is WBoolean.false:
+        return WBoolean.true
+    raise Exception('Unexpected object type: "{}" ({})'.format(arg, type(arg)))
+
+
 def read_integer_literal(s):
     chs = []
     while s.has_chars() and s.peek() in string.digits:
@@ -284,6 +319,8 @@ def get_type(arg):
         return WSymbol.get('List')
     if isinstance(arg, WFunction):
         return WSymbol.get('Function')
+    if isinstance(arg, WBoolean):
+        return WSymbol.get('Boolean')
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 
@@ -343,7 +380,7 @@ def w_eval(expr, state):
         # while isinstance(value, WodehouseObject):
         #     value = apply_expr(value, state)
         return value
-    if isinstance(expr, (WNumber, WString)):
+    if isinstance(expr, (WNumber, WString, WBoolean)):
         return expr
     # if isinstance(expr, Macro):
     #     return expr
@@ -594,6 +631,9 @@ def create_default_state():
         'type': WMagicFunction(get_type),
         'lambda': WMagicFunction(w_lambda),
         'str': WMagicFunction(w_str),
+        'true': WBoolean.true,
+        'false': WBoolean.false,
+        'not': WMagicFunction(w_not),
     })
 
 

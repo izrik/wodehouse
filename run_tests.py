@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import Mock
 
 from wodehouse import eval_str, create_default_state, w_print, WList, \
-    WSymbol, WFunction, WMagicFunction, WString
+    WSymbol, WFunction, WMagicFunction, WString, WBoolean
 
 
 class WodehouseTest(unittest.TestCase):
@@ -261,6 +261,42 @@ class WodehouseTest(unittest.TestCase):
         self.assertIsInstance(result, WString)
         self.assertTrue(result.value.startswith(
             "<wodehouse.WMagicFunction object at 0x"))
+
+    def test_str_stringifies_variables_values(self):
+        # when
+        result = eval_str("(let a 123 str a)", create_default_state())
+        # then
+        self.assertEqual("123", result)
+
+    def test_str_stringifies_boolean_true(self):
+        # when
+        result = eval_str("(str true)", create_default_state())
+        # then
+        self.assertEqual("true", result)
+
+    def test_str_stringifies_boolean_false(self):
+        # when
+        result = eval_str("(str false)", create_default_state())
+        # then
+        self.assertEqual("false", result)
+
+    def test_str_stringifies_boolean_variable(self):
+        # when
+        result = eval_str("(let a true str a)", create_default_state())
+        # then
+        self.assertEqual("true", result)
+
+    def test_not_inverts_true_to_false(self):
+        # when
+        result = eval_str("(not true)", create_default_state())
+        # then
+        self.assertIs(WBoolean.false, result)
+
+    def test_not_inverts_false_to_true(self):
+        # when
+        result = eval_str("(not false)", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
 
 
 if __name__ == '__main__':
