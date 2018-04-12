@@ -36,6 +36,7 @@ import string
 
 import sys
 import traceback
+from inspect import signature
 
 
 class WStream(object):
@@ -227,6 +228,30 @@ def read_list(s):
     return WList(*exprs)
 
 
+class WFunction(WObject):
+    def __init__(self, args, expr):
+        self.args = args
+        self.expr = expr
+        self.num_args = len(args)
+
+
+class WMagicFunction(WFunction):
+    def __init__(self, f):
+        super().__init__([], None)
+        self.f = f
+        sig = signature(f)
+        num_args = len(list(p for p in sig.parameters.values() if
+                            p.kind in [p.POSITIONAL_ONLY,
+                                       p.POSITIONAL_OR_KEYWORD]))
+        if any(p for p in sig.parameters.values()
+               if p.kind == p.VAR_POSITIONAL):
+            num_args = None
+        self.num_args = num_args
+
+    def __call__(self, *args, **kwargs):
+        return self.f(*args)
+
+
 def get_type(arg):
     if isinstance(arg, WNumber):
         return WSymbol.get('Number')
@@ -236,7 +261,22 @@ def get_type(arg):
         return WSymbol.get('Symbol')
     if isinstance(arg, WList):
         return WSymbol.get('List')
+    if isinstance(arg, WFunction):
+        return WSymbol.get('Function')
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
+
+
+def w_lambda(args, expr):
+    if not isinstance(args, (WSymbol, WList)):
+        raise TypeError(
+            'First argument must be either a symbol or a list of symbols. '
+            'Got "{}" ({}) instead'.format(args, type(args)))
+    if isinstance(args, WList):
+        if not all(isinstance(a, WSymbol) for a in args):
+            raise TypeError(
+                'First argument must be either a symbol or a list of symbols. '
+                'Got "{}" ({}) instead'.format(args, type(args)))
+    return WFunction(args, expr)
 
 
 def w_eval(expr, state):
@@ -258,8 +298,22 @@ def w_eval(expr, state):
                 raise Exception('Ran out of arguments')
             callee = w_eval(exprs[0], state=state)
             args = exprs[1:]
+        if not isinstance(callee, WFunction):
+            raise Exception(
+                'Callee is not a function. Got "{}" ({}) instead.'.format(
+                    callee, type(callee)))
         args = [w_eval(arg, state) for arg in args]
-        return callee(*args)
+        if callee.num_args is not None and len(args) != callee.num_args:
+            raise Exception(
+                'Function expected {} args, got {} instead.'.format(
+                    len(callee.args), len(args)))
+        _state = state
+        state = WState(prototype=_state)
+        for i, argname in enumerate(callee.args):
+            state[argname] = args[i]
+        if isinstance(callee, WMagicFunction):
+            return callee(*args)
+        return w_eval(callee.expr, state)
     if isinstance(expr, WSymbol):
         if expr not in state:
             raise NameError(
@@ -369,6 +423,9 @@ class WList(WObject):
 
     def __iter__(self):
         return self.values.__iter__()
+
+    def __len__(self):
+        return len(self.values)
 
     @property
     def head(self):
@@ -499,19 +556,20 @@ class WState:
 
 def create_default_state():
     return WState({
-        '+': add,
-        '-': sub,
-        '*': mult,
-        '/': div,
+        '+': WMagicFunction(add),
+        '-': WMagicFunction(sub),
+        '*': WMagicFunction(mult),
+        '/': WMagicFunction(div),
         'let': Let(),
         'apply': Apply(),
-        'list': list_func,
-        'car': car,
-        'cdr': cdr,
-        'atom': atom,
-        'eq': eq,
-        'print': w_print,
-        'type': get_type,
+        'list': WMagicFunction(list_func),
+        'car': WMagicFunction(car),
+        'cdr': WMagicFunction(cdr),
+        'atom': WMagicFunction(atom),
+        'eq': WMagicFunction(eq),
+        'print': WMagicFunction(w_print),
+        'type': WMagicFunction(get_type),
+        'lambda': WMagicFunction(w_lambda),
     })
 
 

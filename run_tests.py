@@ -3,7 +3,8 @@
 import unittest
 from unittest.mock import Mock
 
-from wodehouse import eval_str, create_default_state, w_print, WList, WSymbol
+from wodehouse import eval_str, create_default_state, w_print, WList, \
+    WSymbol, WFunction, WMagicFunction
 
 
 class WodehouseTest(unittest.TestCase):
@@ -22,7 +23,7 @@ class WodehouseTest(unittest.TestCase):
     def test_calls_functions(self):
         # given
         state = create_default_state()
-        state['onetwothree'] = lambda *args: 123
+        state['onetwothree'] = WMagicFunction(lambda *args: 123)
         # when
         result = eval_str('(onetwothree)', state)
         # then
@@ -47,7 +48,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
         result = eval_str('(print "Hello, world!")', state)
         # then
@@ -57,7 +58,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
         result = eval_str('(print 123)', state)
         # then
@@ -68,7 +69,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
         result = eval_str('(print "Hello, world!")', state)
         # then
@@ -79,7 +80,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
         result = eval_str('(print "newline\\ncreturn\\rtab\\t")', state)
         # then
@@ -90,7 +91,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
         result = eval_str('(print (quote ()))', state)
         # then
@@ -103,7 +104,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         state = create_default_state()
-        state['print'] = lambda x: w_print(x, printer=printer)
+        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
         result = eval_str('(print (quote (1 2 "three")))', state)
         # then
@@ -183,6 +184,32 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str("(type '())", create_default_state())
         # then
         self.assertIs(WSymbol.get("List"), result)
+
+    def test_lambda_creates_wfunction(self):
+        # when
+        result = eval_str("(lambda '(x) '(* x x))", create_default_state())
+        # then
+        self.assertIsInstance(result, WFunction)
+        self.assertNotIsInstance(result, WMagicFunction)
+        self.assertEqual(1, result.num_args)
+        self.assertEqual([WSymbol.get('x')], result.args)
+        times = WSymbol.get('*')
+        x = WSymbol.get('x')
+        self.assertEqual([times, x, x], result.expr)
+
+    def test_wfunction_can_be_called(self):
+        # when
+        result = eval_str("((lambda '(x) '(* x x)) 4)", create_default_state())
+        # then
+        self.assertEqual(16, result)
+
+    def test_wfunctions_can_be_used_in_the_state(self):
+        # given
+        state = create_default_state()
+        state['sqr'] = eval_str("(lambda '(x) '(* x x))", state)
+        # expect
+        self.assertEqual(25, eval_str("(sqr 5)", state))
+        self.assertEqual(81, eval_str("(sqr 9)", state))
 
 
 if __name__ == '__main__':
