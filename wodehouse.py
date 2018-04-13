@@ -534,7 +534,7 @@ def eq(a, b):
         return False
     if not atom(b):
         return False
-    return a == b()
+    return a == b
 
 
 def w_print(x, *, printer=None):
