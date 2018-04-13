@@ -197,6 +197,7 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WSymbol.get("MagicFunction"), result)
 
+    # TODO: create anonymous macros
     # def test_gets_type_of_macro(self):
     #     # when
     #     result = eval_str("(type ???)", create_default_state())
@@ -534,6 +535,7 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WBoolean.true, result)
 
+    # TODO: create anonymous macros
     # def test_isinstance_returns_true_when_match_macro(self):
     #     # when
     #     result = eval_str("(isinstance let 'Macro)",
