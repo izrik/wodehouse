@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import Mock
 
 from wodehouse import eval_str, create_default_state, w_print, WList, \
-    WSymbol, WFunction, WMagicFunction, WString, WBoolean
+    WSymbol, WFunction, WMagicFunction, WString, WBoolean, WState
 
 
 class WodehouseTest(unittest.TestCase):
@@ -389,6 +389,36 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str("(>= 1 1)", create_default_state())
         # then
         self.assertIs(WBoolean.true, result)
+
+    def test_new_state_creates_state_object(self):
+        # when
+        result = eval_str("(new_state)", create_default_state())
+        # then
+        self.assertIsInstance(result, WState)
+        self.assertEqual(0, len(result))
+
+    def test_new_state_args_become_keys_and_values(self):
+        # when
+        result = eval_str("(new_state 'a 1 'b 2)", create_default_state())
+        # then
+        self.assertIsInstance(result, WState)
+        self.assertEqual(2, len(result))
+        self.assertIn('a', result)
+        self.assertEqual(1, result['a'])
+        self.assertIn('b', result)
+        self.assertEqual(2, result['b'])
+
+    def test_get_gets_value_by_key(self):
+        # when
+        result = eval_str("(get (new_state 'a 1 'b 2) 'a)",
+                          create_default_state())
+        # then
+        self.assertEqual(1, result)
+        # when
+        result = eval_str("(get (new_state 'a 1 'b 2) 'b)",
+                          create_default_state())
+        # then
+        self.assertEqual(2, result)
 
 
 if __name__ == '__main__':

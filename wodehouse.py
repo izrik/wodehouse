@@ -71,7 +71,7 @@ def read_expr(s):
         return read_list(s)
     if ch in string.digits:
         return read_integer_literal(s)
-    if ch in '+-*/<>' or ch in string.ascii_letters:
+    if ch in '+-*/<>_' or ch in string.ascii_letters:
         return read_symbol(s)
     if ch == '"':
         return read_string(s)
@@ -189,7 +189,7 @@ class WSymbol(WObject):
 
 def read_symbol(s):
     ch = s.peek()
-    if ch in string.ascii_letters:
+    if ch in string.ascii_letters or ch in '_':
         return read_name(s)
     if ch in '+-*/':
         s.get_next_char()
@@ -207,7 +207,8 @@ def read_symbol(s):
 
 def read_name(s):
     chs = []
-    while s.has_chars() and s.peek() in string.ascii_letters:
+    while s.has_chars() and \
+            (s.peek() in string.ascii_letters or s.peek() in '_'):
         chs.append(s.get_next_char())
     name = ''.join(chs)
     return WSymbol.get(name)
@@ -694,6 +695,43 @@ class WState:
         key = self.normalize_key(key)
         self.deleted.add(key)
 
+    def __len__(self):
+        return len(list(self.keys()))
+
+    def keys(self):
+        keys = set(self.dict.keys())
+        if self.prototype is not None:
+            keys.update(self.prototype.keys())
+        keys.difference_update(self.deleted)
+        for key in keys:
+            yield key
+
+
+def iter_by_two(i):
+    x = i.__iter__()
+    while True:
+        try:
+            item1 = x.__next__()
+        except StopIteration:
+            break
+        try:
+            item2 = x.__next__()
+        except StopIteration:
+            raise Exception('Items are not in pairs')
+        yield item1, item2
+
+
+def new_state(*exprs):
+    state = WState()
+    for key, value in iter_by_two(exprs):
+        state[key] = value
+    return state
+
+
+def get_state_value(state, name_or_symbol):
+    key = WState.normalize_key(name_or_symbol)
+    return state[key]
+
 
 def create_default_state():
     return WState({
@@ -720,6 +758,8 @@ def create_default_state():
         '<=': WMagicFunction(less_than_or_equal_to),
         '>': WMagicFunction(greater_than),
         '>=': WMagicFunction(greater_than_or_equal_to),
+        'new_state': WMagicFunction(new_state),
+        'get': WMagicFunction(get_state_value),
     })
 
 
