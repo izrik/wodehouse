@@ -350,12 +350,13 @@ def w_eval(expr, state):
             return expr.second
         callee = w_eval(expr.head, state)
         args = expr.remaining
-        while isinstance(callee, Macro):
+        if isinstance(callee, WMacro):
             exprs, state = callee(*args, state=state)
+            if isinstance(exprs, (tuple, list)):
+                exprs = WList(*exprs)
             if len(exprs) < 1:
                 raise Exception('Ran out of arguments')
-            callee = w_eval(exprs[0], state=state)
-            args = exprs[1:]
+            return w_eval(exprs, state)
         if not isinstance(callee, WFunction):
             raise Exception(
                 'Callee is not a function. Got "{}" ({}) instead.'.format(
@@ -377,13 +378,9 @@ def w_eval(expr, state):
             raise NameError(
                 'No object found by the name of "{}"'.format(expr.name))
         value = state[expr]
-        # while isinstance(value, WodehouseObject):
-        #     value = apply_expr(value, state)
         return value
     if isinstance(expr, (WNumber, WString, WBoolean)):
         return expr
-    # if isinstance(expr, Macro):
-    #     return expr
     raise Exception('Unknown object type: "{}" ({})'.format(expr, type(expr)))
 
 
@@ -423,30 +420,30 @@ def div(*operands):
     return WNumber(x)
 
 
-class Macro(WObject):
+class WMacro(WObject):
     def __init__(self, func=None):
         self.func = func
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, args, state=None):
         if self.func:
             return self.func(*args, **kwargs)
         raise NotImplemented
 
 
-class Let(Macro):
+class Let(WMacro):
     def __init__(self):
         super(Let, self).__init__()
 
     def __call__(self, symbol, value, *exprs, state=None, **kwargs):
         if state is None:
-            state = {}
+            state = WState()
         _state = state
         state = WState(prototype=_state)
         state[symbol.name] = w_eval(value, _state)
         return exprs, state
 
 
-class Apply(Macro):
+class Apply(WMacro):
     def __init__(self):
         super(Apply, self).__init__()
 
@@ -454,9 +451,25 @@ class Apply(Macro):
         return args, state
 
 
-# class MacroMacro(Macro):
-#     def __call__(self, name, arglist, *body, state=None, **kwargs):
-#         pass
+class If(WMacro):
+    def __call__(self, *args, state=None, **kwargs):
+        if state is None:
+            state = WState()
+        for expr in args:
+            if not isinstance(expr, WList) or len(expr) != 2:
+                raise Exception(
+                    "Argument to `if` is not a condition-value pair: "
+                    "\"{}\" ({})".format(expr, type(expr)))
+        for expr in args:
+            condition, retval = expr.values
+            cond_result = w_eval(condition, state)
+            if cond_result is WBoolean.true:
+                return retval, state
+            if cond_result is not WBoolean.false:
+                raise Exception(
+                    "Condition evaluated to a non-boolean value: "
+                    "\"{}\" ({})".format(cond_result, type(cond_result)))
+        raise Exception("No condition evaluated to true.")
 
 
 class WList(WObject):
@@ -486,6 +499,9 @@ class WList(WObject):
 
     def __len__(self):
         return len(self.values)
+
+    def __getitem__(self, item):
+        return self.values[item]
 
     @property
     def head(self):
@@ -634,6 +650,7 @@ def create_default_state():
         'true': WBoolean.true,
         'false': WBoolean.false,
         'not': WMagicFunction(w_not),
+        'if': If(),
     })
 
 

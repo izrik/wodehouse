@@ -298,6 +298,26 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WBoolean.true, result)
 
+    def test_if_no_conditions_raises(self):
+        # expect
+        self.assertRaisesRegex(
+            Exception,
+            "No condition evaluated to true.",
+            eval_str,
+            "(if)", create_default_state())
+
+    def test_if_condition_is_true_returns_corresponding_retval(self):
+        # when
+        result = eval_str("(if (true 'a))", create_default_state())
+        # then
+        self.assertIs(WSymbol.get('a'), result)
+
+    def test_if_condition_is_false_moves_to_next_condition(self):
+        # when
+        result = eval_str("(if (false 'a) (true 'b))", create_default_state())
+        # then
+        self.assertIs(WSymbol.get('b'), result)
+
 
 if __name__ == '__main__':
     unittest.main()
