@@ -71,7 +71,7 @@ def read_expr(s):
         return read_list(s)
     if ch in string.digits:
         return read_integer_literal(s)
-    if ch in '+-*/' or ch in string.ascii_letters:
+    if ch in '+-*/<>' or ch in string.ascii_letters:
         return read_symbol(s)
     if ch == '"':
         return read_string(s)
@@ -194,6 +194,15 @@ def read_symbol(s):
     if ch in '+-*/':
         s.get_next_char()
         return WSymbol.get(ch)
+    if ch in '<>':
+        s.get_next_char()
+        ch2 = s.peek()
+        if ch2 == '=':
+            s.get_next_char()
+            return WSymbol.get(ch + ch2)
+        return WSymbol.get(ch)
+    raise Exception(
+        "Unexpected character while reading symbol: \"{}\"".format(ch))
 
 
 def read_name(s):
@@ -425,6 +434,54 @@ def div(*operands):
     for operand in operands:
         x /= operand.value
     return WNumber(x)
+
+
+def less_than(a, b):
+    if not isinstance(a, WNumber):
+        raise Exception(
+            "Value is not a number: \"{}\" ({})".format(a, type(a)))
+    if not isinstance(b, WNumber):
+        raise Exception(
+            "Value is not a number: \"{}\" ({})".format(b, type(b)))
+    if a.value < b.value:
+        return WBoolean.true
+    return WBoolean.false
+
+
+def less_than_or_equal_to(a, b):
+    if not isinstance(a, WNumber):
+        raise Exception(
+            "Value is not a number: \"{}\" ({})".format(a, type(a)))
+    if not isinstance(b, WNumber):
+        raise Exception(
+            "Value is not a number: \"{}\" ({})".format(b, type(b)))
+    if a.value <= b.value:
+        return WBoolean.true
+    return WBoolean.false
+
+
+def greater_than(a, b):
+    if not isinstance(a, WNumber):
+        raise Exception(
+            "Value is not a number: \"{}\" ({})".format(a, type(a)))
+    if not isinstance(b, WNumber):
+        raise Exception(
+            "Value is not a number: \"{}\" ({})".format(b, type(b)))
+    if a.value > b.value:
+        return WBoolean.true
+    return WBoolean.false
+
+
+def greater_than_or_equal_to(a, b):
+    if not isinstance(a, WNumber):
+        raise Exception(
+            "Value is not a number: \"{}\" ({})".format(a, type(a)))
+    if not isinstance(b, WNumber):
+        raise Exception(
+            "Value is not a number: \"{}\" ({})".format(b, type(b)))
+    if a.value >= b.value:
+        return WBoolean.true
+    return WBoolean.false
 
 
 class WMacro(WObject):
@@ -659,6 +716,10 @@ def create_default_state():
         'false': WBoolean.false,
         'not': WMagicFunction(w_not),
         'if': If(),
+        '<': WMagicFunction(less_than),
+        '<=': WMagicFunction(less_than_or_equal_to),
+        '>': WMagicFunction(greater_than),
+        '>=': WMagicFunction(greater_than_or_equal_to),
     })
 
 
