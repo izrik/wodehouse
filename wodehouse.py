@@ -68,7 +68,22 @@ def parse(s):
 
 
 def read_expr(s):
+    _i = s.i
     ch = s.peek()
+    while s.has_chars() and (ch.isspace() or ch == '#'):
+        if ch == '#':
+            # read a comment
+            while s.has_chars() and ch != '\n':
+                s.get_next_char()
+                ch = s.peek()
+            if not s.has_chars():
+                raise Exception(
+                    "Ran out of characters before reading expression.")
+        s.get_next_char()
+        ch = s.peek()
+    if not s.has_chars():
+        raise Exception(
+            "Ran out of characters before reading expression.")
     if ch == '(':
         return read_list(s)
     if ch in string.digits:
