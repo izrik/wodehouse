@@ -187,15 +187,27 @@ class WodehouseTest(unittest.TestCase):
 
     def test_gets_type_of_function(self):
         # when
-        result = eval_str("(type list)", create_default_state())
+        result = eval_str("(type (lambda '() 1))", create_default_state())
         # then
         self.assertIs(WSymbol.get("Function"), result)
 
-    def test_gets_type_of_macro(self):
+    def test_gets_type_of_magic_function(self):
+        # when
+        result = eval_str("(type list)", create_default_state())
+        # then
+        self.assertIs(WSymbol.get("MagicFunction"), result)
+
+    # def test_gets_type_of_macro(self):
+    #     # when
+    #     result = eval_str("(type ???)", create_default_state())
+    #     # then
+    #     self.assertIs(WSymbol.get("Macro"), result)
+
+    def test_gets_type_of_magic_macro(self):
         # when
         result = eval_str("(type let)", create_default_state())
         # then
-        self.assertIs(WSymbol.get("Macro"), result)
+        self.assertIs(WSymbol.get("MagicMacro"), result)
 
     def test_lambda_creates_wfunction(self):
         # when
@@ -501,6 +513,20 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WBoolean.true, result)
 
+    def test_isinstance_returns_true_when_match_magic_function(self):
+        # when
+        result = eval_str("(isinstance list 'MagicFunction)",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_function_with_magic_func(self):
+        # when
+        result = eval_str("(isinstance list 'Function)",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
     def test_isinstance_returns_true_when_match_boolean(self):
         # when
         result = eval_str("(isinstance (lambda '() 1) 'Function)",
@@ -508,7 +534,21 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WBoolean.true, result)
 
-    def test_isinstance_returns_true_when_match_macro(self):
+    # def test_isinstance_returns_true_when_match_macro(self):
+    #     # when
+    #     result = eval_str("(isinstance let 'Macro)",
+    #                       create_default_state())
+    #     # then
+    #     self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_magic_macro(self):
+        # when
+        result = eval_str("(isinstance let 'MagicMacro)",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_macro_with_magic_macro(self):
         # when
         result = eval_str("(isinstance let 'Macro)",
                           create_default_state())

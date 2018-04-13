@@ -328,10 +328,14 @@ def get_type(arg):
     if isinstance(arg, WList):
         return WSymbol.get('List')
     if isinstance(arg, WFunction):
+        if isinstance(arg, WMagicFunction):
+            return WSymbol.get('MagicFunction')
         return WSymbol.get('Function')
     if isinstance(arg, WBoolean):
         return WSymbol.get('Boolean')
     if isinstance(arg, WMacro):
+        if isinstance(arg, WMagicMacro):
+            return WSymbol.get('MagicMacro')
         return WSymbol.get('Macro')
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
