@@ -420,6 +420,30 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual(2, result)
 
+    def test_in_returns_false_if_item_present(self):
+        # when
+        result = eval_str("(in 'a '(a))", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+        # when
+        result = eval_str("(in 'a '(a b c))", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+        # when
+        result = eval_str("(in 'b '(a b c))", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+        # when
+        result = eval_str("(in 'c '(a b c))", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_in_returns_false_if_item_not_present(self):
+        # when
+        result = eval_str("(in 'f '(a b c))", create_default_state())
+        # then
+        self.assertIs(WBoolean.false, result)
+
 
 if __name__ == '__main__':
     unittest.main()

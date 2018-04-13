@@ -353,7 +353,8 @@ def w_eval(expr, state):
         (if
             ((eq (type expr) 'Symbol)
                 (get state expr))
-            ...
+            ((in (type expr) '(Number, String, Boolean))
+                expr)
             ((eq (type expr) 'List)
                 ...
     """
@@ -587,6 +588,16 @@ class WList(WObject):
         return WList(*self.values[1:])
 
 
+def w_in(expr, container):
+    if not isinstance(container, WList):
+        raise Exception(
+            "Not a list: \"{}\" ({})".format(container, type(container)))
+    for item in container:
+        if item is expr or item == expr:
+            return WBoolean.true
+    return WBoolean.false
+
+
 def list_func(*args):
     return WList(*args)
 
@@ -760,6 +771,7 @@ def create_default_state():
         '>=': WMagicFunction(greater_than_or_equal_to),
         'new_state': WMagicFunction(new_state),
         'get': WMagicFunction(get_state_value),
+        'in': WMagicFunction(w_in),
     })
 
 
