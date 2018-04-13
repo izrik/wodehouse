@@ -185,6 +185,18 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WSymbol.get("List"), result)
 
+    def test_gets_type_of_function(self):
+        # when
+        result = eval_str("(type list)", create_default_state())
+        # then
+        self.assertIs(WSymbol.get("Function"), result)
+
+    def test_gets_type_of_macro(self):
+        # when
+        result = eval_str("(type let)", create_default_state())
+        # then
+        self.assertIs(WSymbol.get("Macro"), result)
+
     def test_lambda_creates_wfunction(self):
         # when
         result = eval_str("(lambda '(x) '(* x x))", create_default_state())
@@ -443,6 +455,87 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str("(in 'f '(a b c))", create_default_state())
         # then
         self.assertIs(WBoolean.false, result)
+
+    def test_isinstance_returns_true_when_match_number(self):
+        # when
+        result = eval_str("(isinstance 123 'Number)", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_number_type_list(self):
+        # when
+        result = eval_str("(isinstance 123 '(Number))", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_string(self):
+        # when
+        result = eval_str("(isinstance \"abc\" 'String)",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_string_type_list(self):
+        # when
+        result = eval_str("(isinstance \"abc\" '(String))",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_mixed_type_list(self):
+        # when
+        result = eval_str("(isinstance 123 '(Number String))",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+        # when
+        result = eval_str("(isinstance \"abc\" '(Number String))",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_function(self):
+        # when
+        result = eval_str("(isinstance (lambda '() 1) 'Function)",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_boolean(self):
+        # when
+        result = eval_str("(isinstance (lambda '() 1) 'Function)",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_macro(self):
+        # when
+        result = eval_str("(isinstance let 'Macro)",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_symbol(self):
+        # when
+        result = eval_str("(isinstance 'a 'Symbol)",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_list(self):
+        # when
+        result = eval_str("(isinstance '(1 2 3) 'List)",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_false_when_does_not_match(self):
+        # when
+        result = eval_str(
+            "(isinstance 123 '(String Symbol Boolean List Function Macro))",
+            create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
 
 
 if __name__ == '__main__':

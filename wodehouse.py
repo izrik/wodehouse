@@ -331,7 +331,31 @@ def get_type(arg):
         return WSymbol.get('Function')
     if isinstance(arg, WBoolean):
         return WSymbol.get('Boolean')
+    if isinstance(arg, WMacro):
+        return WSymbol.get('Macro')
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
+
+
+def w_isinstance(arg, type_or_types):
+    if isinstance(type_or_types, WSymbol):
+        argtype = get_type(arg)
+        if type_or_types == WSymbol.get('Function') and \
+                argtype == WSymbol.get('MagicFunction'):
+            return WBoolean.true
+        if type_or_types == WSymbol.get('Macro') and \
+                argtype == WSymbol.get('MagicMacro'):
+            return WBoolean.true
+        if argtype == type_or_types:
+            return WBoolean.true
+        return WBoolean.false
+    if not isinstance(type_or_types, WList):
+        raise Exception(
+            "Expected symbol or list, got \"{}\" ({}) instead.".format(
+                type_or_types, type(type_or_types)))
+    for t in type_or_types:
+        if w_isinstance(arg, t):
+            return WBoolean.true
+    return WBoolean.false
 
 
 def w_lambda(args, expr):
@@ -385,7 +409,9 @@ def w_eval(expr, state):
 
 
     """
-    # TODO: isinstance, including subtypes
+    # TODO: subtypes and inheritance
+    #   TODO: MagicFunction
+    #   TODO: MagicMacro
     # TODO: map
     # TODO: raise
     # TODO: w_eval
@@ -793,6 +819,7 @@ def create_default_state():
         'eq': WMagicFunction(eq),
         'print': WMagicFunction(w_print),
         'type': WMagicFunction(get_type),
+        'isinstance': WMagicFunction(w_isinstance),
         'lambda': WMagicFunction(w_lambda),
         'str': WMagicFunction(w_str),
         'true': WBoolean.true,
