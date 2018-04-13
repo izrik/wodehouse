@@ -10,3 +10,6 @@ Design goals:
  * No FFI
  * Lisp-1 (no separate namespace for functions)
  * Macros as first-class objects
+ * No null value
+ * As purely functional as possible
+ * Aggressively concurrent
