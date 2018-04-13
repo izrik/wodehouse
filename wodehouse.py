@@ -62,6 +62,8 @@ class WStream(object):
 
 
 def parse(s):
+    if not isinstance(s, WStream):
+        s = WStream(str(s))
     return read_expr(s)
 
 
@@ -718,8 +720,7 @@ def repl_print(x):
 
 
 def eval_str(input_s, state=None):
-    stream = WStream(input_s)
-    expr = parse(stream)
+    expr = parse(input_s)
     value = w_eval(expr, state)
     return value
 
@@ -870,7 +871,7 @@ def main():
     for arg in sys.argv[1:]:
         print('{} -->'.format(arg))
         s = WStream(arg)
-        print('  {}'.format(parse(s)))
+        print('  {}'.format(parse(arg)))
     if len(sys.argv) < 2:
         repl()
 
