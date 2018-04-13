@@ -413,7 +413,7 @@ def w_eval(expr, state):
                     (let exprs_state (call_macro callee args state)
                     (let exprs (car exprs_state)
                     (let state (car (cdr exprs_state))
-                    w_eval exprs state))))
+                    (w_eval exprs state)))))
                 ((not (isinstance callee 'Function))
                     (raise Exception
                         (format
@@ -421,13 +421,20 @@ def w_eval(expr, state):
                             callee
                             (type callee))))
                 (true
-                    (let args (map ....
+                    (let args
+                        (map
+                            (lambda '(arg) '(w_eval arg state))
+                            args)
                     (let state (new_state prototype=state args
                     (if
                     ((isinstance callee 'MagicFunction)
                         ???)
                     (true
-                        w_eval
+                        (w_eval (second callee) state)))))))))))))
+        (true
+            (raise Exception
+                (format
+                    "Unknown object type: \"{}\" ({})" expr (type expr))))))
 
 
     """
