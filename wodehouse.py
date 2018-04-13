@@ -351,13 +351,47 @@ def w_eval(expr, state):
     """
     (lambda '(expr state)
         (if
-            ((eq (type expr) 'Symbol)
-                (get state expr))
-            ((in (type expr) '(Number, String, Boolean))
-                expr)
-            ((eq (type expr) 'List)
-                ...
+        ((eq (type expr) 'Symbol)
+            (get state expr))
+        ((in (type expr) '(Number, String, Boolean))
+            expr)
+        ((eq (type expr) 'List)
+            (let head (car expr)
+            (if
+            ((eq head 'quote)
+                (cdr expr)) # not quite cdr. car of cdr i think.
+            (true
+                (let callee w_eval(head, state)
+                (let args (cdr expr)
+                (if
+                ((eq (type callee) 'Macro)
+                    (let exprs_state (call_macro callee args state)
+                    (let exprs (car exprs_state)
+                    (let state (car (cdr exprs_state))
+                    w_eval exprs state))))
+                ((neq (type callee) 'Function)
+                    (raise Exception
+                        (format
+                            "Callee is not a function. Got \"{}\" ({}) instead."
+                            callee
+                            (type callee))))
+                (true
+                    (let args (map ....
+                    (let state (new_state prototype=state args
+                    (if
+                    ((eq magicfunction ...
+                    (true
+                        w_eval
+
+
     """
+    # TODO: isinstance, including subtypes
+    # TODO: map
+    # TODO: raise
+    # TODO: w_eval
+    # TODO: call_macro
+    # TODO: neq
+    # TODO: new_state prototype, optional/named arguments, or new_state_from
     if state is None:
         state = WState()
     elif not isinstance(state, WState):
