@@ -351,9 +351,7 @@ def w_eval(expr, state):
         callee = w_eval(expr.head, state)
         args = expr.remaining
         if isinstance(callee, WMacro):
-            exprs, state = callee(*args, state=state)
-            if isinstance(exprs, (tuple, list)):
-                exprs = WList(*exprs)
+            exprs, state = callee.call_macro(args, state=state)
             if len(exprs) < 1:
                 raise Exception('Ran out of arguments')
             return w_eval(exprs, state)
@@ -421,29 +419,30 @@ def div(*operands):
 
 
 class WMacro(WObject):
-    def __init__(self, func=None):
-        self.func = func
-
-    def __call__(self, args, state=None):
-        if self.func:
-            return self.func(*args, **kwargs)
-        raise NotImplemented
+    def call_macro(self, exprs, state):
+        return exprs, state
 
 
-class Let(WMacro):
-    def __init__(self):
-        super(Let, self).__init__()
+class WMagicMacro(WMacro):
+    def call_macro(self, exprs, state):
+        exprs, state = self.call_magic_macro(exprs, state)
+        if not isinstance(exprs, WList):
+            raise TypeError(
+                'Magic macro "{}" returned wrong kind of exprs'.format(self))
+        return exprs, state
 
-    def __call__(self, symbol, value, *exprs, state=None, **kwargs):
-        if state is None:
-            state = WState()
+
+class Let(WMagicMacro):
+    def call_magic_macro(self, exprs, state):
+        symbol, value, *exprs2 = exprs
+        exprs = WList(*exprs2)
         _state = state
         state = WState(prototype=_state)
         state[symbol.name] = w_eval(value, _state)
         return exprs, state
 
 
-class Apply(WMacro):
+class Apply(WMagicMacro):
     def __init__(self):
         super(Apply, self).__init__()
 
@@ -451,16 +450,16 @@ class Apply(WMacro):
         return args, state
 
 
-class If(WMacro):
-    def __call__(self, *args, state=None, **kwargs):
+class If(WMagicMacro):
+    def call_magic_macro(self, exprs, state):
         if state is None:
             state = WState()
-        for expr in args:
+        for expr in exprs:
             if not isinstance(expr, WList) or len(expr) != 2:
                 raise Exception(
                     "Argument to `if` is not a condition-value pair: "
                     "\"{}\" ({})".format(expr, type(expr)))
-        for expr in args:
+        for expr in exprs:
             condition, retval = expr.values
             cond_result = w_eval(condition, state)
             if cond_result is WBoolean.true:
