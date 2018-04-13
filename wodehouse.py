@@ -338,6 +338,15 @@ def w_lambda(args, expr):
 
 
 def w_eval(expr, state):
+    """
+    (lambda '(expr state)
+        (if
+            ((eq (type expr) 'Symbol)
+                (get state expr))
+            ...
+            ((eq (type expr) 'List)
+                ...
+    """
     if state is None:
         state = WState()
     elif not isinstance(state, WState):
