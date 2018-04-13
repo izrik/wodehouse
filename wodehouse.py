@@ -372,7 +372,7 @@ def w_eval(expr, state):
                 ((neq (type callee) 'Function)
                     (raise Exception
                         (format
-                            "Callee is not a function. Got \"{}\" ({}) instead."
+                           "Callee is not a function. Got \"{}\" ({}) instead."
                             callee
                             (type callee))))
                 (true
