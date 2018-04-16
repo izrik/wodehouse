@@ -590,6 +590,21 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WBoolean.true, result)
 
+    def test_maps_with_named_function(self):
+        # when
+        result = eval_str(
+            "(map car '('(1 2 3) '(a b c) '(\"a\" \"b\" \"c\")))",
+            create_default_state())
+        # then
+        self.assertEqual([1, WSymbol.get('a'), 'a'], result)
+
+    def test_maps_with_lambda(self):
+        # when
+        result = eval_str("(map (lambda (x) (* x x)) '(1 2 3 4 5))",
+                          create_default_state())
+        # then
+        self.assertEqual([1, 4, 9, 16, 25], result)
+
 
 if __name__ == '__main__':
     unittest.main()

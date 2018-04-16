@@ -396,7 +396,7 @@ def w_eval(expr, state):
             (let head (car expr)
             (if
             ((eq head 'quote)
-                (cdr expr)) # not quite cdr. car of cdr i think.
+                (car (cdr expr)))
             (true
                 (let callee w_eval(head, state)
                 (let args (cdr expr)
@@ -417,7 +417,7 @@ def w_eval(expr, state):
                         (map
                             (lambda '(arg) '(w_eval arg state))
                             args)
-                    (let state (new_state prototype=state args
+                    (let state (new_state_proto state args)
                     (if
                     ((isinstance callee 'MagicFunction)
                         ???)
@@ -473,7 +473,7 @@ def w_eval(expr, state):
                 'No object found by the name of "{}"'.format(expr.name))
         value = state[expr]
         return value
-    if isinstance(expr, (WNumber, WString, WBoolean, WFunction)):
+    if isinstance(expr, (WNumber, WString, WBoolean, WFunction, WMacro)):
         return expr
     raise Exception('Unknown object type: "{}" ({})'.format(expr, type(expr)))
 
@@ -697,6 +697,17 @@ class WList(WObject):
         return WList(*self.values[1:])
 
 
+def w_map(func, exprs):
+    if not isinstance(func, WFunction):
+        raise Exception(
+            "Expected a function but got \"{}\" ({}) instead.".format(
+                func, type(func)))
+    results = []
+    for expr in exprs:
+        results.append(w_eval(WList(func, expr), state=None))
+    return WList(*results)
+
+
 def w_in(expr, container):
     if not isinstance(container, WList):
         raise Exception(
@@ -881,6 +892,7 @@ def create_default_state():
         'new_state': WMagicFunction(new_state),
         'get': WMagicFunction(get_state_value, 'get'),
         'in': WMagicFunction(w_in, 'in'),
+        'map': WMagicFunction(w_map, 'map'),
     })
 
 
