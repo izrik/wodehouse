@@ -68,7 +68,7 @@ def parse(s):
 
 
 def read_expr(s):
-    _i = s.i
+    # _i = s.i
     ch = s.peek()
     while s.has_chars() and (ch.isspace() or ch == '#'):
         if ch == '#':
@@ -909,7 +909,6 @@ def repl(prompt=None):
 def main():
     for arg in sys.argv[1:]:
         print('{} -->'.format(arg))
-        s = WStream(arg)
         print('  {}'.format(parse(arg)))
     if len(sys.argv) < 2:
         repl()
