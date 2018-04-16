@@ -625,7 +625,7 @@ class Lambda(WMagicMacro):
         expr = exprs[1]
 
         def subst_args(a, e):
-            if isinstance(e, (WNumber, WFunction, WSymbol, WBoolean)):
+            if isinstance(e, (WNumber, WFunction, WBoolean)):
                 return e
             if isinstance(e, WSymbol):
                 if e in a:

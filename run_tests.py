@@ -212,13 +212,25 @@ class WodehouseTest(unittest.TestCase):
 
     def test_lambda_creates_wfunction(self):
         # when
-        result = eval_str("(lambda (x) (* x x))", create_default_state())
+        result = eval_str("(lambda (x) 123)", create_default_state())
         # then
         self.assertIsInstance(result, WFunction)
         self.assertNotIsInstance(result, WMagicFunction)
         self.assertEqual(1, result.num_args)
         self.assertEqual([WSymbol.get('x')], result.args)
-        times = WSymbol.get('*')
+        self.assertEqual(123, result.expr)
+
+    def test_lambda_encloses_values(self):
+        # given
+        state = create_default_state()
+        # when
+        result = eval_str("(lambda (x) (* x x))", state)
+        # then
+        self.assertIsInstance(result, WFunction)
+        self.assertNotIsInstance(result, WMagicFunction)
+        self.assertEqual(1, result.num_args)
+        self.assertEqual([WSymbol.get('x')], result.args)
+        times = state['*']
         x = WSymbol.get('x')
         self.assertEqual([times, x, x], result.expr)
 
