@@ -390,7 +390,7 @@ def w_eval(expr, state):
         (if
         ((isinstance expr 'Symbol)
             (get state expr))
-        ((isinstance expr '(Number, String, Boolean))
+        ((isinstance expr '(Number String Boolean))
             expr)
         ((isinstance expr 'List)
             (let head (car expr)
@@ -398,7 +398,7 @@ def w_eval(expr, state):
             ((eq head 'quote)
                 (car (cdr expr)))
             (true
-                (let callee w_eval(head, state)
+                (let callee w_eval(head state)
                 (let args (cdr expr)
                 (if
                 ((isinstance callee 'Macro)
