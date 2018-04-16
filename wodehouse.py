@@ -591,6 +591,23 @@ class Apply(WMagicMacro):
         return args, state
 
 
+class If(WMagicMacro):
+    def call_magic_macro(self, exprs, state):
+        if state is None:
+            state = WState()
+        if len(exprs) != 3:
+            raise Exception(
+                "Expected 3 arguments to if, got {} instead.".format(
+                    len(exprs)))
+        condition = exprs[0]
+        true_retval = exprs[1]
+        false_retval = exprs[2]
+        cond_result = w_eval(condition, state)
+        if cond_result is WBoolean.true:
+            return true_retval, state
+        return false_retval, state
+
+
 class Cond(WMagicMacro):
     def call_magic_macro(self, exprs, state):
         if state is None:
@@ -598,7 +615,7 @@ class Cond(WMagicMacro):
         for expr in exprs:
             if not isinstance(expr, WList) or len(expr) != 2:
                 raise Exception(
-                    "Argument to `if` is not a condition-value pair: "
+                    "Argument to `cond` is not a condition-value pair: "
                     "\"{}\" ({})".format(expr, type(expr)))
         for expr in exprs:
             condition, retval = expr.values
@@ -885,6 +902,7 @@ def create_default_state():
         'false': WBoolean.false,
         'not': WMagicFunction(w_not, 'not'),
         'cond': Cond(),
+        'if': If(),
         '<': WMagicFunction(less_than, '<'),
         '<=': WMagicFunction(less_than_or_equal_to, '<='),
         '>': WMagicFunction(greater_than, '>'),

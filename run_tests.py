@@ -355,6 +355,20 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WSymbol.get('b'), result)
 
+    def test_if_condition_is_true_returns_first_retval(self):
+        # when
+        result = eval_str("(if (< 2 3) 4 5)",
+                          create_default_state())
+        # then
+        self.assertEqual(4, result)
+
+    def test_if_condition_is_false_returns_second_retval(self):
+        # when
+        result = eval_str("(if (> 2 3) 4 5)",
+                          create_default_state())
+        # then
+        self.assertEqual(5, result)
+
     def test_less_than_returns_true_for_lesser(self):
         # when
         result = eval_str("(< 1 2)", create_default_state())
