@@ -187,7 +187,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_gets_type_of_function(self):
         # when
-        result = eval_str("(type (lambda '() 1))", create_default_state())
+        result = eval_str("(type (lambda () 1))", create_default_state())
         # then
         self.assertIs(WSymbol.get("Function"), result)
 
@@ -212,7 +212,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_lambda_creates_wfunction(self):
         # when
-        result = eval_str("(lambda '(x) '(* x x))", create_default_state())
+        result = eval_str("(lambda (x) (* x x))", create_default_state())
         # then
         self.assertIsInstance(result, WFunction)
         self.assertNotIsInstance(result, WMagicFunction)
@@ -224,14 +224,14 @@ class WodehouseTest(unittest.TestCase):
 
     def test_wfunction_can_be_called(self):
         # when
-        result = eval_str("((lambda '(x) '(* x x)) 4)", create_default_state())
+        result = eval_str("((lambda (x) (* x x)) 4)", create_default_state())
         # then
         self.assertEqual(16, result)
 
     def test_wfunctions_can_be_used_in_the_state(self):
         # given
         state = create_default_state()
-        state['sqr'] = eval_str("(lambda '(x) '(* x x))", state)
+        state['sqr'] = eval_str("(lambda (x) (* x x))", state)
         # expect
         self.assertEqual(25, eval_str("(sqr 5)", state))
         self.assertEqual(81, eval_str("(sqr 9)", state))
@@ -274,10 +274,10 @@ class WodehouseTest(unittest.TestCase):
 
     def test_str_stringifies_lambdas(self):
         # when
-        result = eval_str("(str (lambda '(x) '(* x x)))",
+        result = eval_str("(str (lambda (x) (* x x)))",
                           create_default_state())
         # then
-        self.assertEqual("(lambda '(x) '(* x x))", result)
+        self.assertEqual("(lambda (x) (* x x))", result)
 
     def test_str_stringifies_magic_functions(self):
         # when
@@ -509,7 +509,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_isinstance_returns_true_when_match_function(self):
         # when
-        result = eval_str("(isinstance (lambda '() 1) 'Function)",
+        result = eval_str("(isinstance (lambda () 1) 'Function)",
                           create_default_state())
         # then
         self.assertIs(WBoolean.true, result)
@@ -530,7 +530,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_isinstance_returns_true_when_match_boolean(self):
         # when
-        result = eval_str("(isinstance (lambda '() 1) 'Function)",
+        result = eval_str("(isinstance (lambda () 1) 'Function)",
                           create_default_state())
         # then
         self.assertIs(WBoolean.true, result)

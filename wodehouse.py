@@ -147,12 +147,11 @@ def w_str(arg):
     if isinstance(arg, WFunction):
         if isinstance(arg, WMagicFunction):
             return WString(str(arg))
-        q = WSymbol.get('quote')
         return w_str(
             WList(
                 WSymbol.get('lambda'),
-                WList(q, arg.args),
-                WList(q, arg.expr)))
+                WList(*arg.args),
+                WList(*arg.expr)))
     if isinstance(arg, WBoolean):
         return WString(str(arg))
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
@@ -379,19 +378,6 @@ def w_isinstance(arg, type_or_types):
     return WBoolean.false
 
 
-def w_lambda(args, expr):
-    if not isinstance(args, (WSymbol, WList)):
-        raise TypeError(
-            'First argument must be either a symbol or a list of symbols. '
-            'Got "{}" ({}) instead'.format(args, type(args)))
-    if isinstance(args, WList):
-        if not all(isinstance(a, WSymbol) for a in args):
-            raise TypeError(
-                'First argument must be either a symbol or a list of symbols. '
-                'Got "{}" ({}) instead'.format(args, type(args)))
-    return WFunction(args, expr)
-
-
 def w_eval(expr, state):
     """
     (lambda '(expr state)
@@ -457,10 +443,8 @@ def w_eval(expr, state):
         callee = w_eval(expr.head, state)
         args = expr.remaining
         if isinstance(callee, WMacro):
-            exprs, state = callee.call_macro(args, state=state)
-            if len(exprs) < 1:
-                raise Exception('Ran out of arguments')
-            return w_eval(exprs, state)
+            expr, state = callee.call_macro(args, state=state)
+            return w_eval(expr, state)
         if not isinstance(callee, WFunction):
             raise Exception(
                 'Callee is not a function. Got "{}" ({}) instead.'.format(
@@ -483,7 +467,7 @@ def w_eval(expr, state):
                 'No object found by the name of "{}"'.format(expr.name))
         value = state[expr]
         return value
-    if isinstance(expr, (WNumber, WString, WBoolean)):
+    if isinstance(expr, (WNumber, WString, WBoolean, WFunction)):
         return expr
     raise Exception('Unknown object type: "{}" ({})'.format(expr, type(expr)))
 
@@ -580,9 +564,6 @@ class WMacro(WObject):
 class WMagicMacro(WMacro):
     def call_macro(self, exprs, state):
         exprs, state = self.call_magic_macro(exprs, state)
-        if not isinstance(exprs, WList):
-            raise TypeError(
-                'Magic macro "{}" returned wrong kind of exprs'.format(self))
         return exprs, state
 
 
@@ -623,6 +604,42 @@ class If(WMagicMacro):
                     "Condition evaluated to a non-boolean value: "
                     "\"{}\" ({})".format(cond_result, type(cond_result)))
         raise Exception("No condition evaluated to true.")
+
+
+class Lambda(WMagicMacro):
+    def call_magic_macro(self, exprs, state):
+        if state is None:
+            state = WState()
+        if len(exprs) != 2:
+            raise Exception(
+                "Wrong number of arguments to lambda. "
+                "Expected 2, got {}.".format(len(exprs)))
+        args = exprs[0]
+        if isinstance(args, WSymbol):
+            args = WList(args)
+        if not isinstance(args, WList) or \
+                not all(isinstance(arg, WSymbol) for arg in args):
+            raise Exception(
+                "First argument to lambda must be a symbol or a list of "
+                "symbols.")
+        expr = exprs[1]
+
+        def subst_args(a, e):
+            if isinstance(e, (WNumber, WFunction, WSymbol, WBoolean)):
+                return e
+            if isinstance(e, WSymbol):
+                if e in a:
+                    return e
+                if e in state:
+                    return state[e]
+                raise Exception(
+                    "No value defined for symbol \"{}\".".format(e))
+            if isinstance(e, WList):
+                return WList(*(subst_args(a, e2) for e2 in e))
+            raise Exception(
+                "Can't subst expression \"{}\" ({}).".format(e, type(e)))
+
+        return WFunction(args, subst_args(args, expr)), state
 
 
 class WList(WObject):
@@ -845,7 +862,7 @@ def create_default_state():
         'print': WMagicFunction(w_print),
         'type': WMagicFunction(get_type),
         'isinstance': WMagicFunction(w_isinstance),
-        'lambda': WMagicFunction(w_lambda),
+        'lambda': Lambda(),
         'str': WMagicFunction(w_str),
         'true': WBoolean.true,
         'false': WBoolean.false,
