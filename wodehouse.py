@@ -387,20 +387,20 @@ def w_isinstance(arg, type_or_types):
 def w_eval(expr, state):
     """
     (lambda '(expr state)
-        (if
+        (cond
         ((isinstance expr 'Symbol)
             (get state expr))
         ((isinstance expr '(Number String Boolean))
             expr)
         ((isinstance expr 'List)
             (let head (car expr)
-            (if
+            (cond
             ((eq head 'quote)
                 (car (cdr expr)))
             (true
                 (let callee w_eval(head state)
                 (let args (cdr expr)
-                (if
+                (cond
                 ((isinstance callee 'Macro)
                     (let exprs_state (call_macro callee args state)
                     (let exprs (car exprs_state)
@@ -418,7 +418,7 @@ def w_eval(expr, state):
                             (lambda '(arg) '(w_eval arg state))
                             args)
                     (let state (new_state_proto state args)
-                    (if
+                    (cond
                     ((isinstance callee 'MagicFunction)
                         ???)
                     (true
@@ -591,7 +591,7 @@ class Apply(WMagicMacro):
         return args, state
 
 
-class If(WMagicMacro):
+class Cond(WMagicMacro):
     def call_magic_macro(self, exprs, state):
         if state is None:
             state = WState()
@@ -884,7 +884,7 @@ def create_default_state():
         'true': WBoolean.true,
         'false': WBoolean.false,
         'not': WMagicFunction(w_not, 'not'),
-        'if': If(),
+        'cond': Cond(),
         '<': WMagicFunction(less_than, '<'),
         '<=': WMagicFunction(less_than_or_equal_to, '<='),
         '>': WMagicFunction(greater_than, '>'),
