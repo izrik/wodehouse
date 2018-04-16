@@ -146,7 +146,7 @@ def w_str(arg):
         return WString(str(arg))
     if isinstance(arg, WFunction):
         if isinstance(arg, WMagicFunction):
-            return WString(str(arg))
+            return WString(str(arg.name))
         return w_str(
             WList(
                 WSymbol.get('lambda'),
@@ -318,7 +318,7 @@ class WFunction(WObject):
 
 
 class WMagicFunction(WFunction):
-    def __init__(self, f):
+    def __init__(self, f, name=None):
         super().__init__([], None)
         self.f = f
         sig = signature(f)
@@ -329,6 +329,12 @@ class WMagicFunction(WFunction):
                if p.kind == p.VAR_POSITIONAL):
             num_args = None
         self.num_args = num_args
+        if name is None:
+            name = f.__name__
+        self.name = name
+
+    def __str__(self):
+        return str(self.name)
 
     def __call__(self, *args, **kwargs):
         return self.f(*args)
@@ -848,33 +854,33 @@ def get_state_value(state, name_or_symbol):
 
 def create_default_state():
     return WState({
-        '+': WMagicFunction(add),
-        '-': WMagicFunction(sub),
-        '*': WMagicFunction(mult),
-        '/': WMagicFunction(div),
+        '+': WMagicFunction(add, '+'),
+        '-': WMagicFunction(sub, '-'),
+        '*': WMagicFunction(mult, '*'),
+        '/': WMagicFunction(div, '/'),
         'let': Let(),
         'apply': Apply(),
-        'list': WMagicFunction(list_func),
+        'list': WMagicFunction(list_func, 'list'),
         'car': WMagicFunction(car),
         'cdr': WMagicFunction(cdr),
         'atom': WMagicFunction(atom),
         'eq': WMagicFunction(eq),
-        'print': WMagicFunction(w_print),
-        'type': WMagicFunction(get_type),
-        'isinstance': WMagicFunction(w_isinstance),
+        'print': WMagicFunction(w_print, 'print'),
+        'type': WMagicFunction(get_type, 'type'),
+        'isinstance': WMagicFunction(w_isinstance, 'isinstance'),
         'lambda': Lambda(),
-        'str': WMagicFunction(w_str),
+        'str': WMagicFunction(w_str, 'str'),
         'true': WBoolean.true,
         'false': WBoolean.false,
-        'not': WMagicFunction(w_not),
+        'not': WMagicFunction(w_not, 'not'),
         'if': If(),
-        '<': WMagicFunction(less_than),
-        '<=': WMagicFunction(less_than_or_equal_to),
-        '>': WMagicFunction(greater_than),
-        '>=': WMagicFunction(greater_than_or_equal_to),
+        '<': WMagicFunction(less_than, '<'),
+        '<=': WMagicFunction(less_than_or_equal_to, '<='),
+        '>': WMagicFunction(greater_than, '>'),
+        '>=': WMagicFunction(greater_than_or_equal_to, '>='),
         'new_state': WMagicFunction(new_state),
-        'get': WMagicFunction(get_state_value),
-        'in': WMagicFunction(w_in),
+        'get': WMagicFunction(get_state_value, 'get'),
+        'in': WMagicFunction(w_in, 'in'),
     })
 
 

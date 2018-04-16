@@ -296,8 +296,7 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str("(str str)", create_default_state())
         # then
         self.assertIsInstance(result, WString)
-        self.assertTrue(result.value.startswith(
-            "<wodehouse.WMagicFunction object at 0x"))
+        self.assertTrue(result.value.startswith("str"))
 
     def test_str_stringifies_variables_values(self):
         # when
