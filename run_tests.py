@@ -448,9 +448,16 @@ class WodehouseTest(unittest.TestCase):
         self.assertIsInstance(result, WState)
         self.assertEqual(0, len(result))
 
+    def test_new_state_with_empty_list_for_args_creates_state_object(self):
+        # when
+        result = eval_str("(new_state '())", create_default_state())
+        # then
+        self.assertIsInstance(result, WState)
+        self.assertEqual(0, len(result))
+
     def test_new_state_args_become_keys_and_values(self):
         # when
-        result = eval_str("(new_state 'a 1 'b 2)", create_default_state())
+        result = eval_str("(new_state '((a 1) (b 2)))", create_default_state())
         # then
         self.assertIsInstance(result, WState)
         self.assertEqual(2, len(result))
@@ -461,15 +468,32 @@ class WodehouseTest(unittest.TestCase):
 
     def test_get_gets_value_by_key(self):
         # when
-        result = eval_str("(get (new_state 'a 1 'b 2) 'a)",
+        result = eval_str("(get (new_state '((a 1) (b 2))) 'a)",
                           create_default_state())
         # then
         self.assertEqual(1, result)
         # when
-        result = eval_str("(get (new_state 'a 1 'b 2) 'b)",
+        result = eval_str("(get (new_state '((a 1) (b 2))) 'b)",
                           create_default_state())
         # then
         self.assertEqual(2, result)
+
+    def test_new_state_proto_create_state_object_with_prototype(self):
+        # given
+        p = WState({'a': 3, 'b': 4, 'c': 5})
+        state = create_default_state()
+        state['p'] = p
+        # when
+        result = eval_str("(new_state_proto p '((a 1) (b 2)))", state)
+        # then
+        self.assertIsInstance(result, WState)
+        self.assertEqual(3, len(result))
+        self.assertIn('a', result)
+        self.assertEqual(1, result['a'])
+        self.assertIn('b', result)
+        self.assertEqual(2, result['b'])
+        self.assertIn('c', result)
+        self.assertEqual(5, result['c'])
 
     def test_in_returns_false_if_item_present(self):
         # when

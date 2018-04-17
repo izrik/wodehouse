@@ -315,10 +315,11 @@ class WFunction(WObject):
         self.args = args
         self.expr = expr
         self.num_args = len(args)
+        self.check_args = True
 
 
 class WMagicFunction(WFunction):
-    def __init__(self, f, name=None):
+    def __init__(self, f, name=None, check_args=True):
         super().__init__([], None)
         self.f = f
         sig = signature(f)
@@ -332,6 +333,7 @@ class WMagicFunction(WFunction):
         if name is None:
             name = f.__name__
         self.name = name
+        self.check_args = check_args
 
     def __str__(self):
         return str(self.name)
@@ -457,7 +459,9 @@ def w_eval(expr, state):
                 'Callee is not a function. Got "{}" ({}) instead.'.format(
                     callee, type(callee)))
         args = [w_eval(arg, state) for arg in args]
-        if callee.num_args is not None and len(args) != callee.num_args:
+        if (callee.check_args and
+                callee.num_args is not None and
+                len(args) != callee.num_args):
             raise Exception(
                 'Function expected {} args, got {} instead.'.format(
                     len(callee.args), len(args)))
@@ -869,10 +873,47 @@ def iter_by_two(i):
         yield item1, item2
 
 
-def new_state(*exprs):
+def new_state(pairs=None):
+    """(new_state '((key1 value1) (key2 value2)))"""
+    if pairs is not None:
+        if not isinstance(pairs, WList):
+            raise Exception(
+                "Argument to new_state must be a list of key-value pairs. "
+                "Got \"{}\" ({}) instead.".format(pairs, type(pairs)))
+        for pair in pairs:
+            if not isinstance(pair, WList) or len(pair) != 2:
+                raise Exception(
+                    "Argument to new_state must be a list of key-value pairs. "
+                    "Got \"{}\" ({}) instead.".format(pairs, type(pairs)))
     state = WState()
-    for key, value in iter_by_two(exprs):
-        state[key] = value
+    if pairs is not None:
+        for key, value in pairs:
+            state[key] = value
+    return state
+
+
+def new_state_proto(prototype, pairs=None):
+    """(new_state_proto proto '((key1 value1) (key2 value2)))"""
+    if pairs is not None:
+        if not isinstance(prototype, WState):
+            raise TypeError(
+                "Prototype must be a state object. "
+                "Got \"{}\" ({}) instead.".format(prototype, type(prototype)))
+        if not isinstance(pairs, WList):
+            raise Exception(
+                "Second argument to new_state_proto must be a list of "
+                "key-value pairs. Got \"{}\" ({}) instead.".format(
+                    pairs, type(pairs)))
+        for pair in pairs:
+            if not isinstance(pair, WList) or len(pair) != 2:
+                raise Exception(
+                    "Second argument to new_state_proto must be a list of "
+                    "key-value pairs. Got \"{}\" ({}) instead.".format(
+                        pairs, type(pairs)))
+    state = WState(prototype=prototype)
+    if pairs is not None:
+        for key, value in pairs:
+            state[key] = value
     return state
 
 
@@ -908,7 +949,8 @@ def create_default_state():
         '<=': WMagicFunction(less_than_or_equal_to, '<='),
         '>': WMagicFunction(greater_than, '>'),
         '>=': WMagicFunction(greater_than_or_equal_to, '>='),
-        'new_state': WMagicFunction(new_state),
+        'new_state': WMagicFunction(new_state, check_args=False),
+        'new_state_proto': WMagicFunction(new_state_proto, check_args=False),
         'get': WMagicFunction(get_state_value, 'get'),
         'in': WMagicFunction(w_in, 'in'),
         'map': WMagicFunction(w_map, 'map'),
