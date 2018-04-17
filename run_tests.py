@@ -3,8 +3,9 @@
 import unittest
 from unittest.mock import Mock
 
+import wodehouse
 from wodehouse import eval_str, create_default_state, w_print, WList, \
-    WSymbol, WFunction, WMagicFunction, WString, WBoolean, WState
+    WSymbol, WFunction, WMagicFunction, WString, WBoolean, WState, parse
 
 
 class WodehouseTest(unittest.TestCase):
@@ -650,6 +651,13 @@ class WodehouseTest(unittest.TestCase):
                           create_default_state())
         # then
         self.assertEqual([4, 10, 18], result)
+
+    def test_parses_w_eval(self):
+        source = wodehouse._eval_source
+        # when
+        result = parse(source)
+        # then
+        self.assertNotEqual([], result)
 
 
 if __name__ == '__main__':

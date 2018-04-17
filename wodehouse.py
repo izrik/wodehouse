@@ -388,47 +388,47 @@ def w_isinstance(arg, type_or_types):
 
 def w_eval(expr, state):
     """
-    (lambda '(expr state)
+(lambda (expr state)
+    (cond
+    ((isinstance expr 'Symbol)
+        (get state expr))
+    ((isinstance expr '(Number String Boolean))
+        expr)
+    ((isinstance expr 'List)
+        (let head (car expr)
         (cond
-        ((isinstance expr 'Symbol)
-            (get state expr))
-        ((isinstance expr '(Number String Boolean))
-            expr)
-        ((isinstance expr 'List)
-            (let head (car expr)
-            (cond
-            ((eq head 'quote)
-                (car (cdr expr)))
-            (true
-                (let callee w_eval(head state)
-                (let args (cdr expr)
-                (cond
-                ((isinstance callee 'Macro)
-                    (let exprs_state (call_macro callee args state)
-                    (let exprs (car exprs_state)
-                    (let state (car (cdr exprs_state))
-                    (w_eval exprs state)))))
-                ((not (isinstance callee 'Function))
-                    (raise Exception
-                        (format
-                           "Callee is not a function. Got \"{}\" ({}) instead."
-                            callee
-                            (type callee))))
-                (true
-                    (let args
-                        (map
-                            (lambda (name value)
-                                (list name (w_eval value state)))
-                            args (get_func_args callee))
-                    (let state (new_state_proto state args)
-                    (if
-                        (isinstance callee 'MagicFunction)
-                        implementation_specific
-                        (w_eval (second callee) state)))))))))))
+        ((eq head 'quote)
+            (car (cdr expr)))
         (true
-            (raise Exception
-                (format
-                    "Unknown object type: \"{}\" ({})" expr (type expr))))))
+            (let callee w_eval(head state)
+            (let args (cdr expr)
+            (cond
+            ((isinstance callee 'Macro)
+                (let exprs_state (call_macro callee args state)
+                (let exprs (car exprs_state)
+                (let state (car (cdr exprs_state))
+                (w_eval exprs state)))))
+            ((not (isinstance callee 'Function))
+                (raise Exception
+                    (format
+                        "Callee is not a function. Got \\"{}\\" ({}) instead."
+                        callee
+                        (type callee))))
+            (true
+                (let args
+                    (map
+                        (lambda (name value)
+                            (list name (w_eval value state)))
+                        args (get_func_args callee))
+                (let state (new_state_proto state args)
+                (if
+                    (isinstance callee 'MagicFunction)
+                    implementation_specific
+                    (w_eval (second callee) state))))))))))))
+    (true
+        (raise Exception
+            (format
+                "Unknown object type: \\"{}\\" ({})" expr (type expr))))))
 
 
     """
@@ -481,6 +481,9 @@ def w_eval(expr, state):
     if isinstance(expr, (WNumber, WString, WBoolean, WFunction, WMacro)):
         return expr
     raise Exception('Unknown object type: "{}" ({})'.format(expr, type(expr)))
+
+
+_eval_source = w_eval.__doc__
 
 
 def add(*operands):
