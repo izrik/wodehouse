@@ -417,14 +417,14 @@ def w_eval(expr, state):
                 (true
                     (let args
                         (map
-                            (lambda '(arg) '(w_eval arg state))
-                            args)
+                            (lambda (name value)
+                                (list name (w_eval value state)))
+                            args (get_func_args callee))
                     (let state (new_state_proto state args)
-                    (cond
-                    ((isinstance callee 'MagicFunction)
-                        ???)
-                    (true
-                        (w_eval (second callee) state)))))))))))))
+                    (if
+                        (isinstance callee 'MagicFunction)
+                        implementation_specific
+                        (w_eval (second callee) state)))))))))))
         (true
             (raise Exception
                 (format
@@ -718,16 +718,47 @@ class WList(WObject):
             return WList()
         return WList(*self.values[1:])
 
+    def append(self, value):
+        new_list = list(self.values)
+        new_list.append(value)
+        return WList(*new_list)
 
-def w_map(func, exprs):
+    def extend(self, *values):
+        new_list = list(self.values)
+        new_list.extend(values)
+        return WList(*new_list)
+
+
+def w_map(func, *exprlists):
     if not isinstance(func, WFunction):
         raise Exception(
             "Expected a function but got \"{}\" ({}) instead.".format(
                 func, type(func)))
-    results = []
-    for expr in exprs:
-        results.append(w_eval(WList(func, expr), state=None))
-    return WList(*results)
+    if exprlists:
+        for exprlist in exprlists:
+            if not isinstance(exprlist, WList):
+                raise Exception(
+                    "Argument passed to map must be lists. "
+                    "Got \"{}\" ({}) instead.".format(
+                        exprlist, type(exprlist)))
+        length = len(exprlists[0])
+        for exprlist in exprlists:
+            if len(exprlist) != length:
+                raise Exception(
+                    "All argument lists should have the same length. "
+                    "Expected {}, but got {} instead.".format(
+                        length, len(exprlist)))
+    results = WList()
+    e = WList(*exprlists)
+    while len(e[0]) > 0:
+        cars = WList(*list(exprlist.head for exprlist in e))
+        cdrs = WList(*list(exprlist.remaining for exprlist in e))
+        func_with_args = WList(func, *cars)
+        result = w_eval(func_with_args, state=None)
+        results = results.append(result)
+        e = cdrs
+
+    return results
 
 
 def w_in(expr, container):
@@ -953,7 +984,7 @@ def create_default_state():
         'new_state_proto': WMagicFunction(new_state_proto, check_args=False),
         'get': WMagicFunction(get_state_value, 'get'),
         'in': WMagicFunction(w_in, 'in'),
-        'map': WMagicFunction(w_map, 'map'),
+        'map': WMagicFunction(w_map, 'map', check_args=False),
     })
 
 

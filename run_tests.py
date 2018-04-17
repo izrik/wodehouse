@@ -644,6 +644,13 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual([1, 4, 9, 16, 25], result)
 
+    def test_maps_multiple_lists_and_arguments(self):
+        # when
+        result = eval_str("(map (lambda (x y) (* x y)) '(1 2 3) '(4 5 6))",
+                          create_default_state())
+        # then
+        self.assertEqual([4, 10, 18], result)
+
 
 if __name__ == '__main__':
     unittest.main()
