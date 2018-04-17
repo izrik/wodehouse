@@ -433,12 +433,11 @@ def w_eval(expr, state):
 
     """
     # TODO: proper subtypes and inheritance, instead of just symbols
-    # TODO: map
     # TODO: raise
     # TODO: w_eval
     # TODO: call_macro
-    # TODO: new_state prototype: optional/named arguments, or new_state_from
     # TODO: varargs
+    # TODO: get_func_args
     if state is None:
         state = WState()
     elif not isinstance(state, WState):
