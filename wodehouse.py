@@ -396,10 +396,9 @@ def w_eval(expr, state):
         expr)
     ((isinstance expr 'List)
         (let head (car expr)
-        (cond
-        ((eq head 'quote)
-            (car (cdr expr)))
-        (true
+        (if
+            (eq head 'quote)
+            (car (cdr expr))
             (let callee w_eval(head state)
             (let args (cdr expr)
             (cond
@@ -424,7 +423,7 @@ def w_eval(expr, state):
                 (if
                     (isinstance callee 'MagicFunction)
                     implementation_specific
-                    (w_eval (second callee) state))))))))))))
+                    (w_eval (second callee) state)))))))))))
     (true
         (raise Exception
             (format
