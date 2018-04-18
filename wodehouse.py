@@ -955,6 +955,11 @@ def get_state_value(state, name_or_symbol):
     return state[key]
 
 
+def read_file(path):
+    with open(path.value) as f:
+        return WString(f.read())
+
+
 def create_default_state():
     return WState({
         '+': WMagicFunction(add, '+'),
@@ -987,6 +992,7 @@ def create_default_state():
         'get': WMagicFunction(get_state_value, 'get'),
         'in': WMagicFunction(w_in, 'in'),
         'map': WMagicFunction(w_map, 'map', check_args=False),
+        'read_file': WMagicFunction(read_file),
     })
 
 

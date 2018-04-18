@@ -684,6 +684,12 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual(2, result)
 
+    def test_read_file_reads_files(self):
+        # when
+        result = eval_str("(read_file \"input2.txt\")", create_default_state())
+        # then
+        self.assertEqual("( 123 )\n", result)
+
 
 if __name__ == '__main__':
     unittest.main()
