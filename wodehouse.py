@@ -483,7 +483,8 @@ def w_eval(expr, state):
                 'No object found by the name of "{}"'.format(expr.name))
         value = state[expr]
         return value
-    if isinstance(expr, (WNumber, WString, WBoolean, WFunction, WMacro)):
+    if isinstance(expr, (WNumber, WString, WBoolean, WFunction, WMacro,
+                         WState)):
         return expr
     raise Exception('Unknown object type: "{}" ({})'.format(expr, type(expr)))
 
@@ -843,7 +844,7 @@ def eval_str(input_s, state=None):
     return value
 
 
-class WState:
+class WState(WObject):
     def __init__(self, values=None, prototype=None):
         if values is None:
             values = {}
