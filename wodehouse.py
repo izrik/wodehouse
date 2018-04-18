@@ -873,7 +873,7 @@ class WState(WObject):
             return self.dict.get(item)
         if self.prototype is not None:
             return self.prototype[item]
-        raise KeyError
+        raise KeyError(item.name)
 
     def __setitem__(self, key, value):
         key = self.normalize_key(str(key))
