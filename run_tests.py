@@ -719,6 +719,5 @@ class WodehouseTest(unittest.TestCase):
         self.assertEqual("abc", result)
 
 
-
 if __name__ == '__main__':
     unittest.main()
