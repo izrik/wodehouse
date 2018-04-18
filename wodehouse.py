@@ -1094,18 +1094,23 @@ def repl(prompt=None):
                 print('  ' + line, end='')
 
 
+def w_exec_src(src):
+    fls = create_file_level_state()
+    state = create_default_state(prototype=fls)
+    stream = WStream(src)
+    read_whitespace_and_comments(stream)
+    while stream.has_chars():
+        expr = read_expr(stream)
+        w_eval(expr, state)
+        read_whitespace_and_comments(stream)
+    return fls
+
+
 def main():
     for arg in sys.argv[1:]:
         with open(arg) as f:
             src = f.read()
-        fls = create_file_level_state()
-        state = create_default_state(prototype=fls)
-        stream = WStream(src)
-        read_whitespace_and_comments(stream)
-        while stream.has_chars():
-            expr = read_expr(stream)
-            w_eval(expr, state)
-            read_whitespace_and_comments(stream)
+        w_exec_src(src)
     if len(sys.argv) < 2:
         repl()
 
