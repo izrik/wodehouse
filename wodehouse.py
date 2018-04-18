@@ -1033,8 +1033,10 @@ def repl(prompt=None):
 
 def main():
     for arg in sys.argv[1:]:
-        print('{} -->'.format(arg))
-        print('  {}'.format(parse(arg)))
+        with open(arg) as f:
+            src = f.read()
+        state = create_default_state()
+        eval_str(src, state)
     if len(sys.argv) < 2:
         repl()
 
