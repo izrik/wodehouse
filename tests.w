@@ -19,3 +19,7 @@
 (assert (not (eq import (get example 'import))))
 (assert (not (eq fls (get example 'fls))))
 (assert (eq example (get example 'fls)))
+
+(assert (not (in 'something (list_state fls))))
+(import "example.w" something)
+(assert (in 'example (list_state fls)))
