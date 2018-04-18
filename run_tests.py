@@ -745,6 +745,29 @@ class WodehouseTest(unittest.TestCase):
         self.assertIsInstance(result, WString)
         self.assertEqual("onetwothree", result)
 
+    def test_format_interpolates_arguments(self):
+        # when
+        result = eval_str("(format \"one {} three\" \"two\")",
+                          create_default_state())
+        # then
+        self.assertIsInstance(result, WString)
+        self.assertEqual("one two three", result)
+
+    def test_format_interprets_double_braces_as_escaped(self):
+        # when
+        result = eval_str("(format \"abc {{ def\")", create_default_state())
+        # then
+        self.assertIsInstance(result, WString)
+        self.assertEqual("abc { def", result)
+
+    def test_format_stringifies_arguments(self):
+        # when
+        result = eval_str("(format \"a{}b{}c{}d\" 1 true +)",
+                          create_default_state())
+        # then
+        self.assertIsInstance(result, WString)
+        self.assertEqual("a1btruec+d", result)
+
 
 if __name__ == '__main__':
     unittest.main()

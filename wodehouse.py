@@ -164,6 +164,45 @@ def w_str(arg):
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 
+def w_format(fmt, *args):
+    if args is None:
+        args = WList()
+    elif not isinstance(args, WList):
+        args = WList(*args)
+    _args = args
+    s = WStream(fmt.value)
+    parts = WList()
+    current = WList()
+    # TODO: extract a formatter object and/or function
+    while s.has_chars():
+        ch = WString(s.peek())
+        if ch == '{':
+            s.get_next_char()
+            ch = WString(s.peek())
+            if ch == '}':
+                if len(args) < 1:
+                    raise Exception(
+                        "Not enough arguments for format string \"{}\". "
+                        "Only got {} arguments.".format(fmt, len(_args)))
+                parts = parts.append(add(*current))
+                parts = parts.append(w_str(args.head))
+                args = args.remaining
+                current = WList()
+                s.get_next_char()
+                continue
+            elif ch == '{':
+                pass
+            else:
+                raise Exception(
+                    "Invalid format character "
+                    "\"{}\" in \"{}\"".format(ch, fmt))
+        current = current.append(ch)
+        s.get_next_char()
+    if len(current) > 0:
+        parts = parts.append(add(*current))
+    return add(*parts)
+
+
 def read_string(s):
     delim = s.get_next_char()
     assert delim == '"'
@@ -446,7 +485,6 @@ def w_eval(expr, state):
     # TODO: call_macro
     # TODO: varargs
     # TODO: get_func_args
-    # TODO: format
     if state is None:
         state = WState()
     elif not isinstance(state, WState):
@@ -1100,6 +1138,7 @@ def create_default_state(prototype=None):
         'isinstance': WMagicFunction(w_isinstance, 'isinstance'),
         'lambda': Lambda(),
         'str': WMagicFunction(w_str, 'str'),
+        'format': WMagicFunction(w_format, 'format'),
         'true': WBoolean.true,
         'false': WBoolean.false,
         'not': WMagicFunction(w_not, 'not'),
