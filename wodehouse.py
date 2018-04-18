@@ -67,8 +67,7 @@ def parse(s):
     return read_expr(s)
 
 
-def read_expr(s):
-    # _i = s.i
+def read_whitespace_and_comments(s):
     ch = s.peek()
     while s.has_chars() and (ch.isspace() or ch == '#'):
         if ch == '#':
@@ -81,6 +80,14 @@ def read_expr(s):
                     "Ran out of characters before reading expression.")
         s.get_next_char()
         ch = s.peek()
+
+
+def read_expr(s):
+    # _i = s.i
+    ch = s.peek()
+    if s.has_chars() and (ch.isspace() or ch == '#'):
+        read_whitespace_and_comments(s)
+    ch = s.peek()
     if not s.has_chars():
         raise Exception(
             "Ran out of characters before reading expression.")
@@ -1037,9 +1044,11 @@ def main():
             src = f.read()
         state = create_default_state()
         stream = WStream(src)
+        read_whitespace_and_comments(stream)
         while stream.has_chars():
             expr = read_expr(stream)
             w_eval(expr, state)
+            read_whitespace_and_comments(stream)
     if len(sys.argv) < 2:
         repl()
 
