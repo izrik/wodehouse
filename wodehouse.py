@@ -965,6 +965,10 @@ def get_state_value(state, name_or_symbol):
     return state[key]
 
 
+def list_state(state):
+    return WList(*(key for key in state.keys()))
+
+
 def define(name, value):
     """
     We want to import definitions from one file into another. Specifically, we
@@ -1055,6 +1059,7 @@ def create_default_state(prototype=None):
         'new_state': WMagicFunction(new_state, check_args=False),
         'new_state_proto': WMagicFunction(new_state_proto, check_args=False),
         'get': WMagicFunction(get_state_value, 'get'),
+        'list_state': WMagicFunction(list_state),
         'in': WMagicFunction(w_in, 'in'),
         'map': WMagicFunction(w_map, 'map', check_args=False),
         'read_file': WMagicFunction(read_file),
