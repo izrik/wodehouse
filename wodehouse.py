@@ -31,7 +31,7 @@ requires
     syntax change: read_expr("'(1)") --> WList(1)
 
 """
-
+import os
 import string
 
 import sys
@@ -1020,6 +1020,36 @@ class Define(WMagicMacro):
         return value, state
 
 
+class Import(WMagicMacro):
+    def __init__(self, file_level_state):
+        self.file_level_state = file_level_state
+
+    def call_magic_macro(self, exprs, state):
+        if len(exprs) < 1:
+            raise Exception(
+                "Macro 'import' expected at least 1 arguments. "
+                "Got {} instead.".format(len(exprs)))
+        filename, *import_names = exprs
+        filename = w_eval(filename, state)
+        if not isinstance(filename, WString):
+            raise Exception(
+                "Arg 'filename' to 'import' must be a string. "
+                "Got \"{}\" ({}) instead.".format(filename, type(filename)))
+        for impname in import_names:
+            if not isinstance(impname, WSymbol):
+                raise Exception(
+                    "Names to import must all be symbols. "
+                    "Got \"{}\" ({}) instead.".format(impname, type(impname)))
+        with open(filename.value) as f:
+            src = f.read()
+        other_fls = w_exec_src(src)
+        basename = os.path.splitext(filename.value)[0]
+        self.file_level_state[basename] = other_fls
+        for impname in import_names:
+            self.file_level_state[impname] = other_fls[impname]
+        return other_fls, state
+
+
 def read_file(path):
     with open(path.value) as f:
         return WString(f.read())
@@ -1073,6 +1103,7 @@ def create_file_level_state():
     fls = WState()
     fls['fls'] = fls
     fls['define'] = Define(fls)
+    fls['import'] = Import(fls)
     return fls
 
 
