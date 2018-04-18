@@ -5,7 +5,8 @@ from unittest.mock import Mock
 
 import wodehouse
 from wodehouse import eval_str, create_default_state, w_print, WList, \
-    WSymbol, WFunction, WMagicFunction, WString, WBoolean, WState, parse
+    WSymbol, WFunction, WMagicFunction, WString, WBoolean, WState, parse, \
+    create_file_level_state, WNumber
 
 
 class WodehouseTest(unittest.TestCase):
@@ -717,6 +718,17 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str("(assert \"abc\")", create_default_state())
         # then
         self.assertEqual("abc", result)
+
+    def test_define_adds_to_fls(self):
+        # given
+        fls = create_file_level_state()
+        state = create_default_state(fls)
+        # when
+        result = eval_str("(define x 3)", state)
+        # then
+        self.assertEqual(3, result)
+        self.assertIn(WSymbol.get('x'), fls)
+        self.assertEqual(WNumber(3), fls['x'])
 
 
 if __name__ == '__main__':
