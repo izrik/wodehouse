@@ -368,6 +368,8 @@ def get_type(arg):
         if isinstance(arg, WMagicMacro):
             return WSymbol.get('MagicMacro')
         return WSymbol.get('Macro')
+    if isinstance(arg, WState):
+        return WSymbol.get('State')
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 
