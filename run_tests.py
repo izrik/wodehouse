@@ -690,6 +690,35 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual("( 123 )\n", result)
 
+    def test_assert_raises_exception_on_false(self):
+        # expect
+        self.assertRaisesRegex(
+            Exception,
+            "Assertion failed\\.",
+            eval_str,
+            "(assert false)", create_default_state())
+
+    def test_assert_raises_exception_on_false_expr(self):
+        # expect
+        self.assertRaisesRegex(
+            Exception,
+            "Assertion failed\\.",
+            eval_str,
+            "(assert (< 3 1))", create_default_state())
+
+    def test_assert_returns_true_on_true(self):
+        # when
+        result = eval_str("(assert (< 1 2))", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_assert_returns_arg_on_non_boolean(self):
+        # when
+        result = eval_str("(assert \"abc\")", create_default_state())
+        # then
+        self.assertEqual("abc", result)
+
+
 
 if __name__ == '__main__':
     unittest.main()

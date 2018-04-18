@@ -960,6 +960,12 @@ def read_file(path):
         return WString(f.read())
 
 
+def w_assert(arg):
+    if arg is WBoolean.false:
+        raise Exception("Assertion failed.")
+    return arg
+
+
 def create_default_state():
     return WState({
         '+': WMagicFunction(add, '+'),
@@ -993,6 +999,7 @@ def create_default_state():
         'in': WMagicFunction(w_in, 'in'),
         'map': WMagicFunction(w_map, 'map', check_args=False),
         'read_file': WMagicFunction(read_file),
+        'assert': WMagicFunction(w_assert, 'assert'),
     })
 
 
