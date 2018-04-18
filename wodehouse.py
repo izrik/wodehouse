@@ -1036,7 +1036,10 @@ def main():
         with open(arg) as f:
             src = f.read()
         state = create_default_state()
-        eval_str(src, state)
+        stream = WStream(src)
+        while stream.has_chars():
+            expr = read_expr(stream)
+            w_eval(expr, state)
     if len(sys.argv) < 2:
         repl()
 
