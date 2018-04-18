@@ -447,7 +447,6 @@ def w_eval(expr, state):
     # TODO: varargs
     # TODO: get_func_args
     # TODO: format
-    # TODO: string concat
     if state is None:
         state = WState()
     elif not isinstance(state, WState):
@@ -499,12 +498,22 @@ _eval_source = w_eval.__doc__
 
 
 def add(*operands):
+    # TODO: thorough consideration of all operand types, e.g. number + string
     if not operands:
         return WNumber(0)
-    x = 0
-    for operand in operands:
-        x += operand.value
-    return WNumber(x)
+    if isinstance(operands[0], WNumber):
+        x = 0
+        for operand in operands:
+            x += operand.value
+        return WNumber(x)
+    if isinstance(operands[0], WString):
+        parts = WList()
+        for operand in operands:
+            parts = parts.append(w_str(operand).value)
+        return WString(''.join(parts))
+    raise Exception(
+        "Unknown operand type: "
+        "\"{}\" ({})".format(operands[0], type(operands[0])))
 
 
 def sub(*operands):

@@ -730,6 +730,21 @@ class WodehouseTest(unittest.TestCase):
         self.assertIn(WSymbol.get('x'), fls)
         self.assertEqual(WNumber(3), fls['x'])
 
+    def test_plus_adds_numbers(self):
+        # when
+        result = eval_str("(+ 1 2 3 4)", create_default_state())
+        # then
+        self.assertIsInstance(result, WNumber)
+        self.assertEqual(10, result)
+
+    def test_plus_concatenates_strings(self):
+        # when
+        result = eval_str("(+ \"one\" \"two\" \"three\")",
+                          create_default_state())
+        # then
+        self.assertIsInstance(result, WString)
+        self.assertEqual("onetwothree", result)
+
 
 if __name__ == '__main__':
     unittest.main()
