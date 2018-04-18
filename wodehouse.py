@@ -448,8 +448,10 @@ def w_eval(expr, state):
         state = WState()
     elif not isinstance(state, WState):
         state = WState(state)
-    if isinstance(expr, (int, str)):
-        raise Exception('Non-domain value escaped from containment!')
+    if not isinstance(expr, WObject):
+        raise Exception(
+            'Non-domain value escaped from containment! '
+            'Got "{}" ({}).'.format(expr, type(expr)))
     if isinstance(expr, WList):
         head = expr.head
         if head is WSymbol.get('quote'):
