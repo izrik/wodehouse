@@ -1057,10 +1057,18 @@ def read_file(path):
         return WString(f.read())
 
 
-def w_assert(arg):
-    if arg is WBoolean.false:
-        raise Exception("Assertion failed.")
-    return arg
+class Assert(WMagicMacro):
+    def call_magic_macro(self, exprs, state):
+        if len(exprs) != 1:
+            raise Exception(
+                "Macro assert expected 1 argument. "
+                "Got {} instead.".format(len(exprs)))
+        expr = exprs[0]
+        src = w_str(expr)
+        value = w_eval(expr, state)
+        if value is WBoolean.false:
+            raise Exception("Assertion failed: {}".format(src))
+        return value, state
 
 
 def create_default_state(prototype=None):
@@ -1097,7 +1105,7 @@ def create_default_state(prototype=None):
         'in': WMagicFunction(w_in, 'in'),
         'map': WMagicFunction(w_map, 'map', check_args=False),
         'read_file': WMagicFunction(read_file),
-        'assert': WMagicFunction(w_assert, 'assert'),
+        'assert': Assert(),
     }, prototype=prototype)
 
 

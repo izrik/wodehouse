@@ -695,7 +695,7 @@ class WodehouseTest(unittest.TestCase):
         # expect
         self.assertRaisesRegex(
             Exception,
-            "Assertion failed\\.",
+            "Assertion failed: \"false\"",
             eval_str,
             "(assert false)", create_default_state())
 
@@ -703,7 +703,7 @@ class WodehouseTest(unittest.TestCase):
         # expect
         self.assertRaisesRegex(
             Exception,
-            "Assertion failed\\.",
+            "Assertion failed: \"\\(< 3 1\\)\"",
             eval_str,
             "(assert (< 3 1))", create_default_state())
 
