@@ -446,6 +446,8 @@ def w_eval(expr, state):
     # TODO: call_macro
     # TODO: varargs
     # TODO: get_func_args
+    # TODO: format
+    # TODO: string concat
     if state is None:
         state = WState()
     elif not isinstance(state, WState):
