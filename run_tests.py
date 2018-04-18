@@ -653,11 +653,36 @@ class WodehouseTest(unittest.TestCase):
         self.assertEqual([4, 10, 18], result)
 
     def test_parses_w_eval(self):
+        # given
         source = wodehouse._eval_source
         # when
         result = parse(source)
         # then
         self.assertNotEqual([], result)
+
+    def test_compiles_w_eval(self):
+        # given
+        eval_source = wodehouse._eval_source
+        parsed_eval = parse(eval_source)
+        state = create_default_state()
+        state['state'] = state
+        # when
+        compiled_eval = wodehouse.w_eval(parsed_eval, state)
+        # then
+        self.assertIsInstance(compiled_eval, WFunction)
+
+    def test_compiled_w_eval_evals_things(self):
+        # given
+        eval_source = wodehouse._eval_source
+        parsed_eval = parse(eval_source)
+        state = create_default_state()
+        state['state'] = state
+        compiled_eval = wodehouse.w_eval(parsed_eval, state)
+        state['w_eval'] = compiled_eval
+        # when
+        result = eval_str('(w_eval 2 state)', state)
+        # then
+        self.assertEqual(2, result)
 
 
 if __name__ == '__main__':

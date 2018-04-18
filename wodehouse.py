@@ -654,15 +654,16 @@ class Lambda(WMagicMacro):
         expr = exprs[1]
 
         def subst_args(a, e):
-            if isinstance(e, (WNumber, WFunction, WBoolean)):
+            if isinstance(e, (WNumber, WFunction, WBoolean, WString)):
                 return e
             if isinstance(e, WSymbol):
+                if e is WSymbol.get('quote'):
+                    return e
                 if e in a:
                     return e
                 if e in state:
                     return state[e]
-                raise Exception(
-                    "No value defined for symbol \"{}\".".format(e))
+                return e
             if isinstance(e, WList):
                 return WList(*(subst_args(a, e2) for e2 in e))
             raise Exception(
