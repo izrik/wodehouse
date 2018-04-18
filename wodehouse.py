@@ -811,10 +811,12 @@ def atom(arg):
 
 def eq(a, b):
     if not atom(a):
-        return False
+        return WBoolean.false
     if not atom(b):
-        return False
-    return a == b
+        return WBoolean.false
+    if a == b:
+        return WBoolean.true
+    return WBoolean.false
 
 
 def w_print(x, *, printer=None):
