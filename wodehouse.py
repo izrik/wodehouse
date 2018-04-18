@@ -1069,6 +1069,7 @@ def create_default_state(prototype=None):
 
 def create_file_level_state():
     fls = WState()
+    fls['fls'] = fls
     fls['define'] = Define(fls)
     return fls
 
