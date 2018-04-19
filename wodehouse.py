@@ -914,33 +914,33 @@ class WState(WObject):
         return WSymbol.get(str(key))
 
     def __getitem__(self, item):
-        item = self.normalize_key(str(item))
-        if item in self.deleted:
+        key = self.normalize_key(str(item))
+        if key in self.deleted:
             raise KeyError
-        if item in self.dict:
-            return self.dict.get(item)
+        if key in self.dict:
+            return self.dict.get(key)
         if self.prototype is not None:
-            return self.prototype[item]
-        raise KeyError(item.name)
+            return self.prototype[key]
+        raise KeyError(key.name)
 
     def __setitem__(self, key, value):
-        key = self.normalize_key(str(key))
-        self.dict[key] = value
-        self.deleted.discard(key)
+        key2 = self.normalize_key(str(key))
+        self.dict[key2] = value
+        self.deleted.discard(key2)
 
     def __contains__(self, item):
-        item = self.normalize_key(str(item))
-        if item in self.deleted:
+        key = self.normalize_key(str(item))
+        if key in self.deleted:
             return False
-        if item in self.dict:
+        if key in self.dict:
             return True
         if self.prototype is not None:
-            return item in self.prototype
+            return key in self.prototype
         return False
 
     def __delitem__(self, key):
-        key = self.normalize_key(key)
-        self.deleted.add(key)
+        key2 = self.normalize_key(key)
+        self.deleted.add(key2)
 
     def __len__(self):
         return len(list(self.keys()))
