@@ -51,7 +51,7 @@ class WStream(object):
 
     def get_next_char(self):
         if not self.has_chars():
-            return None
+            raise Exception("No more characters in the stream.")
         ch = self.peek()
         self.i += 1
         return ch
@@ -60,6 +60,36 @@ class WStream(object):
         if not self.has_chars():
             return None
         return self.s[self.i]
+
+
+def stream(s):
+    return WStream(w_str(s).value)
+
+
+def stream_has_chars(s):
+    if not isinstance(s, WStream):
+        raise TypeError(
+            "Argument s should be a stream. "
+            "Got \"{}\" ({}) instead.".format(s, type(s)))
+    if s.has_chars():
+        return WBoolean.true
+    return WBoolean.false
+
+
+def stream_get_next_char(s):
+    if not isinstance(s, WStream):
+        raise TypeError(
+            "Argument s should be a stream. "
+            "Got \"{}\" ({}) instead.".format(s, type(s)))
+    return WString(s.get_next_char())
+
+
+def stream_peek(s):
+    if not isinstance(s, WStream):
+        raise TypeError(
+            "Argument s should be a stream. "
+            "Got \"{}\" ({}) instead.".format(s, type(s)))
+    return WString(s.peek())
 
 
 def parse(s):
@@ -1198,7 +1228,11 @@ def create_default_state(prototype=None):
         'map': WMagicFunction(w_map, 'map', check_args=False),
         'read_file': WMagicFunction(read_file),
         'assert': Assert(),
-        'raise': WMagicFunction(w_raise, 'raise')
+        'raise': WMagicFunction(w_raise, 'raise'),
+        'stream': WMagicFunction(stream),
+        'has_chars': WMagicFunction(stream_has_chars, 'has_chars'),
+        'get_next_char': WMagicFunction(stream_get_next_char, 'get_next_char'),
+        'peek': WMagicFunction(stream_peek, 'peek'),
     }, prototype=prototype)
 
 

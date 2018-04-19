@@ -6,7 +6,7 @@ from unittest.mock import Mock
 import wodehouse
 from wodehouse import eval_str, create_default_state, w_print, WList, \
     WSymbol, WFunction, WMagicFunction, WString, WBoolean, WState, parse, \
-    create_file_level_state, WNumber
+    create_file_level_state, WNumber, WStream
 
 
 class WodehouseTest(unittest.TestCase):
@@ -775,6 +775,73 @@ class WodehouseTest(unittest.TestCase):
             "this is the description",
             eval_str,
             "(raise \"this is the description\")", create_default_state())
+
+    def test_stream_creates_stream_object(self):
+        # when
+        result = eval_str("(stream \"abc\")", create_default_state())
+        # then
+        self.assertIsInstance(result, WStream)
+        self.assertEqual("abc", result.s)
+
+    def test_has_chars_on_empty_stream_returns_false(self):
+        # when
+        result = eval_str("(has_chars (stream \"\"))", create_default_state())
+        # then
+        self.assertIs(WBoolean.false, result)
+
+    def test_has_chars_on_non_empty_stream_returns_true(self):
+        # when
+        result = eval_str("(has_chars (stream \"abc\"))",
+                          create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_get_next_char_gets_next_char(self):
+        # when
+        result = eval_str("(get_next_char (stream \"abc\"))",
+                          create_default_state())
+        # then
+        self.assertIsInstance(result, WString)
+        self.assertEqual("a", result)
+
+    def test_get_next_char_advances_position(self):
+        # given
+        s = WStream("abc")
+        state = create_default_state()
+        state['s'] = s
+        # precondition
+        self.assertEqual(eval_str("(get_next_char s)", state), "a")
+        # expect
+        self.assertEqual(eval_str("(get_next_char s)", state), "b")
+        self.assertEqual(eval_str("(get_next_char s)", state), "c")
+        # then
+        self.assertIs(WBoolean.false, eval_str("(has_chars s)", state))
+
+    def test_get_next_char_after_end_of_stream_raises(self):
+        # expect
+        self.assertRaisesRegex(
+            Exception,
+            "No more characters in the stream.",
+            eval_str,
+            "(get_next_char (stream \"\"))", create_default_state())
+
+    def test_peek_returns_next_char(self):
+        # when
+        result = eval_str("(peek (stream \"abc\"))", create_default_state())
+        # then
+        self.assertIsInstance(result, WString)
+        self.assertEqual("a", result)
+
+    def test_peek_does_not_advance_position(self):
+        # given
+        s = WStream("abc")
+        state = create_default_state()
+        state['s'] = s
+        # precondition
+        self.assertEqual(eval_str("(peek s)", state), "a")
+        # expect
+        self.assertEqual(eval_str("(peek s)", state), "a")
+        self.assertEqual(eval_str("(peek s)", state), "a")
 
 
 if __name__ == '__main__':
