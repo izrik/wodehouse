@@ -480,7 +480,6 @@ def w_eval(expr, state):
 
     """
     # TODO: proper subtypes and inheritance, instead of just symbols
-    # TODO: raise
     # TODO: w_eval
     # TODO: call_macro
     # TODO: varargs
