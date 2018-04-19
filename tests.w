@@ -20,9 +20,10 @@
 (assert (not (eq fls (get example 'fls))))
 (assert (eq example (get example 'fls)))
 
+# importing with additional names imports those names into the current fls
 (assert (not (in 'something (list_state fls))))
 (import "example.w" something)
-(assert (in 'example (list_state fls)))
+(assert (in 'something (list_state fls)))
 
 (assert (eq example example))
 (define example_one example)
