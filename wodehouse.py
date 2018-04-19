@@ -63,6 +63,17 @@ class WStream(object):
 
 
 def parse(s):
+    """
+    (define parse
+    (lambda (s)
+        (read_expr
+            (if
+                (isinstance s 'Stream)
+                s
+                (stream s)))) )
+    :param s:
+    :return:
+    """
     if not isinstance(s, WStream):
         s = WStream(str(s))
     return read_expr(s)
@@ -900,6 +911,11 @@ def repl_print(x):
 
 
 def eval_str(input_s, state=None):
+    """
+    (define eval_str
+    (lambda (input state)
+        w_eval(parse(input) state))
+    """
     expr = parse(input_s)
     value = w_eval(expr, state)
     return value
