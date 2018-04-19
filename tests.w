@@ -25,9 +25,10 @@
 (import "example.w" something)
 (assert (in 'something (list_state fls)))
 
+# importing caches and re-uses the fls
 (assert (eq example example))
 (define example_one example)
 (assert (eq example example_one))
 (import "example.w")
 (define example_two example)
-(assert (not (eq example_one example_two)))
+(assert (eq example_one example_two))

@@ -31,6 +31,7 @@ requires
     syntax change: read_expr("'(1)") --> WList(1)
 
 """
+import hashlib
 import os
 import string
 
@@ -1076,6 +1077,9 @@ class Define(WMagicMacro):
         return value, state
 
 
+_global_import_cache = WState()
+
+
 class Import(WMagicMacro):
     def __init__(self, file_level_state):
         self.file_level_state = file_level_state
@@ -1097,8 +1101,15 @@ class Import(WMagicMacro):
                     "Names to import must all be symbols. "
                     "Got \"{}\" ({}) instead.".format(impname, type(impname)))
         with open(filename.value) as f:
-            src = f.read()
-        other_fls = w_exec_src(src)
+            src = WString(f.read())
+
+        h = w_hash(src)
+        if h in _global_import_cache:
+            other_fls = _global_import_cache[h]
+        else:
+            other_fls = w_exec_src(src)
+            _global_import_cache[h] = other_fls
+
         basename = os.path.splitext(filename.value)[0]
         self.file_level_state[basename] = other_fls
         for impname in import_names:
@@ -1109,6 +1120,12 @@ class Import(WMagicMacro):
 def read_file(path):
     with open(path.value) as f:
         return WString(f.read())
+
+
+def w_hash(arg):
+    bytes_arg = w_str(arg).value.encode('utf-8')
+    h = hashlib.sha256(bytes_arg).hexdigest()
+    return WString(h)
 
 
 class Assert(WMagicMacro):
