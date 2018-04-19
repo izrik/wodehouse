@@ -456,7 +456,7 @@ def w_eval(expr, state):
                 (let state (car (cdr exprs_state))
                 (w_eval exprs state)))))
             ((not (isinstance callee 'Function))
-                (raise Exception
+                (raise
                     (format
                         "Callee is not a function. Got \\"{}\\" ({}) instead."
                         callee
@@ -473,7 +473,7 @@ def w_eval(expr, state):
                     implementation_specific
                     (w_eval (second callee) state)))))))))))
     (true
-        (raise Exception
+        (raise
             (format
                 "Unknown object type: \\"{}\\" ({})" expr (type expr))))))
 
@@ -1120,6 +1120,10 @@ class Assert(WMagicMacro):
         return value, state
 
 
+def w_raise(description):
+    raise Exception(w_str(description).value)
+
+
 def create_default_state(prototype=None):
     return WState({
         '+': WMagicFunction(add, '+'),
@@ -1156,6 +1160,7 @@ def create_default_state(prototype=None):
         'map': WMagicFunction(w_map, 'map', check_args=False),
         'read_file': WMagicFunction(read_file),
         'assert': Assert(),
+        'raise': WMagicFunction(w_raise, 'raise')
     }, prototype=prototype)
 
 

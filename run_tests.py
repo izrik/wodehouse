@@ -768,6 +768,14 @@ class WodehouseTest(unittest.TestCase):
         self.assertIsInstance(result, WString)
         self.assertEqual("a1btruec+d", result)
 
+    def test_raise_raises(self):
+        # expect
+        self.assertRaisesRegex(
+            Exception,
+            "this is the description",
+            eval_str,
+            "(raise \"this is the description\")", create_default_state())
+
 
 if __name__ == '__main__':
     unittest.main()
