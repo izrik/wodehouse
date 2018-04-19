@@ -843,6 +843,26 @@ class WodehouseTest(unittest.TestCase):
         self.assertEqual(eval_str("(peek s)", state), "a")
         self.assertEqual(eval_str("(peek s)", state), "a")
 
+    def test_exec_execs_things(self):
+        i = [0]
+
+        def side_effect():
+            i[0] += 1
+            return WNumber(-1)
+
+        state = create_default_state()
+        state['side_effect'] = WMagicFunction(side_effect)
+        # when
+        eval_str("(exec (side_effect) (side_effect))", state)
+        # then
+        self.assertEqual(2, i[0])
+
+    def test_exec_returns_the_last_expr(self):
+        # when
+        result = eval_str("(exec 2 3 5 7 11)", create_default_state())
+        # then
+        self.assertEqual(11, result)
+
 
 if __name__ == '__main__':
     unittest.main()

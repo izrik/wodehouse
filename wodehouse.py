@@ -1214,6 +1214,12 @@ def w_raise(description):
     raise Exception(w_str(description).value)
 
 
+def w_exec(*args):
+    if len(args) < 1:
+        raise Exception("Function exec requires at least one argument.")
+    return args[-1]
+
+
 def create_default_state(prototype=None):
     return WState({
         '+': WMagicFunction(add, '+'),
@@ -1255,6 +1261,7 @@ def create_default_state(prototype=None):
         'has_chars': WMagicFunction(stream_has_chars, 'has_chars'),
         'get_next_char': WMagicFunction(stream_get_next_char, 'get_next_char'),
         'peek': WMagicFunction(stream_peek, 'peek'),
+        'exec': WMagicFunction(w_exec, 'exec'),
     }, prototype=prototype)
 
 
