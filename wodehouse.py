@@ -127,6 +127,12 @@ class WString(WObject):
             return self.value == other.value
         return False
 
+    def __len__(self):
+        return len(self.value)
+
+    def __getitem__(self, item):
+        return self.value[item]
+
     def escaped(self):
         def escape_char(_ch):
             if _ch == '\n':
