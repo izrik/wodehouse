@@ -348,14 +348,14 @@ class WodehouseTest(unittest.TestCase):
         # when
         result = eval_str("(cond (true 'a))", create_default_state())
         # then
-        self.assertIs(WSymbol.get('a'), result)
+        self.assertEqual(WSymbol.get('a'), result)
 
     def test_cond_condition_is_false_moves_to_next_condition(self):
         # when
         result = eval_str("(cond (false 'a) (true 'b))",
                           create_default_state())
         # then
-        self.assertIs(WSymbol.get('b'), result)
+        self.assertEqual(WSymbol.get('b'), result)
 
     def test_if_condition_is_true_returns_first_retval(self):
         # when

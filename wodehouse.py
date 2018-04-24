@@ -45,6 +45,8 @@ class WStream(object):
         self.s = s
         self.i = 0
         self.len = len(s)
+        self.line = 1
+        self.char = 1
 
     def has_chars(self):
         return self.i < self.len
@@ -54,12 +56,20 @@ class WStream(object):
             raise Exception("No more characters in the stream.")
         ch = self.peek()
         self.i += 1
+        if ch == '\n':
+            self.char = 1
+            self.line += 1
+        else:
+            self.char += 1
         return ch
 
     def peek(self):
         if not self.has_chars():
             return None
         return self.s[self.i]
+
+    def get_position(self):
+        return Position(self.line, self.char)
 
 
 def stream(s):
@@ -170,12 +180,22 @@ def read_expr(s):
     raise Exception('Unknown starting character "{}" in read_expr'.format(ch))
 
 
+class Position(object):
+    def __init__(self, line, char):
+        self.line = line
+        self.char = char
+
+
 class WObject(object):
-    pass
+    position = None
+
+    def __init__(self, position=None):
+        self.position = position
 
 
 class WString(WObject):
-    def __init__(self, value):
+    def __init__(self, value, position=None):
+        super().__init__(position=position)
         self.value = value
 
     def __repr__(self):
@@ -281,7 +301,7 @@ def read_string(s):
         ch = s.get_next_char()
         if ch == delim:
             value = ''.join(chs)
-            return WString(value)
+            return WString(value, position=s.get_position())
         if ch == '\\':
             ch = s.get_next_char()
             if ch == 'n':
@@ -295,7 +315,10 @@ def read_string(s):
 
 
 class WSymbol(WObject):
-    def __init__(self, name):
+    def __init__(self, name, position=None):
+        super().__init__(position=position)
+        if not isinstance(name, str):
+            raise TypeError("name should be a string")
         self.name = name
 
     def __repr__(self):
@@ -305,7 +328,9 @@ class WSymbol(WObject):
         return self.name
 
     def __eq__(self, other):
-        return self is other
+        if not isinstance(other, WSymbol):
+            return False
+        return self.name == other.name
 
     def __hash__(self):
         return hash((WSymbol, self.name))
@@ -319,20 +344,38 @@ class WSymbol(WObject):
         return WSymbol.__symbol_cache__[name]
 
 
+class WSymbolAt(WSymbol):
+    def __init__(self, name, position=None):
+        super().__init__(name, position=position)
+        self.src = WSymbol.get(name)
+
+    def __repr__(self):
+        return repr(self.src)
+
+    def __str__(self):
+        return str(self.src)
+
+    def __eq__(self, other):
+        return self.src == other
+
+    def __hash__(self):
+        return hash(self.src)
+
+
 def read_symbol(s):
     ch = s.peek()
     if ch in string.ascii_letters or ch in '_':
         return read_name(s)
     if ch in '+-*/':
         s.get_next_char()
-        return WSymbol.get(ch)
+        return WSymbolAt(ch, s.get_position())
     if ch in '<>':
         s.get_next_char()
         ch2 = s.peek()
         if ch2 == '=':
             s.get_next_char()
-            return WSymbol.get(ch + ch2)
-        return WSymbol.get(ch)
+            return WSymbolAt(ch + ch2, position=s.get_position())
+        return WSymbolAt(ch, position=s.get_position())
     raise Exception(
         "Unexpected character while reading symbol: \"{}\"".format(ch))
 
@@ -343,11 +386,12 @@ def read_name(s):
             (s.peek() in string.ascii_letters or s.peek() in '_'):
         chs.append(s.get_next_char())
     name = ''.join(chs)
-    return WSymbol.get(name)
+    return WSymbolAt(name, position=s.get_position())
 
 
 class WNumber(WObject):
-    def __init__(self, value):
+    def __init__(self, value, position=None):
+        super().__init__(position=position)
         self.value = value
 
     def __repr__(self):
@@ -369,6 +413,7 @@ class WBoolean(WObject):
     false = None
 
     def __init__(self, value):
+        super().__init__()
         self.value = not not value
 
     def __repr__(self):
@@ -402,7 +447,7 @@ def read_integer_literal(s):
     while s.has_chars() and s.peek() in string.digits:
         chs.append(s.get_next_char())
     _s = ''.join(chs)
-    return WNumber(int(_s))
+    return WNumber(int(_s), position=s.get_position())
 
 
 def read_list(s):
@@ -428,6 +473,7 @@ def read_list(s):
 
 class WFunction(WObject):
     def __init__(self, args, expr):
+        super().__init__()
         self.args = args
         self.expr = expr
         self.num_args = len(args)
@@ -564,7 +610,7 @@ def w_eval(expr, state):
             'Got "{}" ({}).'.format(expr, type(expr)))
     if isinstance(expr, WList):
         head = expr.head
-        if head is WSymbol.get('quote'):
+        if head == WSymbol.get('quote'):
             return expr.second
         callee = w_eval(expr.head, state)
         args = expr.remaining
@@ -787,7 +833,7 @@ class Lambda(WMagicMacro):
             if isinstance(e, (WNumber, WFunction, WBoolean, WString)):
                 return e
             if isinstance(e, WSymbol):
-                if e is WSymbol.get('quote'):
+                if e == WSymbol.get('quote'):
                     return e
                 if e in a:
                     return e
@@ -803,7 +849,8 @@ class Lambda(WMagicMacro):
 
 
 class WList(WObject):
-    def __init__(self, *values):
+    def __init__(self, *values, position=None):
+        super().__init__(position=position)
         self.values = list(values)
 
     def __repr__(self):
