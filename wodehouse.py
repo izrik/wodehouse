@@ -548,6 +548,25 @@ def w_not(arg):
 
 
 def read_integer_literal(s):
+    """
+(define read_integer_literal_char
+(lambda (s)
+(cond
+    ((not (has_chars s))
+        '())
+    ((in (peek s) "0123456789")
+        (cons (get_next_char s) (read_integer_literal_char s)))
+    (true '()))))
+
+(define read_integer_literal
+(lambda (s)
+(if (not (in (peek s) "0123456789"))
+    (raise
+        (format
+            "Unexpected character at the beginning of integer literal: \"{}\""
+            (peek s)))
+    (int_from_str (+ (read_integer_literal_char s)) (get_position s)))))
+    """
     chs = []
     while s.has_chars() and s.peek() in string.digits:
         chs.append(s.get_next_char())
