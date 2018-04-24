@@ -613,29 +613,28 @@ def w_eval(expr, state):
         head = expr.head
         if head == WSymbol.get('quote'):
             return expr.second
-        callee = w_eval(expr.head, state)
+        callee = w_eval(head, state)
         args = expr.remaining
         if isinstance(callee, WMacro):
-            expr, state = callee.call_macro(args, state=state)
-            return w_eval(expr, state)
+            expr2, state2 = callee.call_macro(args, state=state)
+            return expr2
         if not isinstance(callee, WFunction):
             raise Exception(
                 'Callee is not a function. Got "{}" ({}) instead.'.format(
                     callee, type(callee)))
-        args = [w_eval(arg, state) for arg in args]
+        evaled_args = [w_eval(arg, state) for arg in args]
         if (callee.check_args and
                 callee.num_args is not None and
-                len(args) != callee.num_args):
+                len(evaled_args) != callee.num_args):
             raise Exception(
                 'Function expected {} args, got {} instead.'.format(
-                    len(callee.args), len(args)))
-        _state = state
-        state = WState(prototype=_state)
+                    len(callee.args), len(evaled_args)))
+        fstate = WState(prototype=state)
         for i, argname in enumerate(callee.args):
-            state[argname] = args[i]
+            fstate[argname] = evaled_args[i]
         if isinstance(callee, WMagicFunction):
-            return callee(*args)
-        return w_eval(callee.expr, state)
+            return callee(*evaled_args)
+        return w_eval(callee.expr, fstate)
     if isinstance(expr, WSymbol):
         if expr not in state:
             raise NameError(
@@ -820,8 +819,8 @@ class If(WMagicMacro):
         false_retval = exprs[2]
         cond_result = w_eval(condition, state)
         if cond_result is WBoolean.true:
-            return true_retval, state
-        return false_retval, state
+            return w_eval(true_retval, state), state
+        return w_eval(false_retval, state), state
 
 
 class Cond(WMagicMacro):
@@ -837,7 +836,7 @@ class Cond(WMagicMacro):
             condition, retval = expr.values
             cond_result = w_eval(condition, state)
             if cond_result is WBoolean.true:
-                return retval, state
+                return w_eval(retval, state), state
             if cond_result is not WBoolean.false:
                 raise Exception(
                     "Condition evaluated to a non-boolean value: "

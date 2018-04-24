@@ -863,6 +863,28 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual(11, result)
 
+    def test_call_macro_returns_number(self):
+        # when
+        result = eval_str("(if true 1 2)", create_default_state())
+        # then
+        self.assertIsInstance(result, WNumber)
+        self.assertEqual(1, result)
+
+    def test_call_macro_returns_empty_list(self):
+        # when
+        result = eval_str("(if true '() 2)", create_default_state())
+        # then
+        self.assertIsInstance(result, WList)
+        self.assertEqual([], result)
+
+    def test_call_nested_macro_returns_empty_list(self):
+        # when
+        result = eval_str("(if true (if true '() 2) 3)",
+                          create_default_state())
+        # then
+        self.assertIsInstance(result, WList)
+        self.assertEqual([], result)
+
 
 if __name__ == '__main__':
     unittest.main()
