@@ -654,6 +654,8 @@ def add(*operands):
     # TODO: thorough consideration of all operand types, e.g. number + string
     if not operands:
         return WNumber(0)
+    if len(operands) == 1 and isinstance(operands[0], WList):
+        operands = operands[0]
     if isinstance(operands[0], WNumber):
         x = 0
         for operand in operands:

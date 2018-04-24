@@ -745,6 +745,13 @@ class WodehouseTest(unittest.TestCase):
         self.assertIsInstance(result, WString)
         self.assertEqual("onetwothree", result)
 
+    def test_plus_interprets_single_list_arg_as_varargs(self):
+        # when
+        result = eval_str("(+ (list 1 2 3 4))", create_default_state())
+        # then
+        self.assertIsInstance(result, WNumber)
+        self.assertEqual(10, result)
+
     def test_format_interpolates_arguments(self):
         # when
         result = eval_str("(format \"one {} three\" \"two\")",
