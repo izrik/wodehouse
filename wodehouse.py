@@ -295,6 +295,38 @@ def w_format(fmt, *args):
 
 
 def read_string(s):
+    """
+    (define read_string_char
+    (lambda (s)
+    (if (not (has_chars s))
+        (raise "Ran out of characters before string was finished.")
+        (let (ch (get_next_char s))
+        (if (eq ch "\"")
+            (cons ch '())
+            (cons
+                (if (eq ch "\\")
+                    (if (not (has_chars s))
+                        (raise (+ "Ran out of characters before escape "
+                                  "sequence was finished."))
+                        (let (ch2 (get_next_char s))
+                        (cond
+                            ((eq ch2 "n") "\n")
+                            ((eq ch2 "r") "\r")
+                            ((eq ch2 "t") "\t")
+                            (true ch2))))
+                    ch)
+                (read_string_char s)))))))
+
+    (define read_string
+    (lambda (s)
+    (let (delim (get_next_char s))
+    (exec
+        (assert (eq "\"" delim))
+        (+ (read_string_char s))))))
+
+    :param s:
+    :return:
+    """
     delim = s.get_next_char()
     assert delim == '"'
     chs = []
