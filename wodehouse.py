@@ -1026,6 +1026,10 @@ def w_map(func, *exprlists):
 
 
 def w_in(expr, container):
+    if isinstance(expr, WString) and isinstance(container, WString):
+        if expr.value in container.value:
+            return WBoolean.true
+        return WBoolean.false
     if not isinstance(container, WList):
         raise Exception(
             "Not a list: \"{}\" ({})".format(container, type(container)))
