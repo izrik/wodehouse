@@ -38,6 +38,7 @@ import string
 import sys
 import traceback
 from inspect import signature
+from pathlib import Path
 
 
 class WStream(object):
@@ -1511,11 +1512,21 @@ def w_exec_src(src):
     return fls
 
 
+def run_file(filename):
+    with open(filename) as f:
+        src = f.read()
+    w_exec_src(src)
+
+
 def main():
     for arg in sys.argv[1:]:
-        with open(arg) as f:
-            src = f.read()
-        w_exec_src(src)
+        path = Path(arg)
+        if path.is_file():
+            run_file(arg)
+        elif path.is_dir():
+            for f in path.glob('*'):
+                if f.is_file():
+                    run_file(f)
     if len(sys.argv) < 2:
         repl()
 
