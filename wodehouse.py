@@ -493,6 +493,10 @@ def read_name(s):
 class WNumber(WObject):
     def __init__(self, value, position=None):
         super().__init__(position=position)
+        if isinstance(value, WObject):
+            raise TypeError(
+                "Value should not be a w-object: \"{}\"".format(
+                    value, type(value)))
         self.value = value
 
     def __repr__(self):
@@ -548,7 +552,14 @@ def read_integer_literal(s):
     while s.has_chars() and s.peek() in string.digits:
         chs.append(s.get_next_char())
     _s = ''.join(chs)
-    return WNumber(int(_s), position=s.get_position())
+    return int_from_str(_s, position=s.get_position())
+
+
+def int_from_str(s, position=None):
+    if isinstance(s, WString):
+        s = s.value
+    s = str(s)
+    return WNumber(int(s), position=position)
 
 
 def read_list(s):
@@ -1460,6 +1471,7 @@ def create_default_state(prototype=None):
         'peek': WMagicFunction(stream_peek, 'peek'),
         'exec': WMagicFunction(w_exec, 'exec'),
         'symbol_at': WMagicFunction(symbol_at),
+        'int_from_str': WMagicFunction(int_from_str),
     }, prototype=prototype)
 
 
