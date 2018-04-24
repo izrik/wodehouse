@@ -436,8 +436,11 @@ def read_symbol(s):
 
 def read_name(s):
     chs = []
+    assert s.peek() not in string.digits
     while s.has_chars() and \
-            (s.peek() in string.ascii_letters or s.peek() in '_'):
+            (s.peek() in string.ascii_letters or
+             s.peek() in '_' or
+             s.peek() in string.digits):
         chs.append(s.get_next_char())
     name = ''.join(chs)
     return WSymbolAt(name, position=s.get_position())
