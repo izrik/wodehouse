@@ -69,3 +69,45 @@
 (exec
     (assert (eq "\"" delim))
     (+ (read_string_char s))))))
+
+
+(define read_symbol
+(lambda (s)
+(let (ch (peek s))
+(cond
+    ((in ch "abcdefghijklmnopqrstuvwxyz_0123456789")
+        (read_name s))
+    ((in ch "+-*/")
+        (let (_ (get_next_char s))
+        (symbol_at ch (get_position s))))
+    ((in ch "<>")
+        (let (_ (get_next_char s))
+             (ch2 (peek s))
+               # note: side-effects in s prevent instruction re-ordering
+            (if (eq ch2 "=")
+                (let (_ (get_next_char s))
+                    (symbol_at (+ ch ch2) (get_position s)))
+                (symbol_at ch (get_position s)))))
+    (true
+        (raise
+            (format
+                "Unexpected character while reading symbol: \"{}\""
+                ch)))))))
+
+(define read_name_char
+(lambda (s)
+(cond
+    ((not (has_chars s))
+        '())
+    ((in (peek s) "abcdefghijklmnopqrstuvwxyz_0123456789")
+        (cons (get_next_char s) (read_name_char s)))
+    (true '()))))
+
+(define read_name
+(lambda (s)
+(if (not (in (peek s) "abcdefghijklmnopqrstuvwxyz_"))
+    (raise
+        (format
+            "Unexpected character at the beginning of a name: \"{}\""
+             (peek s)))
+    (symbol_at (+ (read_name_char s)) (get_position s)))))
