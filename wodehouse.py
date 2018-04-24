@@ -138,8 +138,9 @@ def read_expr(s):
     """
     (define read_expr
     (lambda (s)
-    (let whitespace (read_whitespace_and_comments s) # convert this to an exec?
-    (let ch (peek s)
+    # convert this to an exec?
+    (let (whitespace (read_whitespace_and_comments s))
+    (let (ch (peek s))
     (cond
     ((not (has_chars s))
         (raise "Ran out of characters before reading expression."))
@@ -559,17 +560,17 @@ def w_eval(expr, state):
     ((isinstance expr '(Number String Boolean))
         expr)
     ((isinstance expr 'List)
-        (let head (car expr)
+        (let (head (car expr))
         (if
             (eq head 'quote)
             (car (cdr expr))
-            (let callee w_eval(head state)
-            (let args (cdr expr)
+            (let (callee w_eval(head state))
+            (let (args (cdr expr))
             (cond
             ((isinstance callee 'Macro)
-                (let exprs_state (call_macro callee args state)
-                (let exprs (car exprs_state)
-                (let state (car (cdr exprs_state))
+                (let (exprs_state (call_macro callee args state))
+                (let (exprs (car exprs_state))
+                (let (state (car (cdr exprs_state)))
                 (w_eval exprs state)))))
             ((not (isinstance callee 'Function))
                 (raise
@@ -578,12 +579,12 @@ def w_eval(expr, state):
                         callee
                         (type callee))))
             (true
-                (let args
+                (let (args
                     (map
                         (lambda (name value)
                             (list name (w_eval value state)))
-                        args (get_func_args callee))
-                (let state (new_state_proto state args)
+                        args (get_func_args callee)))
+                (let (state (new_state_proto state args))
                 (if
                     (isinstance callee 'MagicFunction)
                     implementation_specific
@@ -764,13 +765,38 @@ class WMagicMacro(WMacro):
 
 
 class Let(WMagicMacro):
+    """
+    (let
+        (name1 value1)
+        (name2 value2)
+        ...
+        expr)
+
+    Creates a new state with `name1` equal to the result of `value1`, etc. Then
+    evaluates `expr`. Values are evaluated with the new state object as it is
+    populated.
+    """
     def call_magic_macro(self, exprs, state):
-        symbol, value, *exprs2 = exprs
-        exprs = WList(*exprs2)
-        _state = state
-        state = WState(prototype=_state)
-        state[symbol.name] = w_eval(value, _state)
-        return exprs, state
+        if len(exprs) < 2:
+            raise Exception(
+                "Macro `let` expects at least one variable definition and "
+                "exactly one expression. Get {} total args instead".format(
+                    len(exprs)))
+        *vardefs, retval = exprs
+        for vardef in vardefs:
+            if not isinstance(vardef, WList) or len(vardef) != 2 or \
+                    not isinstance(vardef[0], WSymbol):
+                raise Exception(
+                    "Variable definition in macro `let` should be a list of "
+                    "the form \"(<symbol> <expr>)\". Got \"{}\" ({}) "
+                    "instead.".format(vardef, type(vardef)))
+
+        state2 = WState(prototype=state)
+        for vardef in vardefs:
+            name, expr = vardef
+            value = w_eval(expr, state2)
+            state2[name] = value
+        return w_eval(retval, state2), state
 
 
 class Apply(WMagicMacro):

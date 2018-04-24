@@ -302,7 +302,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_str_stringifies_variables_values(self):
         # when
-        result = eval_str("(let a 123 str a)", create_default_state())
+        result = eval_str("(let (a 123) (str a))", create_default_state())
         # then
         self.assertEqual("123", result)
 
@@ -320,7 +320,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_str_stringifies_boolean_variable(self):
         # when
-        result = eval_str("(let a true str a)", create_default_state())
+        result = eval_str("(let (a true) (str a))", create_default_state())
         # then
         self.assertEqual("true", result)
 
