@@ -205,6 +205,9 @@ class WString(WObject):
     def __str__(self):
         return '"{}"'.format(self.escaped())
 
+    def __hash__(self):
+        return hash(self.value)
+
     def __eq__(self, other):
         if isinstance(other, str):
             return self.value == other
@@ -239,7 +242,7 @@ def w_str(arg):
     if isinstance(arg, WNumber):
         return WString(str(arg.value))
     if isinstance(arg, WSymbol):
-        return WString(str(arg.name))
+        return WString(arg.name)
     if isinstance(arg, WList):
         return WString(str(arg))
     if isinstance(arg, WFunction):
@@ -350,15 +353,17 @@ def read_string(s):
 class WSymbol(WObject):
     def __init__(self, name, position=None):
         super().__init__(position=position)
-        if not isinstance(name, str):
-            raise TypeError("name should be a string")
+        if isinstance(name, str):
+            name = WString(name)
+        if not isinstance(name, WString):
+            name = w_str(name)
         self.name = name
 
     def __repr__(self):
-        return 'Symbol({})'.format(self.name)
+        return 'Symbol({})'.format(self.name.value)
 
     def __str__(self):
-        return self.name
+        return self.name.value
 
     def __eq__(self, other):
         if not isinstance(other, WSymbol):
@@ -372,6 +377,8 @@ class WSymbol(WObject):
 
     @staticmethod
     def get(name):
+        if isinstance(name, str):
+            name = WString(name)
         if name not in WSymbol.__symbol_cache__:
             WSymbol.__symbol_cache__[name] = WSymbol(name)
         return WSymbol.__symbol_cache__[name]
@@ -379,6 +386,8 @@ class WSymbol(WObject):
 
 class WSymbolAt(WSymbol):
     def __init__(self, name, position=None):
+        if isinstance(name, WSymbol):
+            name = name.name
         super().__init__(name, position=position)
         self.src = WSymbol.get(name)
 
@@ -1103,12 +1112,16 @@ class WState(WObject):
 
     @staticmethod
     def normalize_key(key):
+        if isinstance(key, WSymbolAt):
+            return key.src
         if isinstance(key, WSymbol):
             return key
-        return WSymbol.get(str(key))
+        if isinstance(key, str):
+            return WSymbol.get(WString(key))
+        return WSymbol.get(w_str(key))
 
     def __getitem__(self, item):
-        key = self.normalize_key(str(item))
+        key = self.normalize_key(item)
         if key in self.deleted:
             raise KeyError
         if key in self.dict:
@@ -1118,12 +1131,12 @@ class WState(WObject):
         raise KeyError(key.name)
 
     def __setitem__(self, key, value):
-        key2 = self.normalize_key(str(key))
+        key2 = self.normalize_key(key)
         self.dict[key2] = value
         self.deleted.discard(key2)
 
     def __contains__(self, item):
-        key = self.normalize_key(str(item))
+        key = self.normalize_key(item)
         if key in self.deleted:
             return False
         if key in self.dict:
