@@ -1017,10 +1017,6 @@ def atom(arg):
 
 
 def eq(a, b):
-    if not atom(a):
-        return WBoolean.false
-    if not atom(b):
-        return WBoolean.false
     if a == b:
         return WBoolean.true
     return WBoolean.false
