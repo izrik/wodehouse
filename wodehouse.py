@@ -102,6 +102,14 @@ def stream_peek(s):
     return WString(s.peek())
 
 
+def stream_get_position(s):
+    if not isinstance(s, WStream):
+        raise TypeError(
+            "Argument s should be a stream. "
+            "Got \"{}\" ({}) instead.".format(s, type(s)))
+    return s.get_position()
+
+
 def parse(s):
     """
     (define parse
@@ -1393,6 +1401,7 @@ def create_default_state(prototype=None):
         'stream': WMagicFunction(stream),
         'has_chars': WMagicFunction(stream_has_chars, 'has_chars'),
         'get_next_char': WMagicFunction(stream_get_next_char, 'get_next_char'),
+        'get_position': WMagicFunction(stream_get_position, 'get_position'),
         'peek': WMagicFunction(stream_peek, 'peek'),
         'exec': WMagicFunction(w_exec, 'exec'),
     }, prototype=prototype)
