@@ -978,6 +978,14 @@ def cdr(first, *args):
     return first.remaining
 
 
+def cons(a, b):
+    if not isinstance(b, WList):
+        raise Exception(
+            "Expected b to be a list. "
+            "Got \"{}\" ({}) instead.".format(b, type(b)))
+    return WList(a, *b)
+
+
 def atom(arg):
     return not isinstance(arg, WList)
 
@@ -1286,6 +1294,7 @@ def create_default_state(prototype=None):
         'list': WMagicFunction(list_func, 'list'),
         'car': WMagicFunction(car),
         'cdr': WMagicFunction(cdr),
+        'cons': WMagicFunction(cons),
         'atom': WMagicFunction(atom),
         'eq': WMagicFunction(eq),
         'print': WMagicFunction(w_print, 'print'),
