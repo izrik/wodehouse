@@ -412,6 +412,10 @@ class WSymbolAt(WSymbol):
         return hash(self.src)
 
 
+def symbol_at(name, position):
+    return WSymbolAt(name, position)
+
+
 def read_symbol(s):
     ch = s.peek()
     if ch in string.ascii_letters or ch in '_':
@@ -1408,6 +1412,7 @@ def create_default_state(prototype=None):
         'get_position': WMagicFunction(stream_get_position, 'get_position'),
         'peek': WMagicFunction(stream_peek, 'peek'),
         'exec': WMagicFunction(w_exec, 'exec'),
+        'symbol_at': WMagicFunction(symbol_at),
     }, prototype=prototype)
 
 
