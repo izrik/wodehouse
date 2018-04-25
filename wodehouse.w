@@ -129,3 +129,34 @@
             "Unexpected character at the beginning of integer literal: \"{}\""
             (peek s)))
     (int_from_str (+ (read_integer_literal_char s)) (get_position s)))))
+
+
+(define read_expr
+(lambda (s)
+(let (whitespace (read_whitespace_and_comments s))
+     (ch (peek s))
+    (cond
+        ((not (has_chars s))
+            (raise "Ran out of characters before reading expression."))
+        ((eq ch "(") (read_list s))
+        ((in ch "0123456789") (read_integer_literal s))
+        ((or (in ch "+-*/<>_") (in ch "abcdefghijklmnopqrstuvwxyz")) (read_symbol s))
+        ((eq ch "\"") (read_string s))
+        ((eq ch "'")
+            (exec
+                (get_next_char s)
+                (list 'quote (read_expr s))))
+        (true
+            (raise
+                (format
+                    "Unknown starting character \"{}\" in read_expr"
+                    ch)))))))
+
+(define read_list
+(lambda (s)
+    (raise "Not implemented")))
+
+(define read_whitespace_and_comments
+(lambda (s)
+    # Not implemented, but don't throw an exception
+    s))

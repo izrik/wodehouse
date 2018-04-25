@@ -146,27 +146,26 @@ def read_whitespace_and_comments(s):
 
 def read_expr(s):
     """
-    (define read_expr
-    (lambda (s)
-    # convert this to an exec?
-    (let (whitespace (read_whitespace_and_comments s))
-    (let (ch (peek s))
+(define read_expr
+(lambda (s)
+(let (whitespace (read_whitespace_and_comments s))
+     (ch (peek s))
     (cond
-    ((not (has_chars s))
-        (raise "Ran out of characters before reading expression."))
-    ((eq ch "(") (read_list s))
-    ((in ch digits) (read_integer_literal s))
-    ((or (in ch "+-*/<>_") (in ch ascii_letters)) (read_symbol s))
-    ((eq ch "\"") (read_string s))
-    ((eq ch "'")
-        (exec
-            (get_next_char s)
-            (list 'quote (read_expr s))))
-    (true
-        (raise
-            (format
-                "Unknown starting character \"{}\" in read_expr"
-                ch))))))))
+        ((not (has_chars s))
+            (raise "Ran out of characters before reading expression."))
+        ((eq ch "(") (read_list s))
+        ((in ch "0123456789") (read_integer_literal s))
+        ((or (in ch "+-*/<>_") (in ch "abcdefghijklmnopqrstuvwxyz")) (read_symbol s))
+        ((eq ch "\"") (read_string s))
+        ((eq ch "'")
+            (exec
+                (get_next_char s)
+                (list 'quote (read_expr s))))
+        (true
+            (raise
+                (format
+                    "Unknown starting character \"{}\" in read_expr"
+                    ch)))))))
     """
     # _i = s.i
     ch = s.peek()
