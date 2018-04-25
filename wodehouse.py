@@ -815,7 +815,7 @@ _eval_source = w_eval.__doc__
 
 def add(*operands):
     # TODO: thorough consideration of all operand type combinations
-    # TODO: types to consider: number, string, list
+    # TODO: types to consider: number, string, list, boolean
     if not operands:
         return WNumber(0)
     if len(operands) == 1 and isinstance(operands[0], WList):
