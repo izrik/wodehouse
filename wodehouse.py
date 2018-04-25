@@ -548,6 +548,38 @@ def w_not(arg):
     raise Exception('Unexpected object type: "{}" ({})'.format(arg, type(arg)))
 
 
+def w_or(*operands):
+    # TODO: thorough consideration of all operand type combinations
+    if not operands:
+        raise Exception("No arguments given to 'or'.")
+    if len(operands) == 1 and isinstance(operands[0], WList):
+        operands = operands[0]
+    if len(operands) < 1:
+        raise Exception("No arguments given to 'or'.")
+    if any(not isinstance(op, WBoolean) for op in operands):
+        raise Exception("Only booleans are allowed in logical operations.")
+    for operand in operands:
+        if operand is WBoolean.true:
+            return WBoolean.true
+    return WBoolean.false
+
+
+def w_and(*operands):
+    # TODO: thorough consideration of all operand type combinations
+    if not operands:
+        raise Exception("No arguments given to 'and'.")
+    if len(operands) == 1 and isinstance(operands[0], WList):
+        operands = operands[0]
+    if len(operands) < 1:
+        raise Exception("No arguments given to 'and'.")
+    if any(not isinstance(op, WBoolean) for op in operands):
+        raise Exception("Only booleans are allowed in logical operations.")
+    for operand in operands:
+        if operand is WBoolean.false:
+            return WBoolean.false
+    return WBoolean.true
+
+
 def read_integer_literal(s):
     """
 (define read_integer_literal_char
@@ -1469,6 +1501,8 @@ def create_default_state(prototype=None):
         'true': WBoolean.true,
         'false': WBoolean.false,
         'not': WMagicFunction(w_not, 'not'),
+        'or': WMagicFunction(w_or, 'or'),
+        'and': WMagicFunction(w_and, 'and'),
         'cond': Cond(),
         'if': If(),
         '<': WMagicFunction(less_than, '<'),

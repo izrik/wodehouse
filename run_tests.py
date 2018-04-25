@@ -336,6 +336,46 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WBoolean.true, result)
 
+    def test_or_returns_true_if_any_true(self):
+        # when
+        result = eval_str("(or false true)", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+        # when
+        result = eval_str("(or true false)", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+        # when
+        result = eval_str("(or true true)", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_or_returns_false_if_all_false(self):
+        # when
+        result = eval_str("(or false false)", create_default_state())
+        # then
+        self.assertIs(WBoolean.false, result)
+
+    def test_and_returns_false_if_any_false(self):
+        # when
+        result = eval_str("(and false true)", create_default_state())
+        # then
+        self.assertIs(WBoolean.false, result)
+        # when
+        result = eval_str("(and true false)", create_default_state())
+        # then
+        self.assertIs(WBoolean.false, result)
+        # when
+        result = eval_str("(and false false)", create_default_state())
+        # then
+        self.assertIs(WBoolean.false, result)
+
+    def test_and_returns_true_if_all_true(self):
+        # when
+        result = eval_str("(and true true)", create_default_state())
+        # then
+        self.assertIs(WBoolean.true, result)
+
     def test_cond_no_conditions_raises(self):
         # expect
         self.assertRaisesRegex(
