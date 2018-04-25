@@ -155,7 +155,8 @@ def read_expr(s):
             (raise "Ran out of characters before reading expression."))
         ((eq ch "(") (read_list s))
         ((in ch "0123456789") (read_integer_literal s))
-        ((or (in ch "+-*/<>_") (in ch "abcdefghijklmnopqrstuvwxyz")) (read_symbol s))
+        ((or (in ch "+-*/<>_") (in ch "abcdefghijklmnopqrstuvwxyz"))
+            (read_symbol s))
         ((eq ch "\"") (read_string s))
         ((eq ch "'")
             (exec
