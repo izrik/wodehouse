@@ -130,6 +130,43 @@ def parse(s):
 
 
 def read_whitespace_and_comments(s):
+    """
+(define read_comment_char
+(lambda (s)
+(cond
+    ((not (has_chars s))
+        '())
+    ((eq (peek s) "\n")
+        (cons (get_next_char s) (read_wsc_char s)))
+    (true
+        (cons (get_next_char s) (read_comment_char s))))))
+
+(define read_comment
+(lambda (s)
+(if (not (eq (peek s) "#"))
+    (raise
+        (format
+            "Unknown starting character \"{}\" in read_comment" (peek s)))
+    (read_comment_char s))))
+
+(define read_wsc_char
+(lambda (s)
+(cond
+    ((not (has_chars s))
+        '())
+    ((eq (peek s) "#")
+        (read_comment s))
+    ((in (peek s) " \r\n\t")
+        (cons (get_next_char s) (read_wsc_char s)))
+    (true
+        '()))))
+
+(define read_whitespace_and_comments
+(lambda (s)
+(if (not (in (peek s) " \r\n\t#"))
+    ""
+    (+ (read_wsc_char s)))))
+    """
     ch = s.peek()
     while s.has_chars() and (ch.isspace() or ch == '#'):
         if ch == '#':

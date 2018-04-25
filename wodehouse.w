@@ -156,7 +156,38 @@
 (lambda (s)
     (raise "Not implemented")))
 
+(define read_comment_char
+(lambda (s)
+(cond
+    ((not (has_chars s))
+        '())
+    ((eq (peek s) "\n")
+        (cons (get_next_char s) (read_wsc_char s)))
+    (true
+        (cons (get_next_char s) (read_comment_char s))))))
+
+(define read_comment
+(lambda (s)
+(if (not (eq (peek s) "#"))
+    (raise
+        (format
+            "Unknown starting character \"{}\" in read_comment" (peek s)))
+    (read_comment_char s))))
+
+(define read_wsc_char
+(lambda (s)
+(cond
+    ((not (has_chars s))
+        '())
+    ((eq (peek s) "#")
+        (read_comment s))
+    ((in (peek s) " \r\n\t")
+        (cons (get_next_char s) (read_wsc_char s)))
+    (true
+        '()))))
+
 (define read_whitespace_and_comments
 (lambda (s)
-    # Not implemented, but don't throw an exception
-    s))
+(if (not (in (peek s) " \r\n\t#"))
+    ""
+    (+ (read_wsc_char s)))))
