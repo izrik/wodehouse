@@ -42,12 +42,13 @@ from pathlib import Path
 
 
 class WStream(object):
-    def __init__(self, s):
+    def __init__(self, s, filename=None):
         self.s = s
         self.i = 0
         self.len = len(s)
         self.line = 1
         self.char = 1
+        self.filename = filename
 
     def has_chars(self):
         return self.i < self.len
@@ -1400,7 +1401,7 @@ class Import(WMagicMacro):
         if h in _global_import_cache:
             other_fls = _global_import_cache[h]
         else:
-            other_fls = w_exec_src(src)
+            other_fls = w_exec_src(src, filename=filename)
             _global_import_cache[h] = other_fls
 
         basename = os.path.splitext(filename.value)[0]
@@ -1531,10 +1532,10 @@ def repl(prompt=None):
                 print('  ' + line, end='')
 
 
-def w_exec_src(src):
+def w_exec_src(src, filename=None):
     fls = create_file_level_state()
     state = create_default_state(prototype=fls)
-    stream = WStream(src)
+    stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)
     while stream.has_chars():
         expr = read_expr(stream)
@@ -1546,7 +1547,7 @@ def w_exec_src(src):
 def run_file(filename):
     with open(filename) as f:
         src = f.read()
-    w_exec_src(src)
+    w_exec_src(src, filename)
 
 
 def main():
