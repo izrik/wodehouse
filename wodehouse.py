@@ -1415,38 +1415,20 @@ def list_state(state):
     return WList(*(key for key in state.keys()))
 
 
-def define(name, value):
+class Define(WMagicMacro):
     """
-    We want to import definitions from one file into another. Specifically, we
-    want to be able to import w_eval from wodehuouse.w into tests.w. We need
-    some way to accomplish that. At present, we don't have any way of mutating
-    a state object from within wodehouse-language code. All we have are macros
-    (esp let) which are able to create a new state with the previous state as a
-    prototype. Also, every function call implicitly creates a new prototyped
-    state object, to handle the args. None of these is sufficient to enable
-    importing, because their effects are all limited to within a particular
-    scope.
-
-    We could define something new, like `define`, that modifies some global
-    state, but that would require creating the global state machinery. A
-    file-level state (instead of truly global) would probably be better.
-
-    For example: Every file will have a WState object accessible only to that
-    file. This object will at first be empty. Every expression in the file that
+    Every file will have a WState object accessible only to that file. This
+    object will at first be empty. Every top-level expression in the file that
     gets eval'd will have a new state passed to it having the file-level state
-    object as its immediate prototype. So far, this is 100% compatible with
-    what the system already does. If, however, any `define` expressions are
-    eval'd, that will add an entry to the file-level state. So, when we call
-    `(import "filename.w" name1 name2)`, that call will eval the entire
+    object as its immediate prototype. If, however, any `define` expressions
+    are eval'd, that will add an entry to the file-level state. So, when we
+    call `(import "filename.w" name1 name2)`, that call will eval the entire
     `filename.w` file as stated before, and the resulting file-level state
     object will be returned. Then, the `name1` and `name2` from `filename.w`'s
-    state will be added to the current file's file-level state.
+    state will be added to the importing file's file-level state.
     """
-    pass
-
-
-class Define(WMagicMacro):
     def __init__(self, file_level_state):
+        super().__init__()
         self.file_level_state = file_level_state
 
     def call_magic_macro(self, exprs, state):
