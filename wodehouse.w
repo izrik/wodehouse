@@ -152,9 +152,26 @@
                     "Unknown starting character \"{}\" in read_expr"
                     ch)))))))
 
+(define read_list_element
+(lambda (s)
+(let (whitespace (read_whitespace_and_comments s))
+    (if (not (has_chars s))
+        (raise "Ran out of characters while reading the list.")
+        (let (ch (peek s))
+            (if (eq ch ")")
+                (let (_ (get_next_char s))
+                    '())
+                (cons (read_expr s) (read_list_element s))))))))
+
 (define read_list
 (lambda (s)
-    (raise "Not implemented")))
+(let (whitespace (read_whitespace_and_comments s))
+    (if (not (has_chars s))
+        (raise "Ran out of characters before starting the list.")
+        (let (ch (get_next_char s))
+            (if (not (eq ch "("))
+                (raise (format "Unknown starting character \"{}\" in read_list" ch))
+                (read_list_element s)))))))
 
 (define read_comment_char
 (lambda (s)

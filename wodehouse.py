@@ -652,6 +652,30 @@ def int_from_str(s, position=None):
 
 
 def read_list(s):
+    """
+(define read_list_element
+(lambda (s)
+(let (whitespace (read_whitespace_and_comments s))
+    (if (not (has_chars s))
+        (raise "Ran out of characters while reading the list.")
+        (let (ch (peek s))
+            (if (eq ch ")")
+                (let (_ (get_next_char s))
+                    '())
+                (cons (read_expr s) (read_list_element s))))))))
+
+(define read_list
+(lambda (s)
+(let (whitespace (read_whitespace_and_comments s))
+    (if (not (has_chars s))
+        (raise "Ran out of characters before starting the list.")
+        (let (ch (get_next_char s))
+            (if (not (eq ch "("))
+                (raise
+                    (format
+                        "Unknown starting character \"{}\" in read_list" ch))
+                (read_list_element s)))))))
+    """
     assert s.peek() == '('
     exprs = []
     s.get_next_char()
