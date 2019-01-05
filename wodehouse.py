@@ -37,8 +37,8 @@ import traceback
 from pathlib import Path
 
 from functions.eval import eval_str
-from functions.exec_src import create_file_level_scope, \
-    create_default_scope, w_exec_src
+from functions.exec_src import w_exec_src
+from functions.scope import create_default_scope, create_file_level_scope
 from wtypes.list import WList
 from wtypes.number import WNumber
 from wtypes.string import WString

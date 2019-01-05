@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import Mock
 
 from functions.eval import w_eval, eval_str, _eval_source
-from functions.exec_src import create_default_scope, create_file_level_scope
+from functions.scope import create_default_scope, create_file_level_scope
 from functions.function import WFunction
 from functions.io import w_print
 from functions.magic_function import WMagicFunction
