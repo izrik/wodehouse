@@ -8,6 +8,12 @@ import wtypes.symbol
 
 
 def w_str(arg):
+    """
+    Convert a WObject to a WString
+
+    :param arg: an object to convert
+    :return: the WString representation of `arg`.
+    """
     if isinstance(arg, WString):
         return arg
     if isinstance(arg, WNumber):
