@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import Mock
 
 from functions.eval import w_eval, eval_str, _eval_source
-from functions.scope import create_default_scope, create_file_level_scope
+from functions.scope import create_global_scope, create_module_scope
 from functions.function import WFunction
 from functions.io import w_print
 from functions.magic_function import WMagicFunction
@@ -33,7 +33,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_calls_functions(self):
         # given
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['onetwothree'] = WMagicFunction(lambda *args: 123,
                                               enclosing_scope=scope)
         # when
@@ -59,7 +59,7 @@ class WodehouseTest(unittest.TestCase):
     def test_print_function(self):
         # given
         printer = Mock()
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when
@@ -70,7 +70,7 @@ class WodehouseTest(unittest.TestCase):
     def test_prints_integer(self):
         # given
         printer = Mock()
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when
@@ -82,7 +82,7 @@ class WodehouseTest(unittest.TestCase):
     def test_prints_string(self):
         # given
         printer = Mock()
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['print'] = WMagicFunction(
             lambda x: w_print(x, printer=printer),
             enclosing_scope=scope)
@@ -95,7 +95,7 @@ class WodehouseTest(unittest.TestCase):
     def test_prints_escaped_chars_correctly(self):
         # given
         printer = Mock()
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when
@@ -107,7 +107,7 @@ class WodehouseTest(unittest.TestCase):
     def test_prints_empty_list(self):
         # given
         printer = Mock()
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when
@@ -121,7 +121,7 @@ class WodehouseTest(unittest.TestCase):
     def test_prints_list(self):
         # given
         printer = Mock()
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when
@@ -182,37 +182,37 @@ class WodehouseTest(unittest.TestCase):
 
     def test_gets_type_of_number(self):
         # when
-        result = eval_str("(type 123)", create_default_scope())
+        result = eval_str("(type 123)", create_global_scope())
         # then
         self.assertIs(WSymbol.get("Number"), result)
 
     def test_gets_type_of_string(self):
         # when
-        result = eval_str("(type \"abc\")", create_default_scope())
+        result = eval_str("(type \"abc\")", create_global_scope())
         # then
         self.assertIs(WSymbol.get("String"), result)
 
     def test_gets_type_of_symbol(self):
         # when
-        result = eval_str("(type 'a)", create_default_scope())
+        result = eval_str("(type 'a)", create_global_scope())
         # then
         self.assertIs(WSymbol.get("Symbol"), result)
 
     def test_gets_type_of_list(self):
         # when
-        result = eval_str("(type '())", create_default_scope())
+        result = eval_str("(type '())", create_global_scope())
         # then
         self.assertIs(WSymbol.get("List"), result)
 
     def test_gets_type_of_function(self):
         # when
-        result = eval_str("(type (lambda () 1))", create_default_scope())
+        result = eval_str("(type (lambda () 1))", create_global_scope())
         # then
         self.assertIs(WSymbol.get("Function"), result)
 
     def test_gets_type_of_magic_function(self):
         # when
-        result = eval_str("(type list)", create_default_scope())
+        result = eval_str("(type list)", create_global_scope())
         # then
         self.assertIs(WSymbol.get("MagicFunction"), result)
 
@@ -225,13 +225,13 @@ class WodehouseTest(unittest.TestCase):
 
     def test_gets_type_of_magic_macro(self):
         # when
-        result = eval_str("(type let)", create_default_scope())
+        result = eval_str("(type let)", create_global_scope())
         # then
         self.assertIs(WSymbol.get("MagicMacro"), result)
 
     def test_lambda_creates_wfunction(self):
         # when
-        result = eval_str("(lambda (x) 123)", create_default_scope())
+        result = eval_str("(lambda (x) 123)", create_global_scope())
         # then
         self.assertIsInstance(result, WFunction)
         self.assertNotIsInstance(result, WMagicFunction)
@@ -241,7 +241,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_lambda_encloses_values(self):
         # given
-        scope = create_default_scope()
+        scope = create_global_scope()
         # when
         result = eval_str("(lambda (x) (* x x))", scope)
         # then
@@ -255,13 +255,13 @@ class WodehouseTest(unittest.TestCase):
 
     def test_wfunction_can_be_called(self):
         # when
-        result = eval_str("((lambda (x) (* x x)) 4)", create_default_scope())
+        result = eval_str("((lambda (x) (* x x)) 4)", create_global_scope())
         # then
         self.assertEqual(16, result)
 
     def test_wfunctions_can_be_used_in_the_scope(self):
         # given
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['sqr'] = eval_str("(lambda (x) (* x x))", scope)
         # expect
         self.assertEqual(25, eval_str("(sqr 5)", scope))
@@ -269,127 +269,127 @@ class WodehouseTest(unittest.TestCase):
 
     def test_str_stringifies_numbers(self):
         # when
-        result = eval_str("(str 123)", create_default_scope())
+        result = eval_str("(str 123)", create_global_scope())
         # then
         self.assertEqual("123", result)
 
     def test_str_strings_are_unchanged(self):
         # when
-        result = eval_str("(str \"123\")", create_default_scope())
+        result = eval_str("(str \"123\")", create_global_scope())
         # then
         self.assertEqual("123", result)
 
     def test_str_stringifies_lists(self):
         # when
-        result = eval_str("(str (list 1 2 3))", create_default_scope())
+        result = eval_str("(str (list 1 2 3))", create_global_scope())
         # then
         self.assertEqual("(1 2 3)", result)
 
     def test_str_stringifies_quoted_lists(self):
         # when
-        result = eval_str("(str '(1 2 3))", create_default_scope())
+        result = eval_str("(str '(1 2 3))", create_global_scope())
         # then
         self.assertEqual("(1 2 3)", result)
 
     def test_str_stringifies_symbols(self):
         # when
-        result = eval_str("(str 'asdf)", create_default_scope())
+        result = eval_str("(str 'asdf)", create_global_scope())
         # then
         self.assertEqual("asdf", result)
 
     def test_str_stringifies_quoted_symbols(self):
         # when
-        result = eval_str("(str ''asdf)", create_default_scope())
+        result = eval_str("(str ''asdf)", create_global_scope())
         # then
         self.assertEqual("'asdf", result)
 
     def test_str_stringifies_lambdas(self):
         # when
         result = eval_str("(str (lambda (x) (* x x)))",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertEqual("(lambda (x) (* x x))", result)
 
     def test_str_stringifies_magic_functions(self):
         # when
-        result = eval_str("(str str)", create_default_scope())
+        result = eval_str("(str str)", create_global_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertTrue(result.value.startswith("str"))
 
     def test_str_stringifies_variables_values(self):
         # when
-        result = eval_str("(let (a 123) (str a))", create_default_scope())
+        result = eval_str("(let (a 123) (str a))", create_global_scope())
         # then
         self.assertEqual("123", result)
 
     def test_str_stringifies_boolean_true(self):
         # when
-        result = eval_str("(str true)", create_default_scope())
+        result = eval_str("(str true)", create_global_scope())
         # then
         self.assertEqual("true", result)
 
     def test_str_stringifies_boolean_false(self):
         # when
-        result = eval_str("(str false)", create_default_scope())
+        result = eval_str("(str false)", create_global_scope())
         # then
         self.assertEqual("false", result)
 
     def test_str_stringifies_boolean_variable(self):
         # when
-        result = eval_str("(let (a true) (str a))", create_default_scope())
+        result = eval_str("(let (a true) (str a))", create_global_scope())
         # then
         self.assertEqual("true", result)
 
     def test_not_inverts_true_to_false(self):
         # when
-        result = eval_str("(not true)", create_default_scope())
+        result = eval_str("(not true)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_not_inverts_false_to_true(self):
         # when
-        result = eval_str("(not false)", create_default_scope())
+        result = eval_str("(not false)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_or_returns_true_if_any_true(self):
         # when
-        result = eval_str("(or false true)", create_default_scope())
+        result = eval_str("(or false true)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(or true false)", create_default_scope())
+        result = eval_str("(or true false)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(or true true)", create_default_scope())
+        result = eval_str("(or true true)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_or_returns_false_if_all_false(self):
         # when
-        result = eval_str("(or false false)", create_default_scope())
+        result = eval_str("(or false false)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_and_returns_false_if_any_false(self):
         # when
-        result = eval_str("(and false true)", create_default_scope())
+        result = eval_str("(and false true)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
         # when
-        result = eval_str("(and true false)", create_default_scope())
+        result = eval_str("(and true false)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
         # when
-        result = eval_str("(and false false)", create_default_scope())
+        result = eval_str("(and false false)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_and_returns_true_if_all_true(self):
         # when
-        result = eval_str("(and true true)", create_default_scope())
+        result = eval_str("(and true true)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
@@ -399,124 +399,124 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "No condition evaluated to true.",
             eval_str,
-            "(cond)", create_default_scope())
+            "(cond)", create_global_scope())
 
     def test_cond_condition_is_true_returns_corresponding_retval(self):
         # when
-        result = eval_str("(cond (true 'a))", create_default_scope())
+        result = eval_str("(cond (true 'a))", create_global_scope())
         # then
         self.assertEqual(WSymbol.get('a'), result)
 
     def test_cond_condition_is_false_moves_to_next_condition(self):
         # when
         result = eval_str("(cond (false 'a) (true 'b))",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertEqual(WSymbol.get('b'), result)
 
     def test_if_condition_is_true_returns_first_retval(self):
         # when
         result = eval_str("(if (< 2 3) 4 5)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertEqual(4, result)
 
     def test_if_condition_is_false_returns_second_retval(self):
         # when
         result = eval_str("(if (> 2 3) 4 5)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertEqual(5, result)
 
     def test_less_than_returns_true_for_lesser(self):
         # when
-        result = eval_str("(< 1 2)", create_default_scope())
+        result = eval_str("(< 1 2)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_less_than_returns_false_for_greater(self):
         # when
-        result = eval_str("(< 2 1)", create_default_scope())
+        result = eval_str("(< 2 1)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_less_than_returns_false_for_equal(self):
         # when
-        result = eval_str("(< 1 1)", create_default_scope())
+        result = eval_str("(< 1 1)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_leq_returns_true_for_lesser(self):
         # when
-        result = eval_str("(<= 1 2)", create_default_scope())
+        result = eval_str("(<= 1 2)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_leq_returns_false_for_greater(self):
         # when
-        result = eval_str("(<= 2 1)", create_default_scope())
+        result = eval_str("(<= 2 1)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_leq_returns_true_for_equal(self):
         # when
-        result = eval_str("(<= 1 1)", create_default_scope())
+        result = eval_str("(<= 1 1)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_greater_than_returns_false_for_lesser(self):
         # when
-        result = eval_str("(> 1 2)", create_default_scope())
+        result = eval_str("(> 1 2)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_greater_than_returns_true_for_greater(self):
         # when
-        result = eval_str("(> 2 1)", create_default_scope())
+        result = eval_str("(> 2 1)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_greater_than_returns_false_for_equal(self):
         # when
-        result = eval_str("(> 1 1)", create_default_scope())
+        result = eval_str("(> 1 1)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_geq_returns_false_for_lesser(self):
         # when
-        result = eval_str("(>= 1 2)", create_default_scope())
+        result = eval_str("(>= 1 2)", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_geq_returns_true_for_greater(self):
         # when
-        result = eval_str("(>= 2 1)", create_default_scope())
+        result = eval_str("(>= 2 1)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_geq_returns_true_for_equal(self):
         # when
-        result = eval_str("(>= 1 1)", create_default_scope())
+        result = eval_str("(>= 1 1)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_new_scope_creates_scope_object(self):
         # when
-        result = eval_str("(new_scope)", create_default_scope())
+        result = eval_str("(new_scope)", create_global_scope())
         # then
         self.assertIsInstance(result, WScope)
         self.assertEqual(0, len(result))
 
     def test_new_scope_with_empty_list_for_args_creates_scope_object(self):
         # when
-        result = eval_str("(new_scope '())", create_default_scope())
+        result = eval_str("(new_scope '())", create_global_scope())
         # then
         self.assertIsInstance(result, WScope)
         self.assertEqual(0, len(result))
 
     def test_new_scope_args_become_keys_and_values(self):
         # when
-        result = eval_str("(new_scope '((a 1) (b 2)))", create_default_scope())
+        result = eval_str("(new_scope '((a 1) (b 2)))", create_global_scope())
         # then
         self.assertIsInstance(result, WScope)
         self.assertEqual(2, len(result))
@@ -528,19 +528,19 @@ class WodehouseTest(unittest.TestCase):
     def test_get_gets_value_by_key(self):
         # when
         result = eval_str("(get (new_scope '((a 1) (b 2))) 'a)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertEqual(1, result)
         # when
         result = eval_str("(get (new_scope '((a 1) (b 2))) 'b)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertEqual(2, result)
 
     def test_new_scope_proto_create_scope_object_with_prototype(self):
         # given
         p = WScope({'a': 3, 'b': 4, 'c': 5})
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['p'] = p
         # when
         result = eval_str("(new_scope_proto p '((a 1) (b 2)))", scope)
@@ -556,91 +556,91 @@ class WodehouseTest(unittest.TestCase):
 
     def test_in_returns_false_if_item_present(self):
         # when
-        result = eval_str("(in 'a '(a))", create_default_scope())
+        result = eval_str("(in 'a '(a))", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(in 'a '(a b c))", create_default_scope())
+        result = eval_str("(in 'a '(a b c))", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(in 'b '(a b c))", create_default_scope())
+        result = eval_str("(in 'b '(a b c))", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(in 'c '(a b c))", create_default_scope())
+        result = eval_str("(in 'c '(a b c))", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_in_returns_false_if_item_not_present(self):
         # when
-        result = eval_str("(in 'f '(a b c))", create_default_scope())
+        result = eval_str("(in 'f '(a b c))", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_isinstance_returns_true_when_match_number(self):
         # when
-        result = eval_str("(isinstance 123 'Number)", create_default_scope())
+        result = eval_str("(isinstance 123 'Number)", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_number_type_list(self):
         # when
-        result = eval_str("(isinstance 123 '(Number))", create_default_scope())
+        result = eval_str("(isinstance 123 '(Number))", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_string(self):
         # when
         result = eval_str("(isinstance \"abc\" 'String)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_string_type_list(self):
         # when
         result = eval_str("(isinstance \"abc\" '(String))",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_mixed_type_list(self):
         # when
         result = eval_str("(isinstance 123 '(Number String))",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
         result = eval_str("(isinstance \"abc\" '(Number String))",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_function(self):
         # when
         result = eval_str("(isinstance (lambda () 1) 'Function)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_magic_function(self):
         # when
         result = eval_str("(isinstance list 'MagicFunction)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_function_with_magic_func(self):
         # when
         result = eval_str("(isinstance list 'Function)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_boolean(self):
         # when
         result = eval_str("(isinstance (lambda () 1) 'Function)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
@@ -655,28 +655,28 @@ class WodehouseTest(unittest.TestCase):
     def test_isinstance_returns_true_when_match_magic_macro(self):
         # when
         result = eval_str("(isinstance let 'MagicMacro)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_macro_with_magic_macro(self):
         # when
         result = eval_str("(isinstance let 'Macro)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_symbol(self):
         # when
         result = eval_str("(isinstance 'a 'Symbol)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_list(self):
         # when
         result = eval_str("(isinstance '(1 2 3) 'List)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
@@ -684,7 +684,7 @@ class WodehouseTest(unittest.TestCase):
         # when
         result = eval_str(
             "(isinstance 123 '(String Symbol Boolean List Function Macro))",
-            create_default_scope())
+            create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
@@ -692,21 +692,21 @@ class WodehouseTest(unittest.TestCase):
         # when
         result = eval_str(
             "(map car '('(1 2 3) '(a b c) '(\"a\" \"b\" \"c\")))",
-            create_default_scope())
+            create_global_scope())
         # then
         self.assertEqual([1, WSymbol.get('a'), 'a'], result)
 
     def test_maps_with_lambda(self):
         # when
         result = eval_str("(map (lambda (x) (* x x)) '(1 2 3 4 5))",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertEqual([1, 4, 9, 16, 25], result)
 
     def test_maps_multiple_lists_and_arguments(self):
         # when
         result = eval_str("(map (lambda (x y) (* x y)) '(1 2 3) '(4 5 6))",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertEqual([4, 10, 18], result)
 
@@ -722,7 +722,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         eval_source = _eval_source
         parsed_eval = parse(eval_source)
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['scope'] = scope
         # when
         compiled_eval = w_eval(parsed_eval, scope)
@@ -733,7 +733,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         eval_source = _eval_source
         parsed_eval = parse(eval_source)
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['scope'] = scope
         compiled_eval = w_eval(parsed_eval, scope)
         scope['w_eval'] = compiled_eval
@@ -744,7 +744,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_read_file_reads_files(self):
         # when
-        result = eval_str("(read_file \"input2.txt\")", create_default_scope())
+        result = eval_str("(read_file \"input2.txt\")", create_global_scope())
         # then
         self.assertEqual("( 123 )\n", result)
 
@@ -754,7 +754,7 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "Assertion failed: \"false\"",
             eval_str,
-            "(assert false)", create_default_scope())
+            "(assert false)", create_global_scope())
 
     def test_assert_raises_exception_on_false_expr(self):
         # expect
@@ -762,24 +762,24 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "Assertion failed: \"\\(< 3 1\\)\"",
             eval_str,
-            "(assert (< 3 1))", create_default_scope())
+            "(assert (< 3 1))", create_global_scope())
 
     def test_assert_returns_true_on_true(self):
         # when
-        result = eval_str("(assert (< 1 2))", create_default_scope())
+        result = eval_str("(assert (< 1 2))", create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_assert_returns_arg_on_non_boolean(self):
         # when
-        result = eval_str("(assert \"abc\")", create_default_scope())
+        result = eval_str("(assert \"abc\")", create_global_scope())
         # then
         self.assertEqual("abc", result)
 
     def test_define_adds_to_fls(self):
         # given
-        fls = create_file_level_scope()
-        scope = create_default_scope(fls)
+        fls = create_module_scope()
+        scope = create_global_scope(fls)
         # when
         result = eval_str("(define x 3)", scope)
         # then
@@ -789,7 +789,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_plus_adds_numbers(self):
         # when
-        result = eval_str("(+ 1 2 3 4)", create_default_scope())
+        result = eval_str("(+ 1 2 3 4)", create_global_scope())
         # then
         self.assertIsInstance(result, WNumber)
         self.assertEqual(10, result)
@@ -797,14 +797,14 @@ class WodehouseTest(unittest.TestCase):
     def test_plus_concatenates_strings(self):
         # when
         result = eval_str("(+ \"one\" \"two\" \"three\")",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("onetwothree", result)
 
     def test_plus_interprets_single_list_arg_as_varargs(self):
         # when
-        result = eval_str("(+ (list 1 2 3 4))", create_default_scope())
+        result = eval_str("(+ (list 1 2 3 4))", create_global_scope())
         # then
         self.assertIsInstance(result, WNumber)
         self.assertEqual(10, result)
@@ -812,14 +812,14 @@ class WodehouseTest(unittest.TestCase):
     def test_format_interpolates_arguments(self):
         # when
         result = eval_str("(format \"one {} three\" \"two\")",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("one two three", result)
 
     def test_format_interprets_double_braces_as_escaped(self):
         # when
-        result = eval_str("(format \"abc {{ def\")", create_default_scope())
+        result = eval_str("(format \"abc {{ def\")", create_global_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("abc { def", result)
@@ -827,7 +827,7 @@ class WodehouseTest(unittest.TestCase):
     def test_format_stringifies_arguments(self):
         # when
         result = eval_str("(format \"a{}b{}c{}d\" 1 true +)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("a1btruec+d", result)
@@ -838,32 +838,32 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "this is the description",
             eval_str,
-            "(raise \"this is the description\")", create_default_scope())
+            "(raise \"this is the description\")", create_global_scope())
 
     def test_stream_creates_stream_object(self):
         # when
-        result = eval_str("(stream \"abc\")", create_default_scope())
+        result = eval_str("(stream \"abc\")", create_global_scope())
         # then
         self.assertIsInstance(result, WStream)
         self.assertEqual("abc", result.s)
 
     def test_has_chars_on_empty_stream_returns_false(self):
         # when
-        result = eval_str("(has_chars (stream \"\"))", create_default_scope())
+        result = eval_str("(has_chars (stream \"\"))", create_global_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_has_chars_on_non_empty_stream_returns_true(self):
         # when
         result = eval_str("(has_chars (stream \"abc\"))",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_get_next_char_gets_next_char(self):
         # when
         result = eval_str("(get_next_char (stream \"abc\"))",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("a", result)
@@ -871,7 +871,7 @@ class WodehouseTest(unittest.TestCase):
     def test_get_next_char_advances_position(self):
         # given
         s = WStream("abc")
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['s'] = s
         # precondition
         self.assertEqual(eval_str("(get_next_char s)", scope), "a")
@@ -887,11 +887,11 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "No more characters in the stream.",
             eval_str,
-            "(get_next_char (stream \"\"))", create_default_scope())
+            "(get_next_char (stream \"\"))", create_global_scope())
 
     def test_peek_returns_next_char(self):
         # when
-        result = eval_str("(peek (stream \"abc\"))", create_default_scope())
+        result = eval_str("(peek (stream \"abc\"))", create_global_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("a", result)
@@ -899,7 +899,7 @@ class WodehouseTest(unittest.TestCase):
     def test_peek_does_not_advance_position(self):
         # given
         s = WStream("abc")
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['s'] = s
         # precondition
         self.assertEqual(eval_str("(peek s)", scope), "a")
@@ -914,7 +914,7 @@ class WodehouseTest(unittest.TestCase):
             i[0] += 1
             return WNumber(-1)
 
-        scope = create_default_scope()
+        scope = create_global_scope()
         scope['side_effect'] = WMagicFunction(side_effect,
                                               enclosing_scope=scope)
         # when
@@ -924,20 +924,20 @@ class WodehouseTest(unittest.TestCase):
 
     def test_exec_returns_the_last_expr(self):
         # when
-        result = eval_str("(exec 2 3 5 7 11)", create_default_scope())
+        result = eval_str("(exec 2 3 5 7 11)", create_global_scope())
         # then
         self.assertEqual(11, result)
 
     def test_call_macro_returns_number(self):
         # when
-        result = eval_str("(if true 1 2)", create_default_scope())
+        result = eval_str("(if true 1 2)", create_global_scope())
         # then
         self.assertIsInstance(result, WNumber)
         self.assertEqual(1, result)
 
     def test_call_macro_returns_empty_list(self):
         # when
-        result = eval_str("(if true '() 2)", create_default_scope())
+        result = eval_str("(if true '() 2)", create_global_scope())
         # then
         self.assertIsInstance(result, WList)
         self.assertEqual([], result)
@@ -945,7 +945,7 @@ class WodehouseTest(unittest.TestCase):
     def test_call_nested_macro_returns_empty_list(self):
         # when
         result = eval_str("(if true (if true '() 2) 3)",
-                          create_default_scope())
+                          create_global_scope())
         # then
         self.assertIsInstance(result, WList)
         self.assertEqual([], result)

@@ -31,8 +31,8 @@ WStream = wtypes.stream.WStream
 
 
 def w_exec_src(src, filename=None):
-    fls = functions.scope.create_file_level_scope()
-    scope = functions.scope.create_default_scope(prototype=fls)
+    fls = functions.scope.create_module_scope()
+    scope = functions.scope.create_global_scope(prototype=fls)
     stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)
     while stream.has_chars():

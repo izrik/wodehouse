@@ -100,7 +100,7 @@ def list_scope(scope):
     return WList(*(key for key in scope.keys()))
 
 
-def create_file_level_scope():
+def create_module_scope():
     fls = WScope()
     fls['fls'] = fls
     fls['define'] = Define(fls)
@@ -108,7 +108,7 @@ def create_file_level_scope():
     return fls
 
 
-def create_default_scope(prototype=None):
+def create_global_scope(prototype=None):
     scope = WScope(prototype=prototype)
     scope.update({
         '+': WMagicFunction(add, scope, name='+'),

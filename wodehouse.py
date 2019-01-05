@@ -38,7 +38,7 @@ from pathlib import Path
 
 from functions.eval import eval_str
 from functions.exec_src import w_exec_src
-from functions.scope import create_default_scope, create_file_level_scope
+from functions.scope import create_global_scope, create_module_scope
 from wtypes.list import WList
 from wtypes.number import WNumber
 from wtypes.string import WString
@@ -73,8 +73,8 @@ def iter_by_two(i):
 def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
-    fls = create_file_level_scope()
-    scope = create_default_scope(prototype=fls)
+    fls = create_module_scope()
+    scope = create_global_scope(prototype=fls)
     while True:
         try:
             input_s = input(prompt)
