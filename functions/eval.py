@@ -39,16 +39,16 @@ def w_eval(expr, scope):
                         callee
                         (type callee))))
             (true
-                (let (args
+                (let (evaled_args
                     (map
                         (lambda (name value)
                             (list name (w_eval value scope)))
                         args (get_func_args callee)))
-                (let (scope (new_scope_proto scope args))
+                (let (scope (new_scope_proto (get_func_enclosing_scope callee) evaled_args))
                 (if
                     (isinstance callee 'MagicFunction)
                     implementation_specific
-                    (w_eval (second callee) scope)))))))))))
+                    (w_eval (get_func_expr callee) scope)))))))))))
     (true
         (raise
             (format
@@ -61,6 +61,8 @@ def w_eval(expr, scope):
     # TODO: call_macro
     # TODO: varargs
     # TODO: get_func_args
+    # TODO: get_func_expr
+    # TODO: get_func_enclosing_scope
     if scope is None:
         scope = WScope()
     elif not isinstance(scope, WScope):
