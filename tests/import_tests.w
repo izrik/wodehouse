@@ -1,13 +1,13 @@
 
-(assert (not (in 'example (list_state fls))))
+(assert (not (in 'example (list_scope fls))))
 (import "example.w")
-(assert (in 'example (list_state fls)))
-(assert (isinstance example 'State))
-#(assert (eq (list_state example) '(import fls something define)))
-(assert (in 'define (list_state example)))
-(assert (in 'fls (list_state example)))
-(assert (in 'import (list_state example)))
-(assert (in 'something (list_state example)))
+(assert (in 'example (list_scope fls)))
+(assert (isinstance example 'Scope))
+#(assert (eq (list_scope example) '(import fls something define)))
+(assert (in 'define (list_scope example)))
+(assert (in 'fls (list_scope example)))
+(assert (in 'import (list_scope example)))
+(assert (in 'something (list_scope example)))
 (assert (not (eq define (get example 'define))))
 (assert (not (eq import (get example 'import))))
 (assert (not (eq fls (get example 'fls))))
@@ -15,11 +15,11 @@
 
 # importing with additional names imports those names into the current fls
 # given
-(assert (not (in 'something (list_state fls))))
+(assert (not (in 'something (list_scope fls))))
 # when
 (import "example.w" something)
 # then
-(assert (in 'something (list_state fls)))
+(assert (in 'something (list_scope fls)))
 (assert (eq something "abc"))
 
 # importing caches and re-uses the fls

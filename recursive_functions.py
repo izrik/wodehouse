@@ -156,27 +156,27 @@ def read_call(s):
     return Call(exprs)
 
 
-def apply_expr(expr, state):
+def apply_expr(expr, scope):
     if isinstance(expr, int):
         return expr
     if isinstance(expr, Call):
-        callee = apply_expr(expr.callee, state)
+        callee = apply_expr(expr.callee, scope)
         args = expr.arguments
         while isinstance(callee, Macro):
-            exprs, state = callee(*args, state=state)
+            exprs, scope = callee(*args, scope=scope)
             if len(exprs) < 1:
                 raise Exception('Ran out of arguments')
-            callee = apply_expr(exprs[0], state=state)
+            callee = apply_expr(exprs[0], scope=scope)
             args = exprs[1:]
-        args = [apply_expr(arg, state) for arg in args]
+        args = [apply_expr(arg, scope) for arg in args]
         return callee(*args)
     if isinstance(expr, Symbol):
-        if expr.name not in state:
+        if expr.name not in scope:
             raise NameError(
                 'No object found by the name of "{}"'.format(expr.name))
-        value = state[expr.name]
+        value = scope[expr.name]
         # while isinstance(value, WodehouseObject):
-        #     value = apply_expr(value, state)
+        #     value = apply_expr(value, scope)
         return value
     if isinstance(expr, Number):
         return expr.value
@@ -235,30 +235,30 @@ class Let(Macro):
     def __init__(self):
         super(Let, self).__init__()
 
-    def __call__(self, symbol, value, *exprs, state=None, **kwargs):
-        if state is None:
-            state = {}
-        _state = state
-        state = ChainMap({}, _state)
-        state[symbol.name] = apply_expr(value, _state)
-        return exprs, state
+    def __call__(self, symbol, value, *exprs, scope=None, **kwargs):
+        if scope is None:
+            scope = {}
+        _scope = scope
+        scope = ChainMap({}, _scope)
+        scope[symbol.name] = apply_expr(value, _scope)
+        return exprs, scope
 
 
 class Apply(Macro):
     def __init__(self):
         super(Apply, self).__init__()
 
-    def __call__(self, *args, state=None, **kwargs):
-        return args, state
+    def __call__(self, *args, scope=None, **kwargs):
+        return args, scope
 
 
 # class MacroMacro(Macro):
-#     def __call__(self, name, arglist, *body, state=None, **kwargs):
+#     def __call__(self, name, arglist, *body, scope=None, **kwargs):
 #         pass
 
 class Quote(Macro):
-    def __call__(self, *args, state=None, **kwargs):
-        return args, state
+    def __call__(self, *args, scope=None, **kwargs):
+        return args, scope
 
 
 class WList(WObject):
@@ -460,7 +460,7 @@ def evlis(m, a):
 def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
-    state = {
+    scope = {
         '+': add,
         '-': sub,
         '*': mult,
@@ -484,7 +484,7 @@ def repl(prompt=None):
                 continue
             stream = Stream(input_s)
             expr = parse(stream)
-            value = apply_expr(expr, state)
+            value = apply_expr(expr, scope)
             print(value)
         except Exception as ex:
             print('Caught the following exception: {}'.format(ex))

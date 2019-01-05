@@ -1,8 +1,8 @@
 (define w_eval
-(lambda (expr state)
+(lambda (expr scope)
     (cond
     ((isinstance expr 'Symbol)
-        (get state expr))
+        (get scope expr))
     ((isinstance expr '(Number String Boolean))
         expr)
     ((isinstance expr 'List)
@@ -10,14 +10,14 @@
         (if
             (eq head 'quote)
             (car (cdr expr))
-            (let (callee w_eval(head state))
+            (let (callee w_eval(head scope))
             (let (args (cdr expr))
             (cond
             ((isinstance callee 'Macro)
-                (let (exprs_state (call_macro callee args state))
-                (let (exprs (car exprs_state))
-                (let (state (car (cdr exprs_state)))
-                (w_eval exprs state)))))
+                (let (exprs_scope (call_macro callee args scope))
+                (let (exprs (car exprs_scope))
+                (let (scope (car (cdr exprs_scope)))
+                (w_eval exprs scope)))))
             ((not (isinstance callee 'Function))
                 (raise
                     (format
@@ -28,13 +28,13 @@
                 (let (args
                     (map
                         (lambda (name value)
-                            (list name (w_eval value state)))
+                            (list name (w_eval value scope)))
                         args (get_func_args callee)))
-                (let (state (new_state_proto state args))
+                (let (scope (new_scope_proto scope args))
                 (if
                     (isinstance callee 'MagicFunction)
                     implementation_specific
-                    (w_eval (second callee) state)))))))))))
+                    (w_eval (second callee) scope)))))))))))
     (true
         (raise
             (format

@@ -4,9 +4,9 @@ import unittest
 from unittest.mock import Mock
 
 import wodehouse
-from wodehouse import eval_str, create_default_state, w_print, WList, \
-    WSymbol, WFunction, WMagicFunction, WString, WBoolean, WState, parse, \
-    create_file_level_state, WNumber, WStream
+from wodehouse import eval_str, create_default_scope, w_print, WList, \
+    WSymbol, WFunction, WMagicFunction, WString, WBoolean, WScope, parse, \
+    create_file_level_scope, WNumber, WStream
 
 
 class WodehouseTest(unittest.TestCase):
@@ -24,10 +24,10 @@ class WodehouseTest(unittest.TestCase):
 
     def test_calls_functions(self):
         # given
-        state = create_default_state()
-        state['onetwothree'] = WMagicFunction(lambda *args: 123)
+        scope = create_default_scope()
+        scope['onetwothree'] = WMagicFunction(lambda *args: 123)
         # when
-        result = eval_str('(onetwothree)', state)
+        result = eval_str('(onetwothree)', scope)
         # then
         self.assertEqual(123, result)
 
@@ -49,20 +49,20 @@ class WodehouseTest(unittest.TestCase):
     def test_print_function(self):
         # given
         printer = Mock()
-        state = create_default_state()
-        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope = create_default_scope()
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
-        result = eval_str('(print "Hello, world!")', state)
+        result = eval_str('(print "Hello, world!")', scope)
         # then
         self.assertEqual("Hello, world!", result)
 
     def test_prints_integer(self):
         # given
         printer = Mock()
-        state = create_default_state()
-        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope = create_default_scope()
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
-        result = eval_str('(print 123)', state)
+        result = eval_str('(print 123)', scope)
         # then
         printer.assert_called_once_with(123)
         self.assertEqual(123, result)
@@ -70,10 +70,10 @@ class WodehouseTest(unittest.TestCase):
     def test_prints_string(self):
         # given
         printer = Mock()
-        state = create_default_state()
-        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope = create_default_scope()
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
-        result = eval_str('(print "Hello, world!")', state)
+        result = eval_str('(print "Hello, world!")', scope)
         # then
         printer.assert_called_once_with('Hello, world!')
         self.assertEqual('Hello, world!', result)
@@ -81,10 +81,10 @@ class WodehouseTest(unittest.TestCase):
     def test_prints_escaped_chars_correctly(self):
         # given
         printer = Mock()
-        state = create_default_state()
-        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope = create_default_scope()
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
-        result = eval_str('(print "newline\\ncreturn\\rtab\\t")', state)
+        result = eval_str('(print "newline\\ncreturn\\rtab\\t")', scope)
         # then
         printer.assert_called_once_with('newline\ncreturn\rtab\t')
         self.assertEqual('newline\ncreturn\rtab\t', result)
@@ -92,10 +92,10 @@ class WodehouseTest(unittest.TestCase):
     def test_prints_empty_list(self):
         # given
         printer = Mock()
-        state = create_default_state()
-        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope = create_default_scope()
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
-        result = eval_str('(print (quote ()))', state)
+        result = eval_str('(print (quote ()))', scope)
         # then
         printer.assert_called_once_with([])
         printer.assert_called_once_with(WList())
@@ -105,10 +105,10 @@ class WodehouseTest(unittest.TestCase):
     def test_prints_list(self):
         # given
         printer = Mock()
-        state = create_default_state()
-        state['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope = create_default_scope()
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
         # when
-        result = eval_str('(print (quote (1 2 "three")))', state)
+        result = eval_str('(print (quote (1 2 "three")))', scope)
         # then
         printer.assert_called_once_with([1, 2, "three"])
         self.assertEqual(result, [1, 2, "three"])
@@ -165,56 +165,56 @@ class WodehouseTest(unittest.TestCase):
 
     def test_gets_type_of_number(self):
         # when
-        result = eval_str("(type 123)", create_default_state())
+        result = eval_str("(type 123)", create_default_scope())
         # then
         self.assertIs(WSymbol.get("Number"), result)
 
     def test_gets_type_of_string(self):
         # when
-        result = eval_str("(type \"abc\")", create_default_state())
+        result = eval_str("(type \"abc\")", create_default_scope())
         # then
         self.assertIs(WSymbol.get("String"), result)
 
     def test_gets_type_of_symbol(self):
         # when
-        result = eval_str("(type 'a)", create_default_state())
+        result = eval_str("(type 'a)", create_default_scope())
         # then
         self.assertIs(WSymbol.get("Symbol"), result)
 
     def test_gets_type_of_list(self):
         # when
-        result = eval_str("(type '())", create_default_state())
+        result = eval_str("(type '())", create_default_scope())
         # then
         self.assertIs(WSymbol.get("List"), result)
 
     def test_gets_type_of_function(self):
         # when
-        result = eval_str("(type (lambda () 1))", create_default_state())
+        result = eval_str("(type (lambda () 1))", create_default_scope())
         # then
         self.assertIs(WSymbol.get("Function"), result)
 
     def test_gets_type_of_magic_function(self):
         # when
-        result = eval_str("(type list)", create_default_state())
+        result = eval_str("(type list)", create_default_scope())
         # then
         self.assertIs(WSymbol.get("MagicFunction"), result)
 
     # TODO: create anonymous macros
     # def test_gets_type_of_macro(self):
     #     # when
-    #     result = eval_str("(type ???)", create_default_state())
+    #     result = eval_str("(type ???)", create_default_scope())
     #     # then
     #     self.assertIs(WSymbol.get("Macro"), result)
 
     def test_gets_type_of_magic_macro(self):
         # when
-        result = eval_str("(type let)", create_default_state())
+        result = eval_str("(type let)", create_default_scope())
         # then
         self.assertIs(WSymbol.get("MagicMacro"), result)
 
     def test_lambda_creates_wfunction(self):
         # when
-        result = eval_str("(lambda (x) 123)", create_default_state())
+        result = eval_str("(lambda (x) 123)", create_default_scope())
         # then
         self.assertIsInstance(result, WFunction)
         self.assertNotIsInstance(result, WMagicFunction)
@@ -224,155 +224,155 @@ class WodehouseTest(unittest.TestCase):
 
     def test_lambda_encloses_values(self):
         # given
-        state = create_default_state()
+        scope = create_default_scope()
         # when
-        result = eval_str("(lambda (x) (* x x))", state)
+        result = eval_str("(lambda (x) (* x x))", scope)
         # then
         self.assertIsInstance(result, WFunction)
         self.assertNotIsInstance(result, WMagicFunction)
         self.assertEqual(1, result.num_args)
         self.assertEqual([WSymbol.get('x')], result.args)
-        times = state['*']
+        times = scope['*']
         x = WSymbol.get('x')
         self.assertEqual([times, x, x], result.expr)
 
     def test_wfunction_can_be_called(self):
         # when
-        result = eval_str("((lambda (x) (* x x)) 4)", create_default_state())
+        result = eval_str("((lambda (x) (* x x)) 4)", create_default_scope())
         # then
         self.assertEqual(16, result)
 
-    def test_wfunctions_can_be_used_in_the_state(self):
+    def test_wfunctions_can_be_used_in_the_scope(self):
         # given
-        state = create_default_state()
-        state['sqr'] = eval_str("(lambda (x) (* x x))", state)
+        scope = create_default_scope()
+        scope['sqr'] = eval_str("(lambda (x) (* x x))", scope)
         # expect
-        self.assertEqual(25, eval_str("(sqr 5)", state))
-        self.assertEqual(81, eval_str("(sqr 9)", state))
+        self.assertEqual(25, eval_str("(sqr 5)", scope))
+        self.assertEqual(81, eval_str("(sqr 9)", scope))
 
     def test_str_stringifies_numbers(self):
         # when
-        result = eval_str("(str 123)", create_default_state())
+        result = eval_str("(str 123)", create_default_scope())
         # then
         self.assertEqual("123", result)
 
     def test_str_strings_are_unchanged(self):
         # when
-        result = eval_str("(str \"123\")", create_default_state())
+        result = eval_str("(str \"123\")", create_default_scope())
         # then
         self.assertEqual("123", result)
 
     def test_str_stringifies_lists(self):
         # when
-        result = eval_str("(str (list 1 2 3))", create_default_state())
+        result = eval_str("(str (list 1 2 3))", create_default_scope())
         # then
         self.assertEqual("(1 2 3)", result)
 
     def test_str_stringifies_quoted_lists(self):
         # when
-        result = eval_str("(str '(1 2 3))", create_default_state())
+        result = eval_str("(str '(1 2 3))", create_default_scope())
         # then
         self.assertEqual("(1 2 3)", result)
 
     def test_str_stringifies_symbols(self):
         # when
-        result = eval_str("(str 'asdf)", create_default_state())
+        result = eval_str("(str 'asdf)", create_default_scope())
         # then
         self.assertEqual("asdf", result)
 
     def test_str_stringifies_quoted_symbols(self):
         # when
-        result = eval_str("(str ''asdf)", create_default_state())
+        result = eval_str("(str ''asdf)", create_default_scope())
         # then
         self.assertEqual("'asdf", result)
 
     def test_str_stringifies_lambdas(self):
         # when
         result = eval_str("(str (lambda (x) (* x x)))",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertEqual("(lambda (x) (* x x))", result)
 
     def test_str_stringifies_magic_functions(self):
         # when
-        result = eval_str("(str str)", create_default_state())
+        result = eval_str("(str str)", create_default_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertTrue(result.value.startswith("str"))
 
     def test_str_stringifies_variables_values(self):
         # when
-        result = eval_str("(let (a 123) (str a))", create_default_state())
+        result = eval_str("(let (a 123) (str a))", create_default_scope())
         # then
         self.assertEqual("123", result)
 
     def test_str_stringifies_boolean_true(self):
         # when
-        result = eval_str("(str true)", create_default_state())
+        result = eval_str("(str true)", create_default_scope())
         # then
         self.assertEqual("true", result)
 
     def test_str_stringifies_boolean_false(self):
         # when
-        result = eval_str("(str false)", create_default_state())
+        result = eval_str("(str false)", create_default_scope())
         # then
         self.assertEqual("false", result)
 
     def test_str_stringifies_boolean_variable(self):
         # when
-        result = eval_str("(let (a true) (str a))", create_default_state())
+        result = eval_str("(let (a true) (str a))", create_default_scope())
         # then
         self.assertEqual("true", result)
 
     def test_not_inverts_true_to_false(self):
         # when
-        result = eval_str("(not true)", create_default_state())
+        result = eval_str("(not true)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_not_inverts_false_to_true(self):
         # when
-        result = eval_str("(not false)", create_default_state())
+        result = eval_str("(not false)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_or_returns_true_if_any_true(self):
         # when
-        result = eval_str("(or false true)", create_default_state())
+        result = eval_str("(or false true)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(or true false)", create_default_state())
+        result = eval_str("(or true false)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(or true true)", create_default_state())
+        result = eval_str("(or true true)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_or_returns_false_if_all_false(self):
         # when
-        result = eval_str("(or false false)", create_default_state())
+        result = eval_str("(or false false)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_and_returns_false_if_any_false(self):
         # when
-        result = eval_str("(and false true)", create_default_state())
+        result = eval_str("(and false true)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
         # when
-        result = eval_str("(and true false)", create_default_state())
+        result = eval_str("(and true false)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
         # when
-        result = eval_str("(and false false)", create_default_state())
+        result = eval_str("(and false false)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_and_returns_true_if_all_true(self):
         # when
-        result = eval_str("(and true true)", create_default_state())
+        result = eval_str("(and true true)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
@@ -382,126 +382,126 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "No condition evaluated to true.",
             eval_str,
-            "(cond)", create_default_state())
+            "(cond)", create_default_scope())
 
     def test_cond_condition_is_true_returns_corresponding_retval(self):
         # when
-        result = eval_str("(cond (true 'a))", create_default_state())
+        result = eval_str("(cond (true 'a))", create_default_scope())
         # then
         self.assertEqual(WSymbol.get('a'), result)
 
     def test_cond_condition_is_false_moves_to_next_condition(self):
         # when
         result = eval_str("(cond (false 'a) (true 'b))",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertEqual(WSymbol.get('b'), result)
 
     def test_if_condition_is_true_returns_first_retval(self):
         # when
         result = eval_str("(if (< 2 3) 4 5)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertEqual(4, result)
 
     def test_if_condition_is_false_returns_second_retval(self):
         # when
         result = eval_str("(if (> 2 3) 4 5)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertEqual(5, result)
 
     def test_less_than_returns_true_for_lesser(self):
         # when
-        result = eval_str("(< 1 2)", create_default_state())
+        result = eval_str("(< 1 2)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_less_than_returns_false_for_greater(self):
         # when
-        result = eval_str("(< 2 1)", create_default_state())
+        result = eval_str("(< 2 1)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_less_than_returns_false_for_equal(self):
         # when
-        result = eval_str("(< 1 1)", create_default_state())
+        result = eval_str("(< 1 1)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_leq_returns_true_for_lesser(self):
         # when
-        result = eval_str("(<= 1 2)", create_default_state())
+        result = eval_str("(<= 1 2)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_leq_returns_false_for_greater(self):
         # when
-        result = eval_str("(<= 2 1)", create_default_state())
+        result = eval_str("(<= 2 1)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_leq_returns_true_for_equal(self):
         # when
-        result = eval_str("(<= 1 1)", create_default_state())
+        result = eval_str("(<= 1 1)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_greater_than_returns_false_for_lesser(self):
         # when
-        result = eval_str("(> 1 2)", create_default_state())
+        result = eval_str("(> 1 2)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_greater_than_returns_true_for_greater(self):
         # when
-        result = eval_str("(> 2 1)", create_default_state())
+        result = eval_str("(> 2 1)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_greater_than_returns_false_for_equal(self):
         # when
-        result = eval_str("(> 1 1)", create_default_state())
+        result = eval_str("(> 1 1)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_geq_returns_false_for_lesser(self):
         # when
-        result = eval_str("(>= 1 2)", create_default_state())
+        result = eval_str("(>= 1 2)", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_geq_returns_true_for_greater(self):
         # when
-        result = eval_str("(>= 2 1)", create_default_state())
+        result = eval_str("(>= 2 1)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_geq_returns_true_for_equal(self):
         # when
-        result = eval_str("(>= 1 1)", create_default_state())
+        result = eval_str("(>= 1 1)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
-    def test_new_state_creates_state_object(self):
+    def test_new_scope_creates_scope_object(self):
         # when
-        result = eval_str("(new_state)", create_default_state())
+        result = eval_str("(new_scope)", create_default_scope())
         # then
-        self.assertIsInstance(result, WState)
+        self.assertIsInstance(result, WScope)
         self.assertEqual(0, len(result))
 
-    def test_new_state_with_empty_list_for_args_creates_state_object(self):
+    def test_new_scope_with_empty_list_for_args_creates_scope_object(self):
         # when
-        result = eval_str("(new_state '())", create_default_state())
+        result = eval_str("(new_scope '())", create_default_scope())
         # then
-        self.assertIsInstance(result, WState)
+        self.assertIsInstance(result, WScope)
         self.assertEqual(0, len(result))
 
-    def test_new_state_args_become_keys_and_values(self):
+    def test_new_scope_args_become_keys_and_values(self):
         # when
-        result = eval_str("(new_state '((a 1) (b 2)))", create_default_state())
+        result = eval_str("(new_scope '((a 1) (b 2)))", create_default_scope())
         # then
-        self.assertIsInstance(result, WState)
+        self.assertIsInstance(result, WScope)
         self.assertEqual(2, len(result))
         self.assertIn('a', result)
         self.assertEqual(1, result['a'])
@@ -510,25 +510,25 @@ class WodehouseTest(unittest.TestCase):
 
     def test_get_gets_value_by_key(self):
         # when
-        result = eval_str("(get (new_state '((a 1) (b 2))) 'a)",
-                          create_default_state())
+        result = eval_str("(get (new_scope '((a 1) (b 2))) 'a)",
+                          create_default_scope())
         # then
         self.assertEqual(1, result)
         # when
-        result = eval_str("(get (new_state '((a 1) (b 2))) 'b)",
-                          create_default_state())
+        result = eval_str("(get (new_scope '((a 1) (b 2))) 'b)",
+                          create_default_scope())
         # then
         self.assertEqual(2, result)
 
-    def test_new_state_proto_create_state_object_with_prototype(self):
+    def test_new_scope_proto_create_scope_object_with_prototype(self):
         # given
-        p = WState({'a': 3, 'b': 4, 'c': 5})
-        state = create_default_state()
-        state['p'] = p
+        p = WScope({'a': 3, 'b': 4, 'c': 5})
+        scope = create_default_scope()
+        scope['p'] = p
         # when
-        result = eval_str("(new_state_proto p '((a 1) (b 2)))", state)
+        result = eval_str("(new_scope_proto p '((a 1) (b 2)))", scope)
         # then
-        self.assertIsInstance(result, WState)
+        self.assertIsInstance(result, WScope)
         self.assertEqual(3, len(result))
         self.assertIn('a', result)
         self.assertEqual(1, result['a'])
@@ -539,91 +539,91 @@ class WodehouseTest(unittest.TestCase):
 
     def test_in_returns_false_if_item_present(self):
         # when
-        result = eval_str("(in 'a '(a))", create_default_state())
+        result = eval_str("(in 'a '(a))", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(in 'a '(a b c))", create_default_state())
+        result = eval_str("(in 'a '(a b c))", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(in 'b '(a b c))", create_default_state())
+        result = eval_str("(in 'b '(a b c))", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
-        result = eval_str("(in 'c '(a b c))", create_default_state())
+        result = eval_str("(in 'c '(a b c))", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_in_returns_false_if_item_not_present(self):
         # when
-        result = eval_str("(in 'f '(a b c))", create_default_state())
+        result = eval_str("(in 'f '(a b c))", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_isinstance_returns_true_when_match_number(self):
         # when
-        result = eval_str("(isinstance 123 'Number)", create_default_state())
+        result = eval_str("(isinstance 123 'Number)", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_number_type_list(self):
         # when
-        result = eval_str("(isinstance 123 '(Number))", create_default_state())
+        result = eval_str("(isinstance 123 '(Number))", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_string(self):
         # when
         result = eval_str("(isinstance \"abc\" 'String)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_string_type_list(self):
         # when
         result = eval_str("(isinstance \"abc\" '(String))",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_mixed_type_list(self):
         # when
         result = eval_str("(isinstance 123 '(Number String))",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
         # when
         result = eval_str("(isinstance \"abc\" '(Number String))",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_function(self):
         # when
         result = eval_str("(isinstance (lambda () 1) 'Function)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_magic_function(self):
         # when
         result = eval_str("(isinstance list 'MagicFunction)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_function_with_magic_func(self):
         # when
         result = eval_str("(isinstance list 'Function)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_boolean(self):
         # when
         result = eval_str("(isinstance (lambda () 1) 'Function)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
@@ -631,35 +631,35 @@ class WodehouseTest(unittest.TestCase):
     # def test_isinstance_returns_true_when_match_macro(self):
     #     # when
     #     result = eval_str("(isinstance let 'Macro)",
-    #                       create_default_state())
+    #                       create_default_scope())
     #     # then
     #     self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_magic_macro(self):
         # when
         result = eval_str("(isinstance let 'MagicMacro)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_macro_with_magic_macro(self):
         # when
         result = eval_str("(isinstance let 'Macro)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_symbol(self):
         # when
         result = eval_str("(isinstance 'a 'Symbol)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_list(self):
         # when
         result = eval_str("(isinstance '(1 2 3) 'List)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
@@ -667,7 +667,7 @@ class WodehouseTest(unittest.TestCase):
         # when
         result = eval_str(
             "(isinstance 123 '(String Symbol Boolean List Function Macro))",
-            create_default_state())
+            create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
@@ -675,21 +675,21 @@ class WodehouseTest(unittest.TestCase):
         # when
         result = eval_str(
             "(map car '('(1 2 3) '(a b c) '(\"a\" \"b\" \"c\")))",
-            create_default_state())
+            create_default_scope())
         # then
         self.assertEqual([1, WSymbol.get('a'), 'a'], result)
 
     def test_maps_with_lambda(self):
         # when
         result = eval_str("(map (lambda (x) (* x x)) '(1 2 3 4 5))",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertEqual([1, 4, 9, 16, 25], result)
 
     def test_maps_multiple_lists_and_arguments(self):
         # when
         result = eval_str("(map (lambda (x y) (* x y)) '(1 2 3) '(4 5 6))",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertEqual([4, 10, 18], result)
 
@@ -705,10 +705,10 @@ class WodehouseTest(unittest.TestCase):
         # given
         eval_source = wodehouse._eval_source
         parsed_eval = parse(eval_source)
-        state = create_default_state()
-        state['state'] = state
+        scope = create_default_scope()
+        scope['scope'] = scope
         # when
-        compiled_eval = wodehouse.w_eval(parsed_eval, state)
+        compiled_eval = wodehouse.w_eval(parsed_eval, scope)
         # then
         self.assertIsInstance(compiled_eval, WFunction)
 
@@ -716,18 +716,18 @@ class WodehouseTest(unittest.TestCase):
         # given
         eval_source = wodehouse._eval_source
         parsed_eval = parse(eval_source)
-        state = create_default_state()
-        state['state'] = state
-        compiled_eval = wodehouse.w_eval(parsed_eval, state)
-        state['w_eval'] = compiled_eval
+        scope = create_default_scope()
+        scope['scope'] = scope
+        compiled_eval = wodehouse.w_eval(parsed_eval, scope)
+        scope['w_eval'] = compiled_eval
         # when
-        result = eval_str('(w_eval 2 state)', state)
+        result = eval_str('(w_eval 2 scope)', scope)
         # then
         self.assertEqual(2, result)
 
     def test_read_file_reads_files(self):
         # when
-        result = eval_str("(read_file \"input2.txt\")", create_default_state())
+        result = eval_str("(read_file \"input2.txt\")", create_default_scope())
         # then
         self.assertEqual("( 123 )\n", result)
 
@@ -737,7 +737,7 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "Assertion failed: \"false\"",
             eval_str,
-            "(assert false)", create_default_state())
+            "(assert false)", create_default_scope())
 
     def test_assert_raises_exception_on_false_expr(self):
         # expect
@@ -745,26 +745,26 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "Assertion failed: \"\\(< 3 1\\)\"",
             eval_str,
-            "(assert (< 3 1))", create_default_state())
+            "(assert (< 3 1))", create_default_scope())
 
     def test_assert_returns_true_on_true(self):
         # when
-        result = eval_str("(assert (< 1 2))", create_default_state())
+        result = eval_str("(assert (< 1 2))", create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_assert_returns_arg_on_non_boolean(self):
         # when
-        result = eval_str("(assert \"abc\")", create_default_state())
+        result = eval_str("(assert \"abc\")", create_default_scope())
         # then
         self.assertEqual("abc", result)
 
     def test_define_adds_to_fls(self):
         # given
-        fls = create_file_level_state()
-        state = create_default_state(fls)
+        fls = create_file_level_scope()
+        scope = create_default_scope(fls)
         # when
-        result = eval_str("(define x 3)", state)
+        result = eval_str("(define x 3)", scope)
         # then
         self.assertEqual(3, result)
         self.assertIn(WSymbol.get('x'), fls)
@@ -772,7 +772,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_plus_adds_numbers(self):
         # when
-        result = eval_str("(+ 1 2 3 4)", create_default_state())
+        result = eval_str("(+ 1 2 3 4)", create_default_scope())
         # then
         self.assertIsInstance(result, WNumber)
         self.assertEqual(10, result)
@@ -780,14 +780,14 @@ class WodehouseTest(unittest.TestCase):
     def test_plus_concatenates_strings(self):
         # when
         result = eval_str("(+ \"one\" \"two\" \"three\")",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("onetwothree", result)
 
     def test_plus_interprets_single_list_arg_as_varargs(self):
         # when
-        result = eval_str("(+ (list 1 2 3 4))", create_default_state())
+        result = eval_str("(+ (list 1 2 3 4))", create_default_scope())
         # then
         self.assertIsInstance(result, WNumber)
         self.assertEqual(10, result)
@@ -795,14 +795,14 @@ class WodehouseTest(unittest.TestCase):
     def test_format_interpolates_arguments(self):
         # when
         result = eval_str("(format \"one {} three\" \"two\")",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("one two three", result)
 
     def test_format_interprets_double_braces_as_escaped(self):
         # when
-        result = eval_str("(format \"abc {{ def\")", create_default_state())
+        result = eval_str("(format \"abc {{ def\")", create_default_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("abc { def", result)
@@ -810,7 +810,7 @@ class WodehouseTest(unittest.TestCase):
     def test_format_stringifies_arguments(self):
         # when
         result = eval_str("(format \"a{}b{}c{}d\" 1 true +)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("a1btruec+d", result)
@@ -821,32 +821,32 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "this is the description",
             eval_str,
-            "(raise \"this is the description\")", create_default_state())
+            "(raise \"this is the description\")", create_default_scope())
 
     def test_stream_creates_stream_object(self):
         # when
-        result = eval_str("(stream \"abc\")", create_default_state())
+        result = eval_str("(stream \"abc\")", create_default_scope())
         # then
         self.assertIsInstance(result, WStream)
         self.assertEqual("abc", result.s)
 
     def test_has_chars_on_empty_stream_returns_false(self):
         # when
-        result = eval_str("(has_chars (stream \"\"))", create_default_state())
+        result = eval_str("(has_chars (stream \"\"))", create_default_scope())
         # then
         self.assertIs(WBoolean.false, result)
 
     def test_has_chars_on_non_empty_stream_returns_true(self):
         # when
         result = eval_str("(has_chars (stream \"abc\"))",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_get_next_char_gets_next_char(self):
         # when
         result = eval_str("(get_next_char (stream \"abc\"))",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("a", result)
@@ -854,15 +854,15 @@ class WodehouseTest(unittest.TestCase):
     def test_get_next_char_advances_position(self):
         # given
         s = WStream("abc")
-        state = create_default_state()
-        state['s'] = s
+        scope = create_default_scope()
+        scope['s'] = s
         # precondition
-        self.assertEqual(eval_str("(get_next_char s)", state), "a")
+        self.assertEqual(eval_str("(get_next_char s)", scope), "a")
         # expect
-        self.assertEqual(eval_str("(get_next_char s)", state), "b")
-        self.assertEqual(eval_str("(get_next_char s)", state), "c")
+        self.assertEqual(eval_str("(get_next_char s)", scope), "b")
+        self.assertEqual(eval_str("(get_next_char s)", scope), "c")
         # then
-        self.assertIs(WBoolean.false, eval_str("(has_chars s)", state))
+        self.assertIs(WBoolean.false, eval_str("(has_chars s)", scope))
 
     def test_get_next_char_after_end_of_stream_raises(self):
         # expect
@@ -870,11 +870,11 @@ class WodehouseTest(unittest.TestCase):
             Exception,
             "No more characters in the stream.",
             eval_str,
-            "(get_next_char (stream \"\"))", create_default_state())
+            "(get_next_char (stream \"\"))", create_default_scope())
 
     def test_peek_returns_next_char(self):
         # when
-        result = eval_str("(peek (stream \"abc\"))", create_default_state())
+        result = eval_str("(peek (stream \"abc\"))", create_default_scope())
         # then
         self.assertIsInstance(result, WString)
         self.assertEqual("a", result)
@@ -882,13 +882,13 @@ class WodehouseTest(unittest.TestCase):
     def test_peek_does_not_advance_position(self):
         # given
         s = WStream("abc")
-        state = create_default_state()
-        state['s'] = s
+        scope = create_default_scope()
+        scope['s'] = s
         # precondition
-        self.assertEqual(eval_str("(peek s)", state), "a")
+        self.assertEqual(eval_str("(peek s)", scope), "a")
         # expect
-        self.assertEqual(eval_str("(peek s)", state), "a")
-        self.assertEqual(eval_str("(peek s)", state), "a")
+        self.assertEqual(eval_str("(peek s)", scope), "a")
+        self.assertEqual(eval_str("(peek s)", scope), "a")
 
     def test_exec_execs_things(self):
         i = [0]
@@ -897,29 +897,29 @@ class WodehouseTest(unittest.TestCase):
             i[0] += 1
             return WNumber(-1)
 
-        state = create_default_state()
-        state['side_effect'] = WMagicFunction(side_effect)
+        scope = create_default_scope()
+        scope['side_effect'] = WMagicFunction(side_effect)
         # when
-        eval_str("(exec (side_effect) (side_effect))", state)
+        eval_str("(exec (side_effect) (side_effect))", scope)
         # then
         self.assertEqual(2, i[0])
 
     def test_exec_returns_the_last_expr(self):
         # when
-        result = eval_str("(exec 2 3 5 7 11)", create_default_state())
+        result = eval_str("(exec 2 3 5 7 11)", create_default_scope())
         # then
         self.assertEqual(11, result)
 
     def test_call_macro_returns_number(self):
         # when
-        result = eval_str("(if true 1 2)", create_default_state())
+        result = eval_str("(if true 1 2)", create_default_scope())
         # then
         self.assertIsInstance(result, WNumber)
         self.assertEqual(1, result)
 
     def test_call_macro_returns_empty_list(self):
         # when
-        result = eval_str("(if true '() 2)", create_default_state())
+        result = eval_str("(if true '() 2)", create_default_scope())
         # then
         self.assertIsInstance(result, WList)
         self.assertEqual([], result)
@@ -927,7 +927,7 @@ class WodehouseTest(unittest.TestCase):
     def test_call_nested_macro_returns_empty_list(self):
         # when
         result = eval_str("(if true (if true '() 2) 3)",
-                          create_default_state())
+                          create_default_scope())
         # then
         self.assertIsInstance(result, WList)
         self.assertEqual([], result)

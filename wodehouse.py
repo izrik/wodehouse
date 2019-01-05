@@ -748,8 +748,8 @@ def get_type(arg):
         if isinstance(arg, WMagicMacro):
             return WSymbol.get('MagicMacro')
         return WSymbol.get('Macro')
-    if isinstance(arg, WState):
-        return WSymbol.get('State')
+    if isinstance(arg, WScope):
+        return WSymbol.get('Scope')
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 
@@ -775,12 +775,12 @@ def w_isinstance(arg, type_or_types):
     return WBoolean.false
 
 
-def w_eval(expr, state):
+def w_eval(expr, scope):
     """
-(lambda (expr state)
+(lambda (expr scope)
     (cond
     ((isinstance expr 'Symbol)
-        (get state expr))
+        (get scope expr))
     ((isinstance expr '(Number String Boolean))
         expr)
     ((isinstance expr 'List)
@@ -788,14 +788,14 @@ def w_eval(expr, state):
         (if
             (eq head 'quote)
             (car (cdr expr))
-            (let (callee w_eval(head state))
+            (let (callee w_eval(head scope))
             (let (args (cdr expr))
             (cond
             ((isinstance callee 'Macro)
-                (let (exprs_state (call_macro callee args state))
-                (let (exprs (car exprs_state))
-                (let (state (car (cdr exprs_state)))
-                (w_eval exprs state)))))
+                (let (exprs_scope (call_macro callee args scope))
+                (let (exprs (car exprs_scope))
+                (let (scope (car (cdr exprs_scope)))
+                (w_eval exprs scope)))))
             ((not (isinstance callee 'Function))
                 (raise
                     (format
@@ -806,13 +806,13 @@ def w_eval(expr, state):
                 (let (args
                     (map
                         (lambda (name value)
-                            (list name (w_eval value state)))
+                            (list name (w_eval value scope)))
                         args (get_func_args callee)))
-                (let (state (new_state_proto state args))
+                (let (scope (new_scope_proto scope args))
                 (if
                     (isinstance callee 'MagicFunction)
                     implementation_specific
-                    (w_eval (second callee) state)))))))))))
+                    (w_eval (second callee) scope)))))))))))
     (true
         (raise
             (format
@@ -825,10 +825,10 @@ def w_eval(expr, state):
     # TODO: call_macro
     # TODO: varargs
     # TODO: get_func_args
-    if state is None:
-        state = WState()
-    elif not isinstance(state, WState):
-        state = WState(state)
+    if scope is None:
+        scope = WScope()
+    elif not isinstance(scope, WScope):
+        scope = WScope(scope)
     if not isinstance(expr, WObject):
         raise Exception(
             'Non-domain value escaped from containment! '
@@ -837,36 +837,36 @@ def w_eval(expr, state):
         head = expr.head
         if head == WSymbol.get('quote'):
             return expr.second
-        callee = w_eval(head, state)
+        callee = w_eval(head, scope)
         args = expr.remaining
         if isinstance(callee, WMacro):
-            expr2, state2 = callee.call_macro(args, state=state)
+            expr2, scope2 = callee.call_macro(args, scope=scope)
             return expr2
         if not isinstance(callee, WFunction):
             raise Exception(
                 'Callee is not a function. Got "{}" ({}) instead.'.format(
                     callee, type(callee)))
-        evaled_args = [w_eval(arg, state) for arg in args]
+        evaled_args = [w_eval(arg, scope) for arg in args]
         if (callee.check_args and
                 callee.num_args is not None and
                 len(evaled_args) != callee.num_args):
             raise Exception(
                 'Function expected {} args, got {} instead.'.format(
                     len(callee.args), len(evaled_args)))
-        fstate = WState(prototype=state)
+        fscope = WScope(prototype=scope)
         for i, argname in enumerate(callee.args):
-            fstate[argname] = evaled_args[i]
+            fscope[argname] = evaled_args[i]
         if isinstance(callee, WMagicFunction):
             return callee(*evaled_args)
-        return w_eval(callee.expr, fstate)
+        return w_eval(callee.expr, fscope)
     if isinstance(expr, WSymbol):
-        if expr not in state:
+        if expr not in scope:
             raise NameError(
                 'No object found by the name of "{}"'.format(expr.name))
-        value = state[expr]
+        value = scope[expr]
         return value
     if isinstance(expr, (WNumber, WString, WBoolean, WFunction, WMacro,
-                         WState)):
+                         WScope)):
         return expr
     raise Exception('Unknown object type: "{}" ({})'.format(expr, type(expr)))
 
@@ -972,8 +972,8 @@ def greater_than_or_equal_to(a, b):
 
 
 class WMacro(WObject):
-    def call_macro(self, exprs, state):
-        return exprs, state
+    def call_macro(self, exprs, scope):
+        return exprs, scope
 
 
 class WMagicMacro(WMacro):
@@ -985,9 +985,9 @@ class WMagicMacro(WMacro):
     def __str__(self):
         return self.macro_name
 
-    def call_macro(self, exprs, state):
-        exprs, state = self.call_magic_macro(exprs, state)
-        return exprs, state
+    def call_macro(self, exprs, scope):
+        exprs, scope = self.call_magic_macro(exprs, scope)
+        return exprs, scope
 
 
 class Let(WMagicMacro):
@@ -998,11 +998,11 @@ class Let(WMagicMacro):
         ...
         expr)
 
-    Creates a new state with `name1` equal to the result of `value1`, etc. Then
-    evaluates `expr`. Values are evaluated with the new state object as it is
+    Creates a new scope with `name1` equal to the result of `value1`, etc. Then
+    evaluates `expr`. Values are evaluated with the new scope object as it is
     populated.
     """
-    def call_magic_macro(self, exprs, state):
+    def call_magic_macro(self, exprs, scope):
         if len(exprs) < 2:
             raise Exception(
                 "Macro `let` expects at least one variable definition and "
@@ -1017,26 +1017,26 @@ class Let(WMagicMacro):
                     "the form \"(<symbol> <expr>)\". Got \"{}\" ({}) "
                     "instead.".format(vardef, type(vardef)))
 
-        state2 = WState(prototype=state)
+        scope2 = WScope(prototype=scope)
         for vardef in vardefs:
             name, expr = vardef
-            value = w_eval(expr, state2)
-            state2[name] = value
-        return w_eval(retval, state2), state
+            value = w_eval(expr, scope2)
+            scope2[name] = value
+        return w_eval(retval, scope2), scope
 
 
 class Apply(WMagicMacro):
     def __init__(self):
         super(Apply, self).__init__()
 
-    def __call__(self, *args, state=None, **kwargs):
-        return args, state
+    def __call__(self, *args, scope=None, **kwargs):
+        return args, scope
 
 
 class If(WMagicMacro):
-    def call_magic_macro(self, exprs, state):
-        if state is None:
-            state = WState()
+    def call_magic_macro(self, exprs, scope):
+        if scope is None:
+            scope = WScope()
         if len(exprs) != 3:
             raise Exception(
                 "Expected 3 arguments to if, got {} instead.".format(
@@ -1044,16 +1044,16 @@ class If(WMagicMacro):
         condition = exprs[0]
         true_retval = exprs[1]
         false_retval = exprs[2]
-        cond_result = w_eval(condition, state)
+        cond_result = w_eval(condition, scope)
         if cond_result is WBoolean.true:
-            return w_eval(true_retval, state), state
-        return w_eval(false_retval, state), state
+            return w_eval(true_retval, scope), scope
+        return w_eval(false_retval, scope), scope
 
 
 class Cond(WMagicMacro):
-    def call_magic_macro(self, exprs, state):
-        if state is None:
-            state = WState()
+    def call_magic_macro(self, exprs, scope):
+        if scope is None:
+            scope = WScope()
         for expr in exprs:
             if not isinstance(expr, WList) or len(expr) != 2:
                 raise Exception(
@@ -1061,9 +1061,9 @@ class Cond(WMagicMacro):
                     "\"{}\" ({})".format(expr, type(expr)))
         for expr in exprs:
             condition, retval = expr.values
-            cond_result = w_eval(condition, state)
+            cond_result = w_eval(condition, scope)
             if cond_result is WBoolean.true:
-                return w_eval(retval, state), state
+                return w_eval(retval, scope), scope
             if cond_result is not WBoolean.false:
                 raise Exception(
                     "Condition evaluated to a non-boolean value: "
@@ -1072,9 +1072,9 @@ class Cond(WMagicMacro):
 
 
 class Lambda(WMagicMacro):
-    def call_magic_macro(self, exprs, state):
-        if state is None:
-            state = WState()
+    def call_magic_macro(self, exprs, scope):
+        if scope is None:
+            scope = WScope()
         if len(exprs) != 2:
             raise Exception(
                 "Wrong number of arguments to lambda. "
@@ -1097,15 +1097,15 @@ class Lambda(WMagicMacro):
                     return e
                 if e in a:
                     return e
-                if e in state:
-                    return state[e]
+                if e in scope:
+                    return scope[e]
                 return e
             if isinstance(e, WList):
                 return WList(*(subst_args(a, e2) for e2 in e))
             raise Exception(
                 "Can't subst expression \"{}\" ({}).".format(e, type(e)))
 
-        return WFunction(args, subst_args(args, expr)), state
+        return WFunction(args, subst_args(args, expr)), scope
 
 
 class WList(WObject):
@@ -1193,7 +1193,7 @@ def w_map(func, *exprlists):
         cars = WList(*list(exprlist.head for exprlist in e))
         cdrs = WList(*list(exprlist.remaining for exprlist in e))
         func_with_args = WList(func, *cars)
-        result = w_eval(func_with_args, state=None)
+        result = w_eval(func_with_args, scope=None)
         results = results.append(result)
         e = cdrs
 
@@ -1277,18 +1277,18 @@ def repl_print(x):
     return x
 
 
-def eval_str(input_s, state=None):
+def eval_str(input_s, scope=None):
     """
     (define eval_str
-    (lambda (input state)
-        w_eval(parse(input) state))
+    (lambda (input scope)
+        w_eval(parse(input) scope))
     """
     expr = parse(input_s)
-    value = w_eval(expr, state)
+    value = w_eval(expr, scope)
     return value
 
 
-class WState(WObject):
+class WScope(WObject):
     def __init__(self, values=None, prototype=None):
         if values is None:
             values = {}
@@ -1362,76 +1362,76 @@ def iter_by_two(i):
         yield item1, item2
 
 
-def new_state(pairs=None):
-    """(new_state '((key1 value1) (key2 value2)))"""
+def new_scope(pairs=None):
+    """(new_scope '((key1 value1) (key2 value2)))"""
     if pairs is not None:
         if not isinstance(pairs, WList):
             raise Exception(
-                "Argument to new_state must be a list of key-value pairs. "
+                "Argument to new_scope must be a list of key-value pairs. "
                 "Got \"{}\" ({}) instead.".format(pairs, type(pairs)))
         for pair in pairs:
             if not isinstance(pair, WList) or len(pair) != 2:
                 raise Exception(
-                    "Argument to new_state must be a list of key-value pairs. "
+                    "Argument to new_scope must be a list of key-value pairs. "
                     "Got \"{}\" ({}) instead.".format(pairs, type(pairs)))
-    state = WState()
+    scope = WScope()
     if pairs is not None:
         for key, value in pairs:
-            state[key] = value
-    return state
+            scope[key] = value
+    return scope
 
 
-def new_state_proto(prototype, pairs=None):
-    """(new_state_proto proto '((key1 value1) (key2 value2)))"""
+def new_scope_proto(prototype, pairs=None):
+    """(new_scope_proto proto '((key1 value1) (key2 value2)))"""
     if pairs is not None:
-        if not isinstance(prototype, WState):
+        if not isinstance(prototype, WScope):
             raise TypeError(
-                "Prototype must be a state object. "
+                "Prototype must be a scope object. "
                 "Got \"{}\" ({}) instead.".format(prototype, type(prototype)))
         if not isinstance(pairs, WList):
             raise Exception(
-                "Second argument to new_state_proto must be a list of "
+                "Second argument to new_scope_proto must be a list of "
                 "key-value pairs. Got \"{}\" ({}) instead.".format(
                     pairs, type(pairs)))
         for pair in pairs:
             if not isinstance(pair, WList) or len(pair) != 2:
                 raise Exception(
-                    "Second argument to new_state_proto must be a list of "
+                    "Second argument to new_scope_proto must be a list of "
                     "key-value pairs. Got \"{}\" ({}) instead.".format(
                         pairs, type(pairs)))
-    state = WState(prototype=prototype)
+    scope = WScope(prototype=prototype)
     if pairs is not None:
         for key, value in pairs:
-            state[key] = value
-    return state
+            scope[key] = value
+    return scope
 
 
-def get_state_value(state, name_or_symbol):
-    key = WState.normalize_key(name_or_symbol)
-    return state[key]
+def get_scope_value(scope, name_or_symbol):
+    key = WScope.normalize_key(name_or_symbol)
+    return scope[key]
 
 
-def list_state(state):
-    return WList(*(key for key in state.keys()))
+def list_scope(scope):
+    return WList(*(key for key in scope.keys()))
 
 
 class Define(WMagicMacro):
     """
-    Every file will have a WState object accessible only to that file. This
+    Every file will have a WScope object accessible only to that file. This
     object will at first be empty. Every top-level expression in the file that
-    gets eval'd will have a new state passed to it having the file-level state
+    gets eval'd will have a new scope passed to it having the file-level scope
     object as its immediate prototype. If, however, any `define` expressions
-    are eval'd, that will add an entry to the file-level state. So, when we
+    are eval'd, that will add an entry to the file-level scope. So, when we
     call `(import "filename.w" name1 name2)`, that call will eval the entire
-    `filename.w` file as stated before, and the resulting file-level state
+    `filename.w` file as scoped before, and the resulting file-level scope
     object will be returned. Then, the `name1` and `name2` from `filename.w`'s
-    state will be added to the importing file's file-level state.
+    scope will be added to the importing file's file-level scope.
     """
-    def __init__(self, file_level_state):
+    def __init__(self, file_level_scope):
         super().__init__()
-        self.file_level_state = file_level_state
+        self.file_level_scope = file_level_scope
 
-    def call_magic_macro(self, exprs, state):
+    def call_magic_macro(self, exprs, scope):
         if len(exprs) != 2:
             raise Exception(
                 "Macro 'define' expected 2 arguments. "
@@ -1441,25 +1441,25 @@ class Define(WMagicMacro):
             raise Exception(
                 "Arg 'name' to 'define' must be a symbol. "
                 "Got \"{}\" ({}) instead.".format(name, type(name)))
-        value = w_eval(expr, state)
-        self.file_level_state[name] = value
-        return value, state
+        value = w_eval(expr, scope)
+        self.file_level_scope[name] = value
+        return value, scope
 
 
-_global_import_cache = WState()
+_global_import_cache = WScope()
 
 
 class Import(WMagicMacro):
-    def __init__(self, file_level_state):
-        self.file_level_state = file_level_state
+    def __init__(self, file_level_scope):
+        self.file_level_scope = file_level_scope
 
-    def call_magic_macro(self, exprs, state):
+    def call_magic_macro(self, exprs, scope):
         if len(exprs) < 1:
             raise Exception(
                 "Macro 'import' expected at least 1 arguments. "
                 "Got {} instead.".format(len(exprs)))
         filename, *import_names = exprs
-        filename = w_eval(filename, state)
+        filename = w_eval(filename, scope)
         if not isinstance(filename, WString):
             raise Exception(
                 "Arg 'filename' to 'import' must be a string. "
@@ -1480,10 +1480,10 @@ class Import(WMagicMacro):
             _global_import_cache[h] = other_fls
 
         basename = os.path.splitext(filename.value)[0]
-        self.file_level_state[basename] = other_fls
+        self.file_level_scope[basename] = other_fls
         for impname in import_names:
-            self.file_level_state[impname] = other_fls[impname]
-        return other_fls, state
+            self.file_level_scope[impname] = other_fls[impname]
+        return other_fls, scope
 
 
 def read_file(path):
@@ -1498,17 +1498,17 @@ def w_hash(arg):
 
 
 class Assert(WMagicMacro):
-    def call_magic_macro(self, exprs, state):
+    def call_magic_macro(self, exprs, scope):
         if len(exprs) != 1:
             raise Exception(
                 "Macro assert expected 1 argument. "
                 "Got {} instead.".format(len(exprs)))
         expr = exprs[0]
         src = w_str(expr)
-        value = w_eval(expr, state)
+        value = w_eval(expr, scope)
         if value is WBoolean.false:
             raise Exception("Assertion failed: {}".format(src))
-        return value, state
+        return value, scope
 
 
 def w_raise(description):
@@ -1521,8 +1521,8 @@ def w_exec(*args):
     return args[-1]
 
 
-def create_default_state(prototype=None):
-    return WState({
+def create_default_scope(prototype=None):
+    return WScope({
         '+': WMagicFunction(add, '+'),
         '-': WMagicFunction(sub, '-'),
         '*': WMagicFunction(mult, '*'),
@@ -1552,10 +1552,10 @@ def create_default_state(prototype=None):
         '<=': WMagicFunction(less_than_or_equal_to, '<='),
         '>': WMagicFunction(greater_than, '>'),
         '>=': WMagicFunction(greater_than_or_equal_to, '>='),
-        'new_state': WMagicFunction(new_state, check_args=False),
-        'new_state_proto': WMagicFunction(new_state_proto, check_args=False),
-        'get': WMagicFunction(get_state_value, 'get'),
-        'list_state': WMagicFunction(list_state),
+        'new_scope': WMagicFunction(new_scope, check_args=False),
+        'new_scope_proto': WMagicFunction(new_scope_proto, check_args=False),
+        'get': WMagicFunction(get_scope_value, 'get'),
+        'list_scope': WMagicFunction(list_scope),
         'in': WMagicFunction(w_in, 'in'),
         'map': WMagicFunction(w_map, 'map', check_args=False),
         'read_file': WMagicFunction(read_file),
@@ -1572,8 +1572,8 @@ def create_default_state(prototype=None):
     }, prototype=prototype)
 
 
-def create_file_level_state():
-    fls = WState()
+def create_file_level_scope():
+    fls = WScope()
     fls['fls'] = fls
     fls['define'] = Define(fls)
     fls['import'] = Import(fls)
@@ -1583,8 +1583,8 @@ def create_file_level_state():
 def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
-    fls = create_file_level_state()
-    state = create_default_state(prototype=fls)
+    fls = create_file_level_scope()
+    scope = create_default_scope(prototype=fls)
     while True:
         try:
             input_s = input(prompt)
@@ -1594,7 +1594,7 @@ def repl(prompt=None):
                 break
             if input_s.strip() == '':
                 continue
-            value = eval_str(input_s, state)
+            value = eval_str(input_s, scope)
             repl_print(value)
         except EOFError:
             print('')
@@ -1610,13 +1610,13 @@ def repl(prompt=None):
 
 
 def w_exec_src(src, filename=None):
-    fls = create_file_level_state()
-    state = create_default_state(prototype=fls)
+    fls = create_file_level_scope()
+    scope = create_default_scope(prototype=fls)
     stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)
     while stream.has_chars():
         expr = read_expr(stream)
-        w_eval(expr, state)
+        w_eval(expr, scope)
         read_whitespace_and_comments(stream)
     return fls
 
