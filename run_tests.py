@@ -3,10 +3,19 @@
 import unittest
 from unittest.mock import Mock
 
-import wodehouse
-from wodehouse import eval_str, create_default_scope, w_print, WList, \
-    WSymbol, WFunction, WMagicFunction, WString, WBoolean, WScope, parse, \
-    create_file_level_scope, WNumber, WStream
+from functions.eval import w_eval, eval_str, _eval_source
+from functions.exec_src import create_default_scope, create_file_level_scope
+from functions.function import WFunction
+from functions.io import w_print
+from functions.magic_function import WMagicFunction
+from functions.read import parse
+from wtypes.boolean import WBoolean
+from wtypes.list import WList
+from wtypes.number import WNumber
+from wtypes.scope import WScope
+from wtypes.stream import WStream
+from wtypes.string import WString
+from wtypes.symbol import WSymbol
 
 
 class WodehouseTest(unittest.TestCase):
@@ -695,7 +704,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_parses_w_eval(self):
         # given
-        source = wodehouse._eval_source
+        source = _eval_source
         # when
         result = parse(source)
         # then
@@ -703,22 +712,22 @@ class WodehouseTest(unittest.TestCase):
 
     def test_compiles_w_eval(self):
         # given
-        eval_source = wodehouse._eval_source
+        eval_source = _eval_source
         parsed_eval = parse(eval_source)
         scope = create_default_scope()
         scope['scope'] = scope
         # when
-        compiled_eval = wodehouse.w_eval(parsed_eval, scope)
+        compiled_eval = w_eval(parsed_eval, scope)
         # then
         self.assertIsInstance(compiled_eval, WFunction)
 
     def test_compiled_w_eval_evals_things(self):
         # given
-        eval_source = wodehouse._eval_source
+        eval_source = _eval_source
         parsed_eval = parse(eval_source)
         scope = create_default_scope()
         scope['scope'] = scope
-        compiled_eval = wodehouse.w_eval(parsed_eval, scope)
+        compiled_eval = w_eval(parsed_eval, scope)
         scope['w_eval'] = compiled_eval
         # when
         result = eval_str('(w_eval 2 scope)', scope)
