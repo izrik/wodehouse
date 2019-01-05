@@ -8,13 +8,13 @@ class WMagicFunction(WFunction):
         super().__init__([], None, enclosing_scope)
         self.f = f
         sig = signature(f)
-        num_args = len(list(p for p in sig.parameters.values() if
-                            p.kind in [p.POSITIONAL_ONLY,
-                                       p.POSITIONAL_OR_KEYWORD]))
+        num_parameters = len(list(p for p in sig.parameters.values() if
+                                  p.kind in [p.POSITIONAL_ONLY,
+                                             p.POSITIONAL_OR_KEYWORD]))
         if any(p for p in sig.parameters.values()
                if p.kind == p.VAR_POSITIONAL):
-            num_args = None
-        self.num_args = num_args
+            num_parameters = None
+        self.num_parameters = num_parameters
         if name is None:
             name = f.__name__
         self.name = name
