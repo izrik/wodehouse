@@ -22,7 +22,7 @@ def w_str(arg):
         return w_str(
             wtypes.list.WList(
                 wtypes.symbol.WSymbol.get('lambda'),
-                wtypes.list.WList(*arg.args),
+                wtypes.list.WList(*arg.parameters),
                 wtypes.list.WList(*arg.expr)))
     if isinstance(arg, WBoolean):
         return WString(str(arg))

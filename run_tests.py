@@ -227,8 +227,8 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIsInstance(result, WFunction)
         self.assertNotIsInstance(result, WMagicFunction)
-        self.assertEqual(1, result.num_args)
-        self.assertEqual([WSymbol.get('x')], result.args)
+        self.assertEqual(1, result.num_parameters)
+        self.assertEqual([WSymbol.get('x')], result.parameters)
         self.assertEqual(123, result.expr)
 
     def test_lambda_encloses_values(self):
@@ -239,8 +239,8 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIsInstance(result, WFunction)
         self.assertNotIsInstance(result, WMagicFunction)
-        self.assertEqual(1, result.num_args)
-        self.assertEqual([WSymbol.get('x')], result.args)
+        self.assertEqual(1, result.num_parameters)
+        self.assertEqual([WSymbol.get('x')], result.parameters)
         times = scope['*']
         x = WSymbol.get('x')
         self.assertEqual([times, x, x], result.expr)

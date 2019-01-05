@@ -84,13 +84,13 @@ def w_eval(expr, scope):
                     callee, type(callee)))
         evaled_args = [w_eval(arg, scope) for arg in args]
         if (callee.check_args and
-                callee.num_args is not None and
-                len(evaled_args) != callee.num_args):
+                callee.num_parameters is not None and
+                len(evaled_args) != callee.num_parameters):
             raise Exception(
                 'Function expected {} args, got {} instead.'.format(
-                    len(callee.args), len(evaled_args)))
+                    len(callee.parameters), len(evaled_args)))
         fscope = WScope(prototype=scope)
-        for i, argname in enumerate(callee.args):
+        for i, argname in enumerate(callee.parameters):
             fscope[argname] = evaled_args[i]
         if isinstance(callee, WMagicFunction):
             return callee(*evaled_args)
