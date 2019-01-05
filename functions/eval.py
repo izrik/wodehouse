@@ -89,7 +89,7 @@ def w_eval(expr, scope):
             raise Exception(
                 'Function expected {} args, got {} instead.'.format(
                     len(callee.parameters), len(evaled_args)))
-        fscope = WScope(prototype=scope)
+        fscope = WScope(prototype=callee.enclosing_scope)
         for i, argname in enumerate(callee.parameters):
             fscope[argname] = evaled_args[i]
         if isinstance(callee, WMagicFunction):

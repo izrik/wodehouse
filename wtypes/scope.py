@@ -62,3 +62,7 @@ class WScope(WObject):
         keys.difference_update(self.deleted)
         for key in keys:
             yield key
+
+    def update(self, values):
+        for key, value in values.items():
+            self[key] = value

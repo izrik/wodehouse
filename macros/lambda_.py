@@ -42,4 +42,4 @@ class WLambda(WMagicMacro):
             raise Exception(
                 "Can't subst expression \"{}\" ({}).".format(e, type(e)))
 
-        return WFunction(args, subst_args(args, expr)), scope
+        return WFunction(args, expr, enclosing_scope=scope), scope

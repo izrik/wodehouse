@@ -8,3 +8,4 @@ class WFunction(WObject):
         self.expr = expr
         self.num_parameters = len(parameters)
         self.check_args = True
+        self.enclosing_scope = enclosing_scope

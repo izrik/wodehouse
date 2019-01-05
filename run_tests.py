@@ -34,7 +34,8 @@ class WodehouseTest(unittest.TestCase):
     def test_calls_functions(self):
         # given
         scope = create_default_scope()
-        scope['onetwothree'] = WMagicFunction(lambda *args: 123)
+        scope['onetwothree'] = WMagicFunction(lambda *args: 123,
+                                              enclosing_scope=scope)
         # when
         result = eval_str('(onetwothree)', scope)
         # then
@@ -59,7 +60,8 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         scope = create_default_scope()
-        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
+                                        enclosing_scope=scope)
         # when
         result = eval_str('(print "Hello, world!")', scope)
         # then
@@ -69,7 +71,8 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         scope = create_default_scope()
-        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
+                                        enclosing_scope=scope)
         # when
         result = eval_str('(print 123)', scope)
         # then
@@ -80,7 +83,9 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         scope = create_default_scope()
-        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope['print'] = WMagicFunction(
+            lambda x: w_print(x, printer=printer),
+            enclosing_scope=scope)
         # when
         result = eval_str('(print "Hello, world!")', scope)
         # then
@@ -91,7 +96,8 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         scope = create_default_scope()
-        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
+                                        enclosing_scope=scope)
         # when
         result = eval_str('(print "newline\\ncreturn\\rtab\\t")', scope)
         # then
@@ -102,7 +108,8 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         scope = create_default_scope()
-        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
+                                        enclosing_scope=scope)
         # when
         result = eval_str('(print (quote ()))', scope)
         # then
@@ -115,7 +122,8 @@ class WodehouseTest(unittest.TestCase):
         # given
         printer = Mock()
         scope = create_default_scope()
-        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer))
+        scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
+                                        enclosing_scope=scope)
         # when
         result = eval_str('(print (quote (1 2 "three")))', scope)
         # then
@@ -241,7 +249,7 @@ class WodehouseTest(unittest.TestCase):
         self.assertNotIsInstance(result, WMagicFunction)
         self.assertEqual(1, result.num_parameters)
         self.assertEqual([WSymbol.get('x')], result.parameters)
-        times = scope['*']
+        times = WSymbol.get('*')
         x = WSymbol.get('x')
         self.assertEqual([times, x, x], result.expr)
 
@@ -907,7 +915,8 @@ class WodehouseTest(unittest.TestCase):
             return WNumber(-1)
 
         scope = create_default_scope()
-        scope['side_effect'] = WMagicFunction(side_effect)
+        scope['side_effect'] = WMagicFunction(side_effect,
+                                              enclosing_scope=scope)
         # when
         eval_str("(exec (side_effect) (side_effect))", scope)
         # then

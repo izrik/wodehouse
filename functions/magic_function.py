@@ -4,8 +4,8 @@ from functions.function import WFunction
 
 
 class WMagicFunction(WFunction):
-    def __init__(self, f, name=None, check_args=True):
-        super().__init__([], None)
+    def __init__(self, f, enclosing_scope, *, name=None, check_args=True):
+        super().__init__([], None, enclosing_scope)
         self.f = f
         sig = signature(f)
         num_args = len(list(p for p in sig.parameters.values() if
