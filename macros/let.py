@@ -33,7 +33,7 @@ class Let(WMagicMacro):
                     "the form \"(<symbol> <expr>)\". Got \"{}\" ({}) "
                     "instead.".format(vardef, type(vardef)))
 
-        scope2 = WScope(prototype=scope)
+        scope2 = WScope(enclosing_scope=scope)
         for vardef in vardefs:
             name, expr = vardef
             value = w_eval(expr, scope2)

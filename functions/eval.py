@@ -44,7 +44,7 @@ def w_eval(expr, scope):
                         (lambda (name value)
                             (list name (w_eval value scope)))
                         args (get_func_args callee)))
-                (let (scope (new_scope_proto (get_func_enclosing_scope callee) evaled_args))
+                (let (scope (new_scope_within (get_func_enclosing_scope callee) evaled_args))
                 (if
                     (isinstance callee 'MagicFunction)
                     implementation_specific
@@ -91,7 +91,7 @@ def w_eval(expr, scope):
             raise Exception(
                 'Function expected {} args, got {} instead.'.format(
                     len(callee.parameters), len(evaled_args)))
-        fscope = WScope(prototype=callee.enclosing_scope)
+        fscope = WScope(enclosing_scope=callee.enclosing_scope)
         for i, argname in enumerate(callee.parameters):
             fscope[argname] = evaled_args[i]
         if isinstance(callee, WMagicFunction):

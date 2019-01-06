@@ -537,13 +537,13 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual(2, result)
 
-    def test_new_scope_proto_create_scope_object_with_prototype(self):
+    def test_new_scope_within_create_scope_object_with_enclosing_scope(self):
         # given
         p = WScope({'a': 3, 'b': 4, 'c': 5})
         scope = create_global_scope()
         scope['p'] = p
         # when
-        result = eval_str("(new_scope_proto p '((a 1) (b 2)))", scope)
+        result = eval_str("(new_scope_within p '((a 1) (b 2)))", scope)
         # then
         self.assertIsInstance(result, WScope)
         self.assertEqual(3, len(result))

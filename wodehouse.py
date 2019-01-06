@@ -74,7 +74,7 @@ def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
     fls = create_module_scope()
-    scope = create_global_scope(prototype=fls)
+    scope = create_global_scope(enclosing_scope=fls)
     while True:
         try:
             input_s = input(prompt)

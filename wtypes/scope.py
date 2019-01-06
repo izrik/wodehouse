@@ -5,10 +5,10 @@ from wtypes.symbol import WSymbolAt, WSymbol
 
 
 class WScope(WObject):
-    def __init__(self, values=None, prototype=None):
+    def __init__(self, values=None, enclosing_scope=None):
         if values is None:
             values = {}
-        self.prototype = prototype
+        self.enclosing_scope = enclosing_scope
         self.dict = {self.normalize_key(key): value
                      for key, value in values.items()}
         self.deleted = set()
@@ -29,8 +29,8 @@ class WScope(WObject):
             raise KeyError
         if key in self.dict:
             return self.dict.get(key)
-        if self.prototype is not None:
-            return self.prototype[key]
+        if self.enclosing_scope is not None:
+            return self.enclosing_scope[key]
         raise KeyError(key.name)
 
     def __setitem__(self, key, value):
@@ -44,8 +44,8 @@ class WScope(WObject):
             return False
         if key in self.dict:
             return True
-        if self.prototype is not None:
-            return key in self.prototype
+        if self.enclosing_scope is not None:
+            return key in self.enclosing_scope
         return False
 
     def __delitem__(self, key):
@@ -57,8 +57,8 @@ class WScope(WObject):
 
     def keys(self):
         keys = set(self.dict.keys())
-        if self.prototype is not None:
-            keys.update(self.prototype.keys())
+        if self.enclosing_scope is not None:
+            keys.update(self.enclosing_scope.keys())
         keys.difference_update(self.deleted)
         for key in keys:
             yield key

@@ -66,25 +66,25 @@ def new_scope(pairs=None):
     return scope
 
 
-def new_scope_proto(prototype, pairs=None):
-    """(new_scope_proto proto '((key1 value1) (key2 value2)))"""
+def new_scope_within(enclosing_scope, pairs=None):
+    """(new_scope_within encl '((key1 value1) (key2 value2)))"""
     if pairs is not None:
-        if not isinstance(prototype, WScope):
+        if not isinstance(enclosing_scope, WScope):
             raise TypeError(
-                "Prototype must be a scope object. "
-                "Got \"{}\" ({}) instead.".format(prototype, type(prototype)))
+                "Enclosing scope must be a scope object. "
+                "Got \"{}\" ({}) instead.".format(enclosing_scope, type(enclosing_scope)))
         if not isinstance(pairs, WList):
             raise Exception(
-                "Second argument to new_scope_proto must be a list of "
+                "Second argument to new_scope_within must be a list of "
                 "key-value pairs. Got \"{}\" ({}) instead.".format(
                     pairs, type(pairs)))
         for pair in pairs:
             if not isinstance(pair, WList) or len(pair) != 2:
                 raise Exception(
-                    "Second argument to new_scope_proto must be a list of "
+                    "Second argument to new_scope_within must be a list of "
                     "key-value pairs. Got \"{}\" ({}) instead.".format(
                         pairs, type(pairs)))
-    scope = WScope(prototype=prototype)
+    scope = WScope(enclosing_scope=enclosing_scope)
     if pairs is not None:
         for key, value in pairs:
             scope[key] = value
@@ -108,8 +108,8 @@ def create_module_scope():
     return ms
 
 
-def create_global_scope(prototype=None):
-    scope = WScope(prototype=prototype)
+def create_global_scope(enclosing_scope=None):
+    scope = WScope(enclosing_scope=enclosing_scope)
     scope.update({
         '+': WMagicFunction(add, scope, name='+'),
         '-': WMagicFunction(sub, scope, name='-'),
@@ -141,8 +141,8 @@ def create_global_scope(prototype=None):
         '>': WMagicFunction(greater_than, scope, name='>'),
         '>=': WMagicFunction(greater_than_or_equal_to, scope, name='>='),
         'new_scope': WMagicFunction(new_scope, scope, check_args=False),
-        'new_scope_proto': WMagicFunction(new_scope_proto, scope,
-                                          check_args=False),
+        'new_scope_within': WMagicFunction(new_scope_within, scope,
+                                           check_args=False),
         'get': WMagicFunction(get_scope_value, scope, name='get'),
         'list_scope': WMagicFunction(list_scope, scope),
         'in': WMagicFunction(w_in, scope, name='in'),

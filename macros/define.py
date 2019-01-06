@@ -4,6 +4,7 @@ from wtypes.symbol import WSymbol
 
 
 class Define(WMagicMacro):
+    # TODO: complete re-do this class
     """
     Every file will have a WScope object accessible only to that file. This
     object will at first be empty. Every top-level expression in the file that

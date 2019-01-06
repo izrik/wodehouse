@@ -30,7 +30,7 @@
                         (lambda (name value)
                             (list name (w_eval value scope)))
                         args (get_func_args callee)))
-                (let (scope (new_scope_proto (get_func_enclosing_scope callee) evaled_args))
+                (let (scope (new_scope_within (get_func_enclosing_scope callee) evaled_args))
                 (if
                     (isinstance callee 'MagicFunction)
                     implementation_specific
