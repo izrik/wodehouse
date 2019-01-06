@@ -31,15 +31,15 @@ WStream = wtypes.stream.WStream
 
 
 def w_exec_src(src, filename=None):
-    fls = functions.scope.create_module_scope()
-    scope = functions.scope.create_global_scope(prototype=fls)
+    ms = functions.scope.create_module_scope()
+    scope = functions.scope.create_global_scope(prototype=ms)
     stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)
     while stream.has_chars():
         expr = read_expr(stream)
         w_eval(expr, scope)
         read_whitespace_and_comments(stream)
-    return fls
+    return ms
 
 
 def w_exec(*args):

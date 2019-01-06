@@ -1,28 +1,28 @@
 
-(assert (not (in 'example (list_scope fls))))
+(assert (not (in 'example (list_scope ms))))
 (import "example.w")
-(assert (in 'example (list_scope fls)))
+(assert (in 'example (list_scope ms)))
 (assert (isinstance example 'Scope))
-#(assert (eq (list_scope example) '(import fls something define)))
+#(assert (eq (list_scope example) '(import ms something define)))
 (assert (in 'define (list_scope example)))
-(assert (in 'fls (list_scope example)))
+(assert (in 'ms (list_scope example)))
 (assert (in 'import (list_scope example)))
 (assert (in 'something (list_scope example)))
 (assert (not (eq define (get example 'define))))
 (assert (not (eq import (get example 'import))))
-(assert (not (eq fls (get example 'fls))))
-(assert (eq example (get example 'fls)))
+(assert (not (eq ms (get example 'ms))))
+(assert (eq example (get example 'ms)))
 
-# importing with additional names imports those names into the current fls
+# importing with additional names imports those names into the current ms
 # given
-(assert (not (in 'something (list_scope fls))))
+(assert (not (in 'something (list_scope ms))))
 # when
 (import "example.w" something)
 # then
-(assert (in 'something (list_scope fls)))
+(assert (in 'something (list_scope ms)))
 (assert (eq something "abc"))
 
-# importing caches and re-uses the fls
+# importing caches and re-uses the ms
 # given
 (assert (eq example example))
 (define example_one example)

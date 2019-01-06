@@ -101,11 +101,11 @@ def list_scope(scope):
 
 
 def create_module_scope():
-    fls = WScope()
-    fls['fls'] = fls
-    fls['define'] = Define(fls)
-    fls['import'] = Import(fls)
-    return fls
+    ms = WScope()
+    ms['ms'] = ms
+    ms['define'] = Define(ms)
+    ms['import'] = Import(ms)
+    return ms
 
 
 def create_global_scope(prototype=None):
