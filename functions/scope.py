@@ -46,7 +46,6 @@ WBoolean = wtypes.boolean.WBoolean
 WStream = wtypes.stream.WStream
 
 
-
 def new_scope(pairs=None):
     """(new_scope '((key1 value1) (key2 value2)))"""
     if pairs is not None:
@@ -72,7 +71,8 @@ def new_scope_within(enclosing_scope, pairs=None):
         if not isinstance(enclosing_scope, WScope):
             raise TypeError(
                 "Enclosing scope must be a scope object. "
-                "Got \"{}\" ({}) instead.".format(enclosing_scope, type(enclosing_scope)))
+                "Got \"{}\" ({}) instead.".format(enclosing_scope,
+                                                  type(enclosing_scope)))
         if not isinstance(pairs, WList):
             raise Exception(
                 "Second argument to new_scope_within must be a list of "

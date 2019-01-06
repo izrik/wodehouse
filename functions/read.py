@@ -176,7 +176,6 @@ def read_string(s):
     raise Exception('Ran out of characters before string was finished.')
 
 
-
 def read_symbol(s):
     """
 (define read_symbol

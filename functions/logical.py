@@ -8,6 +8,7 @@ def eq(a, b):
         return WBoolean.true
     return WBoolean.false
 
+
 def w_not(arg):
     if arg is WBoolean.true:
         return WBoolean.false
@@ -94,4 +95,3 @@ def greater_than_or_equal_to(a, b):
     if a.value >= b.value:
         return WBoolean.true
     return WBoolean.false
-

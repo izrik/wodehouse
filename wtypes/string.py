@@ -41,4 +41,3 @@ class WString(WObject):
             return _ch
 
         return ''.join(escape_char(ch) for ch in self.value)
-

@@ -51,4 +51,3 @@ def div(*operands):
     for operand in operands:
         x /= operand.value
     return WNumber(x)
-

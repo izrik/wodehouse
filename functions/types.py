@@ -34,7 +34,6 @@ def get_type(arg):
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 
-
 def w_isinstance(arg, type_or_types):
     if isinstance(type_or_types, WSymbol):
         argtype = get_type(arg)

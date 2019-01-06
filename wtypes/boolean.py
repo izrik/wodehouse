@@ -25,4 +25,3 @@ class WBoolean(WObject):
 
 WBoolean.true = WBoolean(True)
 WBoolean.false = WBoolean(False)
-

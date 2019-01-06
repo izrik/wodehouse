@@ -60,4 +60,3 @@ class WList(WObject):
         new_list = list(self.values)
         new_list.extend(values)
         return WList(*new_list)
-
