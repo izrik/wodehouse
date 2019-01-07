@@ -1,4 +1,4 @@
-(import "wodehouse.w" read_symbol read_name read_name_char)
+(import "wodehouse.w" read_symbol)
 
 (assert
     (eq (read_symbol (stream "bertie"))

@@ -1,5 +1,4 @@
-(import "wodehouse.w" read_whitespace_and_comments read_wsc_char read_comment
-    read_comment_char)
+(import "wodehouse.w" read_whitespace_and_comments)
 
 (assert
     (eq (read_whitespace_and_comments (stream "# this is a comment\n"))
