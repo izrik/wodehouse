@@ -131,7 +131,7 @@ def read_string(s):
         (raise "Ran out of characters before string was finished.")
         (let (ch (get_next_char s))
         (if (eq ch "\"")
-            (cons ch '())
+            '()
             (cons
                 (if (eq ch "\\")
                     (if (not (has_chars s))

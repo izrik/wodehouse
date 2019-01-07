@@ -118,7 +118,7 @@ def eval_str(input_s, scope=None):
     """
     (define eval_str
     (lambda (input scope)
-        w_eval(parse(input) scope))
+        (w_eval (parse input) scope)))
     """
     expr = parse(input_s)
     value = w_eval(expr, scope)
