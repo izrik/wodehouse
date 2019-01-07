@@ -37,7 +37,7 @@ for k, v in ms.dict.items():
         continue
     kk = str(k)
     if kk not in pyfuncs:
-        print(f'compare_spirces: {kk} NOT FOUND')
+        print(f'compare_sources: {kk} NOT FOUND')
         continue
     if v.expr != pyfuncs[kk].expr:
-        print(f'compare_spirces: {kk} DOES NOT MATCH')
+        print(f'compare_sources: {kk} DOES NOT MATCH')
