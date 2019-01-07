@@ -3,12 +3,16 @@
 import unittest
 from unittest.mock import Mock
 
-from functions.eval import w_eval, eval_str, _eval_source
+import functions.eval
+from functions.eval import w_eval, eval_str
+from functions.exec_src import w_exec_src
 from functions.scope import create_global_scope, create_module_scope
 from functions.function import WFunction
 from functions.io import w_print
 from functions.magic_function import WMagicFunction
 from functions.read import parse
+from macros.define import Define
+from macros.import_ import Import
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
 from wtypes.number import WNumber
@@ -712,7 +716,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_parses_w_eval(self):
         # given
-        source = _eval_source
+        source = functions.eval._eval_source
         # when
         result = parse(source)
         # then
@@ -720,7 +724,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_compiles_w_eval(self):
         # given
-        eval_source = _eval_source
+        eval_source = functions.eval._eval_source
         parsed_eval = parse(eval_source)
         scope = create_global_scope()
         scope['scope'] = scope
@@ -731,7 +735,7 @@ class WodehouseTest(unittest.TestCase):
 
     def test_compiled_w_eval_evals_things(self):
         # given
-        eval_source = _eval_source
+        eval_source = functions.eval._eval_source
         parsed_eval = parse(eval_source)
         scope = create_global_scope()
         scope['scope'] = scope
@@ -949,6 +953,83 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIsInstance(result, WList)
         self.assertEqual([], result)
+
+    def test_w_exec_src_execs_src_and_returns_ms(self):
+        # given
+        gs = WScope()
+        # when
+        result = w_exec_src("", filename="<test>", enclosing_scope=gs)
+        # then
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, WScope)
+        self.assertEqual(1, len(result))
+        self.assertIn('ms', result)
+        self.assertIs(result, result['ms'])
+
+    def test_import_imports_names(self):
+        # given
+        def loader(filename):
+            return "(define x 1) (define y 2)"
+
+        gs = WScope({
+            'import': Import(loader=loader),
+            'define': Define(),
+        })
+        # when
+        result = w_exec_src("(import \"file\" x)", filename="<test>",
+                            enclosing_scope=gs)
+        # then
+        self.assertIsInstance(result, WScope)
+        self.assertEqual(5, len(result))
+        self.assertIn('ms', result)
+        self.assertIs(result, result['ms'])
+        self.assertIn('file', result)
+        self.assertIsInstance(result['file'], WScope)
+        self.assertIn('x', result['file'])
+        self.assertIn('y', result['file'])
+        self.assertIn('x', result)
+        self.assertEqual(1, result['x'])
+        self.assertNotIn('y', result)
+
+    def test_import_imported_names_quoted_symbols_are_not_resolved(self):
+        # given
+        def loader(filename):
+            return "(define x 'y) (define y 2)"
+
+        gs = create_global_scope()
+        gs['import'] = Import(loader=loader)
+        # when
+        result = w_exec_src("(import \"file\" x)", filename="<test>",
+                            enclosing_scope=gs)
+        # then
+        self.assertIsInstance(result, WScope)
+        self.assertIn('x', result)
+        self.assertEqual(WSymbol.get('y'), result['x'])
+        self.assertNotIn('y', result)
+
+    def test_defining_names_in_importing_files_not_affect_imported_files(self):
+        # given
+        def loader(filename):
+            return """
+                (define x
+                (lambda () y))
+
+                (define y 2)
+            """
+
+        gs = create_global_scope()
+        gs['import'] = Import(loader=loader)
+        # when
+        result = w_exec_src("(import \"file\" x) (define y 3) (define z (x))",
+                            filename="<test>", enclosing_scope=gs)
+        # then
+        self.assertIsInstance(result, WScope)
+        self.assertIn('x', result)
+        self.assertIsInstance(result['x'], WFunction)
+        self.assertIn('y', result)
+        self.assertEqual(3, result['y'])
+        self.assertIn('z', result)
+        self.assertEqual(2, result['z'])
 
 
 if __name__ == '__main__':
