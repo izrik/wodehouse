@@ -1,0 +1,5 @@
+homo-iconic?
+self-hosted
+jit
+execution engine
+import compiled libraries
