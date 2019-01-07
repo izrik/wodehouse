@@ -3,6 +3,7 @@ from functions.magic_function import WMagicFunction
 from macros.macro import WMacro
 from macros.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
+from wtypes.exception import WException
 from wtypes.list import WList
 from wtypes.number import WNumber
 from wtypes.scope import WScope
@@ -31,6 +32,8 @@ def get_type(arg):
         return WSymbol.get('Macro')
     if isinstance(arg, WScope):
         return WSymbol.get('Scope')
+    if isinstance(arg, WException):
+        return WSymbol.get('Exception')
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 

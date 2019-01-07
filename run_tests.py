@@ -1031,6 +1031,47 @@ class WodehouseTest(unittest.TestCase):
         self.assertIn('z', result)
         self.assertEqual(2, result['z'])
 
+    def test_isinstance_returns_true_when_match_exception(self):
+        # when
+        result = eval_str("(isinstance (exception) 'Exception)",
+                          create_global_scope())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_exception_type_list(self):
+        # when
+        result = eval_str("(isinstance (exception) '(Exception))",
+                          create_global_scope())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_exception_with_message(self):
+        # when
+        result = eval_str("(isinstance (exception \"message\") 'Exception)",
+                          create_global_scope())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_isinstance_returns_true_when_match_exc_list_with_message(self):
+        # when
+        result = eval_str("(isinstance (exception \"message\") '(Exception))",
+                          create_global_scope())
+        # then
+        self.assertIs(WBoolean.true, result)
+
+    def test_gets_type_of_exception(self):
+        # when
+        result = eval_str("(type (exception))", create_global_scope())
+        # then
+        self.assertIs(WSymbol.get("Exception"), result)
+
+    def test_gets_type_of_exception_with_message(self):
+        # when
+        result = eval_str("(type (exception \"message\"))",
+                          create_global_scope())
+        # then
+        self.assertIs(WSymbol.get("Exception"), result)
+
 
 if __name__ == '__main__':
     unittest.main()

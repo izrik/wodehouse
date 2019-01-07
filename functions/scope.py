@@ -19,6 +19,7 @@ from functions.types import get_type, w_isinstance
 from wtypes.list import WList
 from wtypes.scope import WScope
 import functions.magic_function
+import functions.exception
 
 import macros.apply
 import macros.assert_
@@ -160,6 +161,8 @@ def create_global_scope():
         'int_from_str': WMagicFunction(int_from_str, scope),
         'symbol_at': WMagicFunction(symbol_at, scope),
         'define': Define(),
-        'import': Import()
+        'import': Import(),
+        'exception': WMagicFunction(functions.exception.exception, scope,
+                                    check_args=False)
     })
     return scope
