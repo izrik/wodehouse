@@ -11,6 +11,17 @@ _global_import_cache = WScope()
 
 
 class Import(WMagicMacro):
+    def __init__(self, loader=None):
+        super().__init__()
+        if loader is None:
+            loader = Import.default_loader
+        self.loader = loader
+
+    @ classmethod
+    def default_loader(cls, filename):
+        with open(filename) as f:
+            return f.read()
+
     def call_magic_macro(self, exprs, scope):
         if len(exprs) < 1:
             raise Exception(
@@ -27,8 +38,8 @@ class Import(WMagicMacro):
                 raise Exception(
                     "Names to import must all be symbols. "
                     "Got \"{}\" ({}) instead.".format(impname, type(impname)))
-        with open(filename.value) as f:
-            src = WString(f.read())
+
+        src = WString(self.loader(filename.value))
 
         h = w_hash(src)
         if h in _global_import_cache:
