@@ -103,8 +103,6 @@ def list_scope(scope):
 def create_module_scope(enclosing_scope):
     ms = WScope(enclosing_scope=enclosing_scope)
     ms['ms'] = ms
-    ms['define'] = Define(ms)
-    ms['import'] = Import(ms)
     return ms
 
 
@@ -161,5 +159,7 @@ def create_global_scope():
         'exec': WMagicFunction(functions.exec_src.w_exec, scope, name='exec'),
         'int_from_str': WMagicFunction(int_from_str, scope),
         'symbol_at': WMagicFunction(symbol_at, scope),
+        'define': Define(),
+        'import': Import()
     })
     return scope

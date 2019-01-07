@@ -11,9 +11,6 @@ _global_import_cache = WScope()
 
 
 class Import(WMagicMacro):
-    def __init__(self, file_level_scope):
-        self.file_level_scope = file_level_scope
-
     def call_magic_macro(self, exprs, scope):
         if len(exprs) < 1:
             raise Exception(
@@ -44,7 +41,7 @@ class Import(WMagicMacro):
             _global_import_cache[h] = imported_ms
 
         basename = os.path.splitext(filename.value)[0]
-        self.file_level_scope[basename] = imported_ms
+        scope[basename] = imported_ms
         for impname in import_names:
-            self.file_level_scope[impname] = imported_ms[impname]
+            scope[impname] = imported_ms[impname]
         return imported_ms, scope

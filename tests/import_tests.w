@@ -8,8 +8,8 @@
 (assert (in 'ms (list_scope example)))
 (assert (in 'import (list_scope example)))
 (assert (in 'something (list_scope example)))
-(assert (not (eq define (get example 'define))))
-(assert (not (eq import (get example 'import))))
+(assert (eq define (get example 'define)))
+(assert (eq import (get example 'import)))
 (assert (not (eq ms (get example 'ms))))
 (assert (eq example (get example 'ms)))
 

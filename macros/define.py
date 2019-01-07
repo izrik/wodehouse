@@ -17,10 +17,6 @@ class Define(WMagicMacro):
     scope will be added to the importing file's file-level scope.
     """
 
-    def __init__(self, file_level_scope):
-        super().__init__()
-        self.file_level_scope = file_level_scope
-
     def call_magic_macro(self, exprs, scope):
         if len(exprs) != 2:
             raise Exception(
@@ -32,5 +28,5 @@ class Define(WMagicMacro):
                 "Arg 'name' to 'define' must be a symbol. "
                 "Got \"{}\" ({}) instead.".format(name, type(name)))
         value = w_eval(expr, scope)
-        self.file_level_scope[name] = value
+        scope[name] = value
         return value, scope
