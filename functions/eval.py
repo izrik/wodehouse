@@ -13,6 +13,7 @@ from wtypes.symbol import WSymbol
 
 def w_eval(expr, scope):
     """
+(define w_eval
 (lambda (expr scope)
     (cond
     ((isinstance expr 'Symbol)
@@ -54,7 +55,7 @@ def w_eval(expr, scope):
     (true
         (raise
             (format
-                "Unknown object type: \\"{}\\" ({})" expr (type expr))))))
+                "Unknown object type: \\"{}\\" ({})" expr (type expr)))))))
 
 
     """

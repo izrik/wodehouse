@@ -31,4 +31,4 @@ class WStream(object):
         return self.s[self.i]
 
     def get_position(self):
-        return Position(self.line, self.char)
+        return Position(self.filename, self.line, self.char)

@@ -16,8 +16,6 @@ def parse(s):
                 (isinstance s 'Stream)
                 s
                 (stream s)))) )
-    :param s:
-    :return:
     """
     if not isinstance(s, WStream):
         s = WStream(str(s))
@@ -25,7 +23,7 @@ def parse(s):
 
 
 def read_whitespace_and_comments(s):
-    """
+    r"""
 (define read_comment_char
 (lambda (s)
 (cond
@@ -77,7 +75,7 @@ def read_whitespace_and_comments(s):
 
 
 def read_expr(s):
-    """
+    r"""
 (define read_expr
 (lambda (s)
 (let (whitespace (read_whitespace_and_comments s))
@@ -124,7 +122,7 @@ def read_expr(s):
 
 
 def read_string(s):
-    """
+    r"""
     (define read_string_char
     (lambda (s)
     (if (not (has_chars s))
@@ -152,9 +150,6 @@ def read_string(s):
     (exec
         (assert (eq "\"" delim))
         (+ (read_string_char s))))))
-
-    :param s:
-    :return:
     """
     delim = s.get_next_char()
     assert delim == '"'
@@ -177,7 +172,7 @@ def read_string(s):
 
 
 def read_symbol(s):
-    """
+    r"""
 (define read_symbol
 (lambda (s)
 (let (ch (peek s))
@@ -219,7 +214,7 @@ def read_symbol(s):
 
 
 def read_name(s):
-    """
+    r"""
 (define read_name_char
 (lambda (s)
 (cond
@@ -250,7 +245,7 @@ def read_name(s):
 
 
 def read_integer_literal(s):
-    """
+    r"""
 (define read_integer_literal_char
 (lambda (s)
 (cond
@@ -277,7 +272,7 @@ def read_integer_literal(s):
 
 
 def read_list(s):
-    """
+    r"""
 (define read_list_element
 (lambda (s)
 (let (whitespace (read_whitespace_and_comments s))
