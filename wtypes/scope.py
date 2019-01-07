@@ -66,3 +66,9 @@ class WScope(WObject):
     def update(self, values):
         for key, value in values.items():
             self[key] = value
+
+    def get_outermost(self):
+        s = self
+        while s.enclosing_scope is not None:
+            s = s.enclosing_scope
+        return s

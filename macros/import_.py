@@ -35,14 +35,16 @@ class Import(WMagicMacro):
 
         h = w_hash(src)
         if h in _global_import_cache:
-            other_ms = _global_import_cache[h]
+            imported_ms = _global_import_cache[h]
         else:
             from functions.exec_src import w_exec_src
-            other_ms = w_exec_src(src, filename=filename)
-            _global_import_cache[h] = other_ms
+            gs = scope.get_outermost()
+            imported_ms = w_exec_src(src, enclosing_scope=gs,
+                                     filename=filename)
+            _global_import_cache[h] = imported_ms
 
         basename = os.path.splitext(filename.value)[0]
-        self.file_level_scope[basename] = other_ms
+        self.file_level_scope[basename] = imported_ms
         for impname in import_names:
-            self.file_level_scope[impname] = other_ms[impname]
-        return other_ms, scope
+            self.file_level_scope[impname] = imported_ms[impname]
+        return imported_ms, scope

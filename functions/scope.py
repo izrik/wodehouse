@@ -100,16 +100,16 @@ def list_scope(scope):
     return WList(*(key for key in scope.keys()))
 
 
-def create_module_scope():
-    ms = WScope()
+def create_module_scope(enclosing_scope):
+    ms = WScope(enclosing_scope=enclosing_scope)
     ms['ms'] = ms
     ms['define'] = Define(ms)
     ms['import'] = Import(ms)
     return ms
 
 
-def create_global_scope(enclosing_scope=None):
-    scope = WScope(enclosing_scope=enclosing_scope)
+def create_global_scope():
+    scope = WScope()
     scope.update({
         '+': WMagicFunction(add, scope, name='+'),
         '-': WMagicFunction(sub, scope, name='-'),

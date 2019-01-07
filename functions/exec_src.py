@@ -30,14 +30,13 @@ import wtypes.stream
 WStream = wtypes.stream.WStream
 
 
-def w_exec_src(src, filename=None):
-    ms = functions.scope.create_module_scope()
-    scope = functions.scope.create_global_scope(enclosing_scope=ms)
+def w_exec_src(src, enclosing_scope, filename=None):
+    ms = functions.scope.create_module_scope(enclosing_scope=enclosing_scope)
     stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)
     while stream.has_chars():
         expr = read_expr(stream)
-        w_eval(expr, scope)
+        w_eval(expr, ms)
         read_whitespace_and_comments(stream)
     return ms
 

@@ -776,16 +776,16 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual("abc", result)
 
-    def test_define_adds_to_fls(self):
+    def test_define_in_module_adds_to_module_scope(self):
         # given
-        fls = create_module_scope()
-        scope = create_global_scope(fls)
+        gs = create_global_scope()
+        scope = create_module_scope(gs)
         # when
         result = eval_str("(define x 3)", scope)
         # then
         self.assertEqual(3, result)
-        self.assertIn(WSymbol.get('x'), fls)
-        self.assertEqual(WNumber(3), fls['x'])
+        self.assertIn(WSymbol.get('x'), scope)
+        self.assertEqual(WNumber(3), scope['x'])
 
     def test_plus_adds_numbers(self):
         # when

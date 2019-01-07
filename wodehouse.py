@@ -73,8 +73,8 @@ def iter_by_two(i):
 def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
-    fls = create_module_scope()
-    scope = create_global_scope(enclosing_scope=fls)
+    ms = create_module_scope()
+    scope = create_global_scope(enclosing_scope=ms)
     while True:
         try:
             input_s = input(prompt)
@@ -102,7 +102,8 @@ def repl(prompt=None):
 def run_file(filename):
     with open(filename) as f:
         src = f.read()
-    w_exec_src(src, filename)
+    gs = create_global_scope()
+    w_exec_src(src, enclosing_scope=gs, filename=filename)
 
 
 def main():
