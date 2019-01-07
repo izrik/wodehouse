@@ -3,6 +3,7 @@ from macros.macro import WMacro
 
 class WMagicMacro(WMacro):
     def __init__(self, macro_name=None):
+        super().__init__()
         if macro_name is None:
             macro_name = type(self).__name__.lower()
         self.macro_name = macro_name
@@ -12,4 +13,7 @@ class WMagicMacro(WMacro):
 
     def call_macro(self, exprs, scope):
         exprs, scope = self.call_magic_macro(exprs, scope)
+        return exprs, scope
+
+    def call_magic_macro(self, exprs, scope):
         return exprs, scope
