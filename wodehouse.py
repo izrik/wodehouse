@@ -73,8 +73,8 @@ def iter_by_two(i):
 def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
-    ms = create_module_scope()
-    scope = create_global_scope(enclosing_scope=ms)
+    gs = create_global_scope()
+    scope = create_module_scope(enclosing_scope=gs)
     while True:
         try:
             input_s = input(prompt)
