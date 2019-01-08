@@ -77,6 +77,7 @@ def w_eval(expr, scope):
     if isinstance(expr, WList):
         head = expr.head
         if head == WSymbol.get('quote'):
+            # TODO: more checks (e.g. make sure second is there)
             return expr.second
         callee = w_eval(head, scope)
         args = expr.remaining
