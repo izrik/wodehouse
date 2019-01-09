@@ -1114,6 +1114,22 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual([5, 8, 13, 20, 29], result)
 
+    def test_map_multi_args_uneven_list_result_matches_shortest_length(self):
+        # given
+        gs = create_global_scope()
+
+        def abc(a, b):
+            a = a.value
+            b = b.value
+            return WNumber(a * a + b * b)
+
+        gs['abc'] = WMagicFunction(abc, gs, name='abc')
+        # when
+        result = eval_str("(map abc '(1 2 3 4 5) '(2 2 2))", gs)
+        # then
+        self.assertEqual([5, 8, 13], result)
+
+
 
 if __name__ == '__main__':
     unittest.main()

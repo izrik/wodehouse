@@ -17,16 +17,10 @@ def w_map(func, *exprlists):
                     "Argument passed to map must be lists. "
                     "Got \"{}\" ({}) instead.".format(
                         exprlist, type(exprlist)))
-        length = len(exprlists[0])
-        for exprlist in exprlists:
-            if len(exprlist) != length:
-                raise Exception(
-                    "All argument lists should have the same length. "
-                    "Expected {}, but got {} instead.".format(
-                        length, len(exprlist)))
+        length = min(len(e) for e in exprlists)
     results = WList()
     e = WList(*exprlists)
-    while len(e[0]) > 0:
+    while len(results) < length:
         cars = WList(*list(exprlist.head for exprlist in e))
         cdrs = WList(*list(exprlist.remaining for exprlist in e))
         func_with_args = WList(func, *cars)
