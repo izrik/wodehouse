@@ -60,7 +60,7 @@ class WScope(WObject):
         if self.enclosing_scope is not None:
             keys.update(self.enclosing_scope.keys())
         keys.difference_update(self.deleted)
-        for key in keys:
+        for key in sorted(keys, key=lambda s: str(s)):
             yield key
 
     def update(self, values):
