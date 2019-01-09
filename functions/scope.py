@@ -20,6 +20,7 @@ from wtypes.list import WList
 from wtypes.scope import WScope
 import functions.magic_function
 import functions.exception
+from wtypes.string import WString
 
 import macros.apply
 import macros.assert_
@@ -101,9 +102,15 @@ def list_scope(scope):
     return WList(*(key for key in scope.keys()))
 
 
-def create_module_scope(enclosing_scope):
+def create_module_scope(enclosing_scope=None, name=None, filename=None):
     ms = WScope(enclosing_scope=enclosing_scope)
     ms['ms'] = ms
+    if name:
+        ms['__name__'] = WString(name)
+    if filename:
+        ms['__file__'] = WString(filename)
+    if enclosing_scope is not None:
+        ms['__global__'] = enclosing_scope
     return ms
 
 

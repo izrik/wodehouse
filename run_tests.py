@@ -544,10 +544,10 @@ class WodehouseTest(unittest.TestCase):
     def test_new_scope_within_create_scope_object_with_enclosing_scope(self):
         # given
         p = WScope({'a': 3, 'b': 4, 'c': 5})
-        scope = create_global_scope()
-        scope['p'] = p
+        gs = create_global_scope()
+        gs['p'] = p
         # when
-        result = eval_str("(new_scope_within p '((a 1) (b 2)))", scope)
+        result = eval_str("(new_scope_within p '((a 1) (b 2)))", gs)
         # then
         self.assertIsInstance(result, WScope)
         self.assertEqual(3, len(result))
@@ -556,7 +556,14 @@ class WodehouseTest(unittest.TestCase):
         self.assertIn('b', result)
         self.assertEqual(2, result['b'])
         self.assertIn('c', result)
-        self.assertEqual(5, result['c'])
+        self.assertNotIn('c', result.dict.keys())
+        self.assertIn('c', result.enclosing_scope)
+        self.assertEqual(5, result.enclosing_scope['c'])
+        # expect
+        p2 = result
+        self.assertEqual(1, eval_str("a", p2))
+        self.assertEqual(2, eval_str("b", p2))
+        self.assertEqual(5, eval_str("c", p2))
 
     def test_in_returns_false_if_item_present(self):
         # when
@@ -783,7 +790,7 @@ class WodehouseTest(unittest.TestCase):
     def test_define_in_module_adds_to_module_scope(self):
         # given
         gs = create_global_scope()
-        scope = create_module_scope(gs)
+        scope = create_module_scope(enclosing_scope=gs)
         # when
         result = eval_str("(define x 3)", scope)
         # then
@@ -958,13 +965,19 @@ class WodehouseTest(unittest.TestCase):
         # given
         gs = WScope()
         # when
-        result = w_exec_src("", filename="<test>", enclosing_scope=gs)
+        result = w_exec_src(src="", filename="<test>", enclosing_scope=gs)
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, WScope)
-        self.assertEqual(1, len(result))
+        self.assertEqual(4, len(result))
         self.assertIn('ms', result)
         self.assertIs(result, result['ms'])
+        self.assertIn('__global__', result)
+        self.assertIs(gs, result['__global__'])
+        self.assertIn('__name__', result)
+        self.assertEqual("<test>", result['__name__'])
+        self.assertIn('__file__', result)
+        self.assertEqual("<test>", result['__file__'])
 
     def test_import_imports_names(self):
         # given
@@ -980,7 +993,7 @@ class WodehouseTest(unittest.TestCase):
                             enclosing_scope=gs)
         # then
         self.assertIsInstance(result, WScope)
-        self.assertEqual(5, len(result))
+        self.assertEqual(8, len(result))
         self.assertIn('ms', result)
         self.assertIs(result, result['ms'])
         self.assertIn('file', result)
