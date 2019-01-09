@@ -1085,6 +1085,35 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertIs(WSymbol.get("Exception"), result)
 
+    def test_map_single_arg_calculates_correctly(self):
+        # given
+        gs = create_global_scope()
+
+        def sqr(x):
+            y = x.value
+            return WNumber(y * y)
+
+        gs['sqr'] = WMagicFunction(sqr, gs, name='sqr')
+        # when
+        result = eval_str("(map sqr '(1 2 3 4 5))", gs)
+        # then
+        self.assertEqual([1, 4, 9, 16, 25], result)
+
+    def test_map_double_arg_calculates_correctly(self):
+        # given
+        gs = create_global_scope()
+
+        def abc(a, b):
+            a = a.value
+            b = b.value
+            return WNumber(a * a + b * b)
+
+        gs['abc'] = WMagicFunction(abc, gs, name='abc')
+        # when
+        result = eval_str("(map abc '(1 2 3 4 5) '(2 2 2 2 2))", gs)
+        # then
+        self.assertEqual([5, 8, 13, 20, 29], result)
+
 
 if __name__ == '__main__':
     unittest.main()
