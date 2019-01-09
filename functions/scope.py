@@ -60,7 +60,7 @@ def list_scope(scope):
 
 def create_module_scope(enclosing_scope=None, name=None, filename=None):
     ms = WScope(enclosing_scope=enclosing_scope)
-    ms['ms'] = ms
+    ms['__module__'] = ms
     if name:
         ms['__name__'] = WString(name)
     if filename:

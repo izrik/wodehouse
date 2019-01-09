@@ -1,28 +1,28 @@
 
-(assert (not (in 'example (list_scope ms))))
+(assert (not (in 'example (list_scope __module__))))
 (import "example.w")
-(assert (in 'example (list_scope ms)))
+(assert (in 'example (list_scope __module__)))
 (assert (isinstance example 'Scope))
-#(assert (eq (list_scope example) '(import ms something define)))
+#(assert (eq (list_scope example) '(import __module__ something define)))
 (assert (in 'define (list_scope example)))
-(assert (in 'ms (list_scope example)))
+(assert (in '__module__ (list_scope example)))
 (assert (in 'import (list_scope example)))
 (assert (in 'something (list_scope example)))
 (assert (eq define (get example 'define)))
 (assert (eq import (get example 'import)))
-(assert (not (eq ms (get example 'ms))))
-(assert (eq example (get example 'ms)))
+(assert (not (eq __module__ (get example '__module__))))
+(assert (eq example (get example '__module__)))
 
-# importing with additional names imports those names into the current ms
+# importing with additional names imports those names into the current module
 # given
-(assert (not (in 'something (list_scope ms))))
+(assert (not (in 'something (list_scope __module__))))
 # when
 (import "example.w" something)
 # then
-(assert (in 'something (list_scope ms)))
+(assert (in 'something (list_scope __module__)))
 (assert (eq something "abc"))
 
-# importing caches and re-uses the ms
+# importing caches and re-uses the __module__
 # given
 (assert (eq example example))
 (define example_one example)
