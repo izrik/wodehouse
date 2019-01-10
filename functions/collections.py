@@ -1,4 +1,3 @@
-from functions.eval import w_eval
 from functions.function import WFunction
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
@@ -17,18 +16,29 @@ def w_map(func, *exprlists):
                     "Argument passed to map must be lists. "
                     "Got \"{}\" ({}) instead.".format(
                         exprlist, type(exprlist)))
-        length = min(len(e) for e in exprlists)
+    length = min(len(e) for e in exprlists)
     results = WList()
+    if length < 1:
+        return results
+
     e = WList(*exprlists)
-    while len(results) < length:
+    cars = WList(*list(exprlist.head for exprlist in e))
+    cdrs = WList(*list(exprlist.remaining for exprlist in e))
+
+    func_with_args = WList(func, *cars)
+
+    def callback(result):
+        nonlocal results
+        nonlocal cdrs
+        results = results.append(result)
+        if len(results) >= length:
+            return results
+        e = cdrs
         cars = WList(*list(exprlist.head for exprlist in e))
         cdrs = WList(*list(exprlist.remaining for exprlist in e))
-        func_with_args = WList(func, *cars)
-        result = w_eval(func_with_args, scope=None)
-        results = results.append(result)
-        e = cdrs
+        return WList(func, *cars), callback
 
-    return results
+    return func_with_args, callback
 
 
 def w_in(expr, container):

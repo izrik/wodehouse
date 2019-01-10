@@ -1129,6 +1129,13 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual([5, 8, 13], result)
 
+    def test_map_empty_list_yields_empty_list(self):
+        # given
+        gs = create_global_scope()
+        # when
+        result = eval_str("(map (lambda (x) (* x x)) '())", gs)
+        # then
+        self.assertEqual([], result)
 
 
 if __name__ == '__main__':
