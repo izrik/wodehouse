@@ -1,6 +1,6 @@
 from functions.eval import w_eval
 from functions.str import w_str
-from macros.magic_macro import WMagicMacro
+from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 
 

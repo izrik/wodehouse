@@ -1,4 +1,4 @@
-from macros.macro import WMacro
+from wtypes.macro import WMacro
 
 
 class WMagicMacro(WMacro):

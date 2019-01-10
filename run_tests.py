@@ -7,9 +7,9 @@ import functions.eval
 from functions.eval import w_eval, eval_str
 from functions.exec_src import w_exec_src
 from functions.scope import create_global_scope, create_module_scope
-from functions.function import WFunction
+from wtypes.function import WFunction
 from functions.io import w_print
-from functions.magic_function import WMagicFunction
+from wtypes.magic_function import WMagicFunction
 from functions.read import parse
 from macros.define import Define
 from macros.import_ import Import

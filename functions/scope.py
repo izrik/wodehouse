@@ -80,7 +80,7 @@ def create_global_scope():
     from functions.list import list_func
     from functions.logical import w_not, w_or, w_and, less_than, \
         less_than_or_equal_to, greater_than, greater_than_or_equal_to, eq
-    from functions.magic_function import WMagicFunction
+    from wtypes.magic_function import WMagicFunction
     from functions.math import add, sub, mult, div
     from functions.raise_ import w_raise
     from functions.str import w_str

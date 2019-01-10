@@ -1,6 +1,6 @@
 from inspect import signature
 
-from functions.function import WFunction
+from wtypes.function import WFunction
 
 
 class WMagicFunction(WFunction):

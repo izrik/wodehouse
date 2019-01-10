@@ -1,4 +1,4 @@
-from macros.magic_macro import WMagicMacro
+from wtypes.magic_macro import WMagicMacro
 
 
 class Apply(WMagicMacro):

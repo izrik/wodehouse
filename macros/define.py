@@ -1,5 +1,5 @@
 from functions.eval import w_eval
-from macros.magic_macro import WMagicMacro
+from wtypes.magic_macro import WMagicMacro
 from wtypes.symbol import WSymbol
 
 

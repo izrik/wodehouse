@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from functions.exec_src import w_exec_src
-from functions.function import WFunction
+from wtypes.function import WFunction
 import functions.read
 import functions.eval
 from functions.scope import create_global_scope

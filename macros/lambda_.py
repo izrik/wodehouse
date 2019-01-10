@@ -1,5 +1,5 @@
-from functions.function import WFunction
-from macros.magic_macro import WMagicMacro
+from wtypes.function import WFunction
+from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
 from wtypes.number import WNumber

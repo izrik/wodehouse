@@ -2,7 +2,7 @@ import os
 
 from functions.eval import w_eval
 from functions.hash import w_hash
-from macros.magic_macro import WMagicMacro
+from wtypes.magic_macro import WMagicMacro
 from wtypes.scope import WScope
 from wtypes.string import WString
 from wtypes.symbol import WSymbol

@@ -1,4 +1,4 @@
-from functions.function import WFunction
+from wtypes.function import WFunction
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
 from wtypes.string import WString
