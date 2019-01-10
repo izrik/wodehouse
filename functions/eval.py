@@ -99,7 +99,17 @@ def w_eval(expr, scope):
         for i, argname in enumerate(callee.parameters):
             fscope[argname] = evaled_args[i]
         if isinstance(callee, WMagicFunction):
-            return callee.call_magic_function(*evaled_args)
+
+            def eval_for_magic_function(rv, s):
+                if isinstance(rv, WObject):
+                    return rv
+                e1, callback = rv
+                e2 = w_eval(e1, s)
+                return eval_for_magic_function(callback(e2), s)
+
+            rv1 = callee.call_magic_function(*evaled_args)
+            return eval_for_magic_function(rv1, scope)
+
         return w_eval(callee.expr, fscope)
     if isinstance(expr, WSymbol):
         if expr not in scope:
