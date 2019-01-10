@@ -1,7 +1,8 @@
+from wtypes.object import WObject
 from wtypes.position import Position
 
 
-class WStream(object):
+class WStream(WObject):
     def __init__(self, s, filename=None):
         self.s = s
         self.i = 0

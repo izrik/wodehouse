@@ -38,7 +38,7 @@ class WodehouseTest(unittest.TestCase):
     def test_calls_functions(self):
         # given
         scope = create_global_scope()
-        scope['onetwothree'] = WMagicFunction(lambda *args: 123,
+        scope['onetwothree'] = WMagicFunction(lambda *args: WNumber(123),
                                               enclosing_scope=scope)
         # when
         result = eval_str('(onetwothree)', scope)

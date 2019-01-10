@@ -1,5 +1,7 @@
+from wtypes.object import WObject
 
-class Position(object):
+
+class Position(WObject):
     def __init__(self, filename, line, char):
         self.filename = filename
         self.line = line
