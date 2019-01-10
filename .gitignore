@@ -196,3 +196,4 @@ FakesAssemblies/
 __pycache__/
 .coverage
 htmlcov/
+_scratch*
