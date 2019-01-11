@@ -32,4 +32,7 @@ def w_str(arg):
                 wtypes.list.WList(*arg.expr)))
     if isinstance(arg, WBoolean):
         return WString(str(arg))
+    from wtypes.scope import WScope
+    if isinstance(arg, WScope):
+        return WString(str(arg))
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))

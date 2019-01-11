@@ -6,6 +6,7 @@ from wtypes.symbol import WSymbolAt, WSymbol
 
 class WScope(WObject):
     def __init__(self, values=None, enclosing_scope=None):
+        super().__init__()
         if values is None:
             values = {}
         self.enclosing_scope = enclosing_scope
@@ -54,6 +55,9 @@ class WScope(WObject):
 
     def __len__(self):
         return len(list(self.keys()))
+
+    def __str__(self):
+        return f'WScope ({len(self)} keys)'
 
     def keys(self):
         keys = set(self.dict.keys())

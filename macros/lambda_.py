@@ -9,6 +9,9 @@ from wtypes.symbol import WSymbol
 
 
 class WLambda(WMagicMacro):
+    def __init__(self):
+        super().__init__(name='lambda')
+
     def call_magic_macro(self, exprs, scope):
         if scope is None:
             scope = WScope()

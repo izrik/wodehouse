@@ -97,6 +97,7 @@ def create_global_scope():
     from macros.lambda_ import WLambda
     from macros.let import Let
     from wtypes.boolean import WBoolean
+    from functions.help import w_help
 
     scope = WScope()
     scope.update({
@@ -152,6 +153,7 @@ def create_global_scope():
         'symbol_at': WMagicFunction(symbol_at, scope),
         'define': Define(),
         'import': Import(),
-        'exception': WMagicFunction(exception, scope, check_args=False)
+        'exception': WMagicFunction(exception, scope, check_args=False),
+        'help': WMagicFunction(w_help, scope, name='help'),
     })
     return scope
