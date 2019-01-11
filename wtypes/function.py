@@ -9,3 +9,4 @@ class WFunction(WObject):
         self.num_parameters = len(parameters)
         self.check_args = True
         self.enclosing_scope = enclosing_scope
+        self.name = None

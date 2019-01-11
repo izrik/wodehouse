@@ -1,4 +1,6 @@
 from functions.eval import w_eval
+from wtypes.function import WFunction
+from wtypes.macro import WMacro
 from wtypes.magic_macro import WMagicMacro
 from wtypes.symbol import WSymbol
 
@@ -20,5 +22,7 @@ class Define(WMagicMacro):
                 "Arg 'name' to 'define' must be a symbol. "
                 "Got \"{}\" ({}) instead.".format(name, type(name)))
         value = w_eval(expr, scope)
+        if isinstance(value, (WFunction, WMacro)):
+            value.name = name
         scope[name] = value
         return value, scope
