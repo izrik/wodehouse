@@ -2,6 +2,7 @@
 from wtypes.list import WList
 from wtypes.scope import WScope
 from wtypes.string import WString
+from wtypes.symbol import WSymbol
 
 
 def new_scope(pairs=None):
@@ -99,6 +100,8 @@ def create_global_scope():
     from wtypes.boolean import WBoolean
     from functions.help import w_help
 
+    lambda_ = WLambda()
+
     scope = WScope()
     scope.update({
         '+': WMagicFunction(add, scope, name='+'),
@@ -116,7 +119,7 @@ def create_global_scope():
         'print': WMagicFunction(w_print, scope, name='print'),
         'type': WMagicFunction(get_type, scope, name='type'),
         'isinstance': WMagicFunction(w_isinstance, scope, name='isinstance'),
-        'lambda': WLambda(),
+        'lambda': lambda_,
         'str': WMagicFunction(w_str, scope, name='str'),
         'format': WMagicFunction(w_format, scope, name='format'),
         'true': WBoolean.true,
@@ -126,6 +129,7 @@ def create_global_scope():
         'and': WMagicFunction(w_and, scope, name='and'),
         'cond': Cond(),
         'if': If(),
+        'if2': Macro(),
         '<': WMagicFunction(less_than, scope, name='<'),
         '<=': WMagicFunction(less_than_or_equal_to, scope, name='<='),
         '>': WMagicFunction(greater_than, scope, name='>'),
@@ -155,5 +159,9 @@ def create_global_scope():
         'import': Import(),
         'exception': WMagicFunction(exception, scope, check_args=False),
         'help': WMagicFunction(w_help, scope, name='help'),
+        'sqr': lambda_.call_magic_macro(
+            WList(WList(WSymbol.get('x')),
+                  WList(WSymbol.get('*'), WSymbol.get('x'), WSymbol.get('x'))),
+            scope)[0],
     })
     return scope
