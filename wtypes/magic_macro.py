@@ -12,8 +12,7 @@ class WMagicMacro(WMacro):
         return self.name
 
     def call_macro(self, exprs, scope):
-        exprs, scope = self.call_magic_macro(exprs, scope)
-        return exprs, scope
+        return self.call_magic_macro(exprs, scope)
 
     def call_magic_macro(self, exprs, scope):
         return exprs, scope

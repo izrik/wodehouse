@@ -1,4 +1,4 @@
-from functions.eval import w_eval
+from wtypes.control import WControl
 from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
@@ -14,13 +14,26 @@ class Cond(WMagicMacro):
                 raise Exception(
                     "Argument to `cond` is not a condition-value pair: "
                     "\"{}\" ({})".format(expr, type(expr)))
-        for expr in exprs:
-            condition, retval = expr.values
-            cond_result = w_eval(condition, scope)
-            if cond_result is WBoolean.true:
-                return w_eval(retval, scope), scope
-            if cond_result is not WBoolean.false:
+
+        def run_next_expr(_exprs):
+            if len(_exprs) < 1:
+                raise Exception("No condition evaluated to true.")
+            _expr = _exprs.head
+            condition, retval = _expr.values
+            return WControl(expr=condition,
+                            callback=condition_evaluated(retval,
+                                                         _exprs.remaining))
+
+        def condition_evaluated(_retval, _exprs):
+            def _condition_evaluated(_cond_result):
+                if _cond_result is WBoolean.true:
+                    return WControl(expr=_retval,
+                                    callback=lambda _e: (_e, scope))
+                if _cond_result is WBoolean.false:
+                    return run_next_expr(_exprs)
                 raise Exception(
                     "Condition evaluated to a non-boolean value: "
-                    "\"{}\" ({})".format(cond_result, type(cond_result)))
-        raise Exception("No condition evaluated to true.")
+                    "\"{}\" ({})".format(_cond_result, type(_cond_result)))
+            return _condition_evaluated
+
+        return run_next_expr(exprs)
