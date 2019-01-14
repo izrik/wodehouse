@@ -1,3 +1,4 @@
+from wtypes.control import WControl
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
 from functions.read import parse
@@ -106,9 +107,22 @@ def w_eval(expr, scope):
             def eval_for_magic_function(rv, s):
                 if isinstance(rv, WObject):
                     return rv
-                e1, callback = rv
-                e2 = w_eval(e1, s)
-                return eval_for_magic_function(callback(e2), s)
+                if isinstance(rv, WControl):
+                    # if rv.exception:
+                    #     return rv
+                    if rv.callback:
+                        if not rv.expr:
+                            raise Exception(f'No value given for the '
+                                            f'callback: {rv.callback}')
+                        e2 = w_eval(rv.expr, s)
+                        return eval_for_magic_function(rv.callback(e2), 1)
+                    raise Exception(f'Not sure what to do with the control: '
+                                    f'{rv}')
+                if isinstance(rv, tuple):
+                    e1, callback = rv
+                    e2 = w_eval(e1, s)
+                    return eval_for_magic_function(callback(e2), s)
+                raise Exception(f'Invalid return from magic function: {rv}')
 
             rv1 = callee.call_magic_function(*evaled_args)
             return eval_for_magic_function(rv1, scope)
