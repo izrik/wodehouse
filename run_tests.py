@@ -488,6 +488,8 @@ class WodehouseTest(unittest.TestCase):
         self.assertTrue(evaled1)
         self.assertFalse(evaled2)
 
+    # TODO: test cond with various levels of quoting
+
     def test_if_condition_is_true_returns_first_retval(self):
         # when
         result = eval_str("(if (< 2 3) 4 5)",
