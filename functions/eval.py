@@ -105,8 +105,6 @@ def w_eval(expr, scope):
         if isinstance(callee, WMagicFunction):
 
             def eval_for_magic_function(rv, s):
-                if isinstance(rv, WObject):
-                    return rv
                 if isinstance(rv, WControl):
                     # if rv.exception:
                     #     return rv
@@ -118,6 +116,8 @@ def w_eval(expr, scope):
                         return eval_for_magic_function(rv.callback(e2), s)
                     raise Exception(f'Not sure what to do with the control: '
                                     f'{rv}')
+                if isinstance(rv, WObject):
+                    return rv
                 if isinstance(rv, tuple):
                     e1, callback = rv
                     e2 = w_eval(e1, s)
