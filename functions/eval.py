@@ -4,6 +4,7 @@ from functions.read import parse
 from wtypes.macro import WMacro
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
+from wtypes.magic_macro import WMagicMacro
 from wtypes.number import WNumber
 from wtypes.object import WObject
 from wtypes.scope import WScope
@@ -82,8 +83,10 @@ def w_eval(expr, scope):
         callee = w_eval(head, scope)
         args = expr.remaining
         if isinstance(callee, WMacro):
-            expr2, scope2 = callee.call_macro(args, scope=scope)
-            return expr2
+            if isinstance(callee, WMagicMacro):
+                expr2, scope2 = callee.call_macro(args, scope=scope)
+                return expr2
+            raise Exception(f'WMacro not implemented: {callee}')
         if not isinstance(callee, WFunction):
             raise Exception(
                 'Callee is not a function. Got "{}" ({}) instead.'.format(
