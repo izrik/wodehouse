@@ -76,6 +76,27 @@ def w_eval(expr, scope):
         raise Exception(
             'Non-domain value escaped from containment! '
             'Got "{}" ({}).'.format(expr, type(expr)))
+
+    def eval_for_magic(rv, s):
+        if isinstance(rv, WControl):
+            # if rv.exception:
+            #     return rv
+            if rv.callback:
+                if not rv.expr:
+                    raise Exception(f'No value given for the '
+                                    f'callback: {rv.callback}')
+                e2 = w_eval(rv.expr, s)
+                return eval_for_magic(rv.callback(e2), s)
+            raise Exception(f'Not sure what to do with the control: '
+                            f'{rv}')
+        if isinstance(rv, WObject):
+            return rv
+        if isinstance(rv, tuple):
+            e1, callback = rv
+            e2 = w_eval(e1, s)
+            return eval_for_magic(callback(e2), s)
+        raise Exception(f'Invalid return from magic function: {rv}')
+
     if isinstance(expr, WList):
         head = expr.head
         if head == WSymbol.get('quote'):
@@ -103,29 +124,8 @@ def w_eval(expr, scope):
         for i, argname in enumerate(callee.parameters):
             fscope[argname] = evaled_args[i]
         if isinstance(callee, WMagicFunction):
-
-            def eval_for_magic_function(rv, s):
-                if isinstance(rv, WControl):
-                    # if rv.exception:
-                    #     return rv
-                    if rv.callback:
-                        if not rv.expr:
-                            raise Exception(f'No value given for the '
-                                            f'callback: {rv.callback}')
-                        e2 = w_eval(rv.expr, s)
-                        return eval_for_magic_function(rv.callback(e2), s)
-                    raise Exception(f'Not sure what to do with the control: '
-                                    f'{rv}')
-                if isinstance(rv, WObject):
-                    return rv
-                if isinstance(rv, tuple):
-                    e1, callback = rv
-                    e2 = w_eval(e1, s)
-                    return eval_for_magic_function(callback(e2), s)
-                raise Exception(f'Invalid return from magic function: {rv}')
-
             rv1 = callee.call_magic_function(*evaled_args)
-            return eval_for_magic_function(rv1, scope)
+            return eval_for_magic(rv1, scope)
 
         return w_eval(callee.expr, fscope)
     if isinstance(expr, WSymbol):
