@@ -92,9 +92,8 @@ def w_eval(expr, scope):
         if isinstance(rv, WObject):
             return rv
         if isinstance(rv, tuple):
-            e1, callback = rv
-            e2 = w_eval(e1, s)
-            return eval_for_magic(callback(e2), s)
+            # magic macro returning (expr, scope)
+            return rv
         raise Exception(f'Invalid return from magic function: {rv}')
 
     if isinstance(expr, WList):
