@@ -115,7 +115,7 @@ def w_eval(expr, scope):
                             raise Exception(f'No value given for the '
                                             f'callback: {rv.callback}')
                         e2 = w_eval(rv.expr, s)
-                        return eval_for_magic_function(rv.callback(e2), 1)
+                        return eval_for_magic_function(rv.callback(e2), s)
                     raise Exception(f'Not sure what to do with the control: '
                                     f'{rv}')
                 if isinstance(rv, tuple):
