@@ -870,6 +870,52 @@ class WodehouseTest(unittest.TestCase):
         self.assertIn(WSymbol.get('x'), scope)
         self.assertEqual(WNumber(3), scope['x'])
 
+    def test_define_with_undefined_symbol_raises(self):
+        # given
+        gs = create_global_scope()
+        scope = create_module_scope(enclosing_scope=gs)
+        # expect
+        self.assertRaisesRegex(
+            Exception,
+            "No object found by the name of \"\"y\"\"",
+            eval_str,
+            "(define x y)", scope)
+
+    def test_define_with_defined_symbol_returned_value(self):
+        # given
+        gs = create_global_scope()
+        scope = create_module_scope(enclosing_scope=gs)
+        scope['y'] = WString("abc")
+        # when
+        result = eval_str("(define x y)", scope)
+        # then
+        self.assertEqual('abc', result)
+        self.assertIn(WSymbol.get('x'), scope)
+        self.assertEqual('abc', scope['x'])
+
+    def test_define_with_quoted_symbol(self):
+        # given
+        gs = create_global_scope()
+        scope = create_module_scope(enclosing_scope=gs)
+        # when
+        result = eval_str("(define x 'y)", scope)
+        # then
+        self.assertEqual(WSymbol.get('y'), result)
+        self.assertIn(WSymbol.get('x'), scope)
+        self.assertEqual(WSymbol.get('y'), scope['x'])
+
+    def test_define_with_doubly_quoted_symbol(self):
+        # given
+        gs = create_global_scope()
+        scope = create_module_scope(enclosing_scope=gs)
+        # when
+        result = eval_str("(define x ''y)", scope)
+        # then
+        expected = [WSymbol.get('quote'), WSymbol.get('y')]
+        self.assertEqual(expected, result)
+        self.assertIn(WSymbol.get('x'), scope)
+        self.assertEqual(expected, scope['x'])
+
     def test_plus_adds_numbers(self):
         # when
         result = eval_str("(+ 1 2 3 4)", create_global_scope())
