@@ -1,5 +1,5 @@
-from functions.eval import w_eval
 from functions.str import w_str
+from wtypes.control import WControl
 from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 
@@ -12,7 +12,10 @@ class WAssert(WMagicMacro):
                 "Got {} instead.".format(len(exprs)))
         expr = exprs[0]
         src = w_str(expr)
-        value = w_eval(expr, scope)
-        if value is WBoolean.false:
-            raise Exception("Assertion failed: {}".format(src))
-        return value, scope
+
+        def callback(_value):
+            if _value is WBoolean.false:
+                raise Exception("Assertion failed: {}".format(src))
+            return WControl(expr=_value, callback=lambda _e: (_e, scope))
+
+        return WControl(expr=expr, callback=callback)
