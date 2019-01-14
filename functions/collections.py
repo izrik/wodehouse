@@ -1,3 +1,4 @@
+from wtypes.control import WControl
 from wtypes.function import WFunction
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
@@ -36,9 +37,9 @@ def w_map(func, *exprlists):
         e = cdrs
         cars = WList(*list(exprlist.head for exprlist in e))
         cdrs = WList(*list(exprlist.remaining for exprlist in e))
-        return WList(func, *cars), callback
+        return WControl(expr=WList(func, *cars), callback=callback)
 
-    return func_with_args, callback
+    return WControl(expr=func_with_args, callback=callback)
 
 
 def w_in(expr, container):
