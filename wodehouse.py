@@ -110,12 +110,17 @@ def run_file(filename):
 def main():
     for arg in sys.argv[1:]:
         path = Path(arg)
+        filenames = []
         if path.is_file():
-            run_file(arg)
+            filenames = [arg]
         elif path.is_dir():
             for f in path.glob('*'):
                 if f.is_file():
-                    run_file(f)
+                    filenames.append(f)
+
+        for filename in filenames:
+            run_file(filename)
+
     if len(sys.argv) < 2:
         repl()
 
