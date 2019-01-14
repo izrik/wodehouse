@@ -93,7 +93,7 @@ def w_eval(expr, scope):
             return rv
         if isinstance(rv, tuple):
             # magic macro returning (expr, scope)
-            return rv
+            return rv[0]
         raise Exception(f'Invalid return from magic function: {rv}')
 
     if isinstance(expr, WList):
@@ -105,8 +105,8 @@ def w_eval(expr, scope):
         args = expr.remaining
         if isinstance(callee, WMacro):
             if isinstance(callee, WMagicMacro):
-                expr2, scope2 = callee.call_macro(args, scope=scope)
-                return expr2
+                rv1 = callee.call_macro(args, scope=scope)
+                return eval_for_magic(rv1, scope)
             raise Exception(f'WMacro not implemented: {callee}')
         if not isinstance(callee, WFunction):
             raise Exception(
@@ -122,6 +122,7 @@ def w_eval(expr, scope):
         fscope = WScope(enclosing_scope=callee.enclosing_scope)
         for i, argname in enumerate(callee.parameters):
             fscope[argname] = evaled_args[i]
+
         if isinstance(callee, WMagicFunction):
             rv1 = callee.call_magic_function(*evaled_args)
             return eval_for_magic(rv1, scope)
