@@ -99,6 +99,7 @@ def read_expr(s):
                     ch)))))))
     """
     # _i = s.i
+    pos = s.get_position()
     ch = s.peek()
     if s.has_chars() and (ch.isspace() or ch == '#'):
         read_whitespace_and_comments(s)
@@ -117,7 +118,7 @@ def read_expr(s):
     if ch == '\'':
         s.get_next_char()
         expr = read_expr(s)
-        return WList(WSymbol.get('quote'), expr)
+        return WList(WSymbol.get('quote'), expr, position=pos)
     raise Exception('Unknown starting character "{}" in read_expr'.format(ch))
 
 
@@ -151,6 +152,7 @@ def read_string(s):
         (assert (eq "\"" delim))
         (+ (read_string_char s))))))
     """
+    pos = s.get_position()
     delim = s.get_next_char()
     assert delim == '"'
     chs = []
@@ -158,7 +160,7 @@ def read_string(s):
         ch = s.get_next_char()
         if ch == delim:
             value = ''.join(chs)
-            return WString(value, position=s.get_position())
+            return WString(value, position=pos)
         if ch == '\\':
             ch = s.get_next_char()
             if ch == 'n':
@@ -197,18 +199,19 @@ def read_symbol(s):
                 ch)))))))
     """
     ch = s.peek()
+    pos = s.get_position()
     if ch in string.ascii_letters or ch in '_':
         return read_name(s)
     if ch in '+-*/':
         s.get_next_char()
-        return WSymbolAt(ch, s.get_position())
+        return WSymbolAt(ch, position=pos)
     if ch in '<>':
         s.get_next_char()
         ch2 = s.peek()
         if ch2 == '=':
             s.get_next_char()
-            return WSymbolAt(ch + ch2, position=s.get_position())
-        return WSymbolAt(ch, position=s.get_position())
+            return WSymbolAt(ch + ch2, position=pos)
+        return WSymbolAt(ch, position=pos)
     raise Exception(
         "Unexpected character while reading symbol: \"{}\"".format(ch))
 
@@ -234,6 +237,7 @@ def read_name(s):
     (symbol_at (+ (read_name_char s)) (get_position s)))))
     """
     chs = []
+    pos = s.get_position()
     assert s.peek() not in string.digits
     while s.has_chars() and \
             (s.peek() in string.ascii_letters or
@@ -241,7 +245,7 @@ def read_name(s):
              s.peek() in string.digits):
         chs.append(s.get_next_char())
     name = ''.join(chs)
-    return WSymbolAt(name, position=s.get_position())
+    return WSymbolAt(name, position=pos)
 
 
 def read_integer_literal(s):
@@ -265,10 +269,11 @@ def read_integer_literal(s):
     (int_from_str (+ (read_integer_literal_char s)) (get_position s)))))
     """
     chs = []
+    pos = s.get_position()
     while s.has_chars() and s.peek() in string.digits:
         chs.append(s.get_next_char())
     _s = ''.join(chs)
-    return int_from_str(_s, position=s.get_position())
+    return int_from_str(_s, position=pos)
 
 
 def read_list(s):
@@ -298,6 +303,7 @@ def read_list(s):
     """
     assert s.peek() == '('
     exprs = []
+    pos = s.get_position()
     s.get_next_char()
     while True:
         while True:
@@ -313,4 +319,4 @@ def read_list(s):
             break
         expr = read_expr(s)
         exprs.append(expr)
-    return WList(*exprs)
+    return WList(*exprs, position=pos)
