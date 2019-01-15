@@ -834,20 +834,26 @@ class WodehouseTest(unittest.TestCase):
         self.assertEqual("( 123 )\n", result)
 
     def test_assert_raises_exception_on_false(self):
-        # expect
-        self.assertRaisesRegex(
-            Exception,
-            "Assertion failed: \"false\"",
-            eval_str,
-            "(assert false)", create_global_scope())
+        # when
+        result = eval_str("(assert false)", create_global_scope())
+        # then
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, WControl)
+        self.assertIsNotNone(result.exception)
+        self.assertIsInstance(result.exception, WException)
+        self.assertEqual('Assertion failed: "false"',
+                         result.exception.message)
 
     def test_assert_raises_exception_on_false_expr(self):
-        # expect
-        self.assertRaisesRegex(
-            Exception,
-            "Assertion failed: \"\\(< 3 1\\)\"",
-            eval_str,
-            "(assert (< 3 1))", create_global_scope())
+        # when
+        result = eval_str("(assert (< 3 1))", create_global_scope())
+        # then
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, WControl)
+        self.assertIsNotNone(result.exception)
+        self.assertIsInstance(result.exception, WException)
+        self.assertEqual('Assertion failed: "(< 3 1)"',
+                         result.exception.message)
 
     def test_assert_returns_true_on_true(self):
         # when

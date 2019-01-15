@@ -1,5 +1,6 @@
 from functions.str import w_str
 from wtypes.control import WControl
+from wtypes.exception import WException
 from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 
@@ -15,7 +16,8 @@ class WAssert(WMagicMacro):
 
         def callback(_value):
             if _value is WBoolean.false:
-                raise Exception("Assertion failed: {}".format(src))
+                return WControl(
+                    exception=WException(f'Assertion failed: {src}'))
             return WControl(expr=_value, callback=lambda _e: (_e, scope))
 
         return WControl(expr=expr, callback=callback)
