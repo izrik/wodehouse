@@ -964,12 +964,16 @@ class WodehouseTest(unittest.TestCase):
         self.assertEqual("a1btruec+d", result)
 
     def test_raise_raises(self):
-        # expect
-        self.assertRaisesRegex(
-            Exception,
-            "this is the description",
-            eval_str,
-            "(raise \"this is the description\")", create_global_scope())
+        # when
+        result = eval_str("(raise \"this is the description\")",
+                          create_global_scope())
+        # then
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, WControl)
+        self.assertIsNotNone(result.exception)
+        self.assertIsInstance(result.exception, WException)
+        self.assertEqual('this is the description',
+                         result.exception.message)
 
     def test_stream_creates_stream_object(self):
         # when

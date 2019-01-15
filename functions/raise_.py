@@ -1,5 +1,6 @@
-from functions.str import w_str
+from wtypes.control import WControl
+from wtypes.exception import WException
 
 
 def w_raise(description):
-    raise Exception(w_str(description).value)
+    return WControl(exception=WException(description))
