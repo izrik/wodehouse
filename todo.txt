@@ -1,4 +1,9 @@
 homo-iconic?
+    - no, not exactly
+types and subtypes
+attribute access syntax
+file i/o
+argparse
 self-hosted
 jit
 execution engine
