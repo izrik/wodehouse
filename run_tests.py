@@ -7,6 +7,8 @@ import functions.eval
 from functions.eval import w_eval, eval_str
 from functions.exec_src import w_exec_src
 from functions.scope import create_global_scope, create_module_scope
+from wtypes.control import WControl
+from wtypes.exception import WException
 from wtypes.function import WFunction
 from functions.io import w_print
 from wtypes.magic_function import WMagicFunction
@@ -1264,6 +1266,15 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str("(let (x 3) (y x) y)", gs)
         # then y is bound to the value of x after x is bound to 3
         self.assertEqual(3, result)
+
+    def test_div_by_zero_raises_proper_wexception(self):
+        # when
+        result = eval_str('(/ 1 0)', create_global_scope())
+        # then
+        self.assertIsNotNone(result)
+        self.assertIsInstance(result, WControl)
+        self.assertIsNotNone(result.exception)
+        self.assertIsInstance(result.exception, WException)
 
 
 if __name__ == '__main__':
