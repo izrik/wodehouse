@@ -1,5 +1,6 @@
 import os
 
+from functions.eval import is_exception
 from functions.hash import w_hash
 from wtypes.control import WControl
 from wtypes.magic_macro import WMagicMacro
@@ -52,6 +53,8 @@ class Import(WMagicMacro):
                 gs = scope.get_outermost()
                 imported_ms = w_exec_src(src, enclosing_scope=gs,
                                          filename=filename)
+                if is_exception(imported_ms):
+                    return imported_ms
                 _global_import_cache[h] = imported_ms
 
             basename = os.path.splitext(filename.value)[0]

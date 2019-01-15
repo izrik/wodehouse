@@ -1,3 +1,4 @@
+from wtypes.callstack import WStackFrame
 from wtypes.control import WControl
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
@@ -13,7 +14,7 @@ from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
 
-def w_eval(expr, scope):
+def w_eval(expr, scope, stack=None):
     """
 (define w_eval
 (lambda (expr scope)
@@ -76,11 +77,12 @@ def w_eval(expr, scope):
         raise Exception(
             'Non-domain value escaped from containment! '
             'Got "{}" ({}).'.format(expr, type(expr)))
+    stack = WStackFrame(expr=expr, prev=stack)
 
     def eval_for_magic(rv, s):
         if isinstance(rv, WControl):
-            # if rv.exception:
-            #     return rv
+            if is_exception(rv, stack):
+                return rv
             if rv.callback:
                 if rv.expr is None:
                     raise Exception(f'No value given for the '
@@ -88,7 +90,9 @@ def w_eval(expr, scope):
                 s2 = s
                 if rv.scope is not None:
                     s2 = rv.scope
-                e2 = w_eval(rv.expr, s2)
+                e2 = w_eval(rv.expr, s2, stack=stack)
+                if is_exception(e2, stack):
+                    return e2
                 return eval_for_magic(rv.callback(e2), s)
             if rv.expr is None:
                 raise Exception(f'Not sure what to do with the control: '
@@ -106,7 +110,9 @@ def w_eval(expr, scope):
         if head == WSymbol.get('quote'):
             # TODO: more checks (e.g. make sure second is there)
             return expr.second
-        callee = w_eval(head, scope)
+        callee = w_eval(head, scope, stack=stack)
+        if is_exception(callee, stack):
+            return callee
         args = expr.remaining
         if isinstance(callee, WMacro):
             if isinstance(callee, WMagicMacro):
@@ -117,7 +123,14 @@ def w_eval(expr, scope):
             raise Exception(
                 'Callee is not a function. Got "{}" ({}) instead.'.format(
                     callee, type(callee)))
-        evaled_args = [w_eval(arg, scope) for arg in args]
+
+        evaled_args = []
+        for arg in args:
+            evaled_arg = w_eval(arg, scope, stack=stack)
+            if is_exception(evaled_arg, stack):
+                return evaled_arg
+            evaled_args.append(evaled_arg)
+
         if (callee.check_args and
                 callee.num_parameters is not None and
                 len(evaled_args) != callee.num_parameters):
@@ -132,7 +145,9 @@ def w_eval(expr, scope):
             rv1 = callee.call_magic_function(*evaled_args)
             return eval_for_magic(rv1, scope)
 
-        return w_eval(callee.expr, fscope)
+        frv = w_eval(callee.expr, fscope, stack=stack)
+        is_exception(frv, stack)  # set the stack attribute
+        return frv
     if isinstance(expr, WSymbol):
         if expr not in scope:
             raise NameError(
@@ -157,3 +172,11 @@ def eval_str(input_s, scope=None):
     expr = parse(input_s)
     value = w_eval(expr, scope)
     return value
+
+
+def is_exception(rv, _stack=None):
+    if isinstance(rv, WControl) and rv.exception is not None:
+        if rv.stack is None:
+            rv.stack = _stack
+        return True
+    return False

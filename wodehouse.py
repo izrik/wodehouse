@@ -36,7 +36,7 @@ import sys
 import traceback
 from pathlib import Path
 
-from functions.eval import eval_str
+from functions.eval import eval_str, is_exception
 from functions.exec_src import w_exec_src
 from functions.scope import create_global_scope, create_module_scope
 from wtypes.list import WList
@@ -104,7 +104,20 @@ def run_file(filename):
     with open(filename) as f:
         src = f.read()
     gs = create_global_scope()
-    w_exec_src(src, enclosing_scope=gs, filename=filename)
+    rv = w_exec_src(src, enclosing_scope=gs, filename=filename)
+    if is_exception(rv):
+        def format_stacktrace(_stack):
+            frames = []
+            while _stack is not None:
+                frames.append(
+                    f'File <file>, line <line>, in {_stack.expr.head}')
+                _stack = _stack.prev
+            frames.reverse()
+            return '\n'.join(frames)
+
+        stacktrace = format_stacktrace(rv.stack)
+        print('Stacktrace (most recent call last):')
+        print(stacktrace)
 
 
 def main():
