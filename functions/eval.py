@@ -87,8 +87,10 @@ def w_eval(expr, scope):
                                     f'callback: {rv.callback}')
                 e2 = w_eval(rv.expr, s)
                 return eval_for_magic(rv.callback(e2), s)
-            raise Exception(f'Not sure what to do with the control: '
-                            f'{rv}')
+            if not rv.expr:
+                raise Exception(f'Not sure what to do with the control: '
+                                f'{rv}')
+            return rv.expr
         if isinstance(rv, WObject):
             return rv
         if isinstance(rv, tuple):
