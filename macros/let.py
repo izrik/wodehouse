@@ -1,4 +1,5 @@
-from functions.eval import w_eval
+
+from wtypes.control import WControl
 from wtypes.magic_macro import WMagicMacro
 from wtypes.list import WList
 from wtypes.scope import WScope
@@ -26,6 +27,7 @@ class Let(WMagicMacro):
                 "exactly one expression. Get {} total args instead".format(
                     len(exprs)))
         *vardefs, retval = exprs
+        vardefs = WList(*vardefs)
         for vardef in vardefs:
             if not isinstance(vardef, WList) or len(vardef) != 2 or \
                     not isinstance(vardef[0], WSymbol):
@@ -35,8 +37,20 @@ class Let(WMagicMacro):
                     "instead.".format(vardef, type(vardef)))
 
         scope2 = WScope(enclosing_scope=scope)
-        for vardef in vardefs:
-            name, expr = vardef
-            value = w_eval(expr, scope2)
-            scope2[name] = value
-        return w_eval(retval, scope2), scope
+
+        def assign_next_var(_vardefs):
+            if len(_vardefs) < 1:
+                return WControl(expr=retval, scope=scope2,
+                                callback=lambda _e: _e)
+            _vardef = _vardefs.head
+            _name, _expr = _vardef
+            return WControl(expr=_expr, scope=scope2,
+                            callback=var_evaluated(_name, _vardefs.remaining))
+
+        def var_evaluated(_name, _vardefs):
+            def _var_evaluated(_value):
+                scope2[_name] = _value
+                return assign_next_var(_vardefs)
+            return _var_evaluated
+
+        return assign_next_var(vardefs)
