@@ -85,7 +85,10 @@ def w_eval(expr, scope):
                 if rv.expr is None:
                     raise Exception(f'No value given for the '
                                     f'callback: {rv.callback}')
-                e2 = w_eval(rv.expr, s)
+                s2 = s
+                if rv.scope is not None:
+                    s2 = rv.scope
+                e2 = w_eval(rv.expr, s2)
                 return eval_for_magic(rv.callback(e2), s)
             if rv.expr is None:
                 raise Exception(f'Not sure what to do with the control: '
