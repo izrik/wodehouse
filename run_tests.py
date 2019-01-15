@@ -1255,6 +1255,16 @@ class WodehouseTest(unittest.TestCase):
         # then
         self.assertEqual([], result)
 
+    def test_let_assigns_values_sequentially(self):
+        # given
+        gs = create_global_scope()
+        gs['x'] = WNumber(1)
+        gs['y'] = WNumber(2)
+        # when
+        result = eval_str("(let (x 3) (y x) y)", gs)
+        # then y is bound to the value of x after x is bound to 3
+        self.assertEqual(3, result)
+
 
 if __name__ == '__main__':
     unittest.main()

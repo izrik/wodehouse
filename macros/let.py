@@ -17,6 +17,7 @@ class Let(WMagicMacro):
     evaluates `expr`. Values are evaluated with the new scope object as it is
     populated.
     """
+    # TODO: clean up syntax. use "((n1 v1) (n2 v2))" for multiple vars
 
     def call_magic_macro(self, exprs, scope):
         if len(exprs) < 2:
