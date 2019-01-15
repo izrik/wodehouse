@@ -149,10 +149,13 @@ def w_eval(expr, scope, stack=None):
         is_exception(frv, stack)  # set the stack attribute
         return frv
     if isinstance(expr, WSymbol):
-        if expr not in scope:
+        _scope = scope
+        if expr not in _scope:
+            _scope = _scope.get_global_scope()
+        if _scope is None or expr not in _scope:
             raise NameError(
                 'No object found by the name of "{}"'.format(expr.name))
-        value = scope[expr]
+        value = _scope[expr]
         return value
     if isinstance(expr, (WNumber, WString, WBoolean, WFunction, WMacro,
                          WScope)):

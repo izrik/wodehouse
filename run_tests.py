@@ -870,7 +870,7 @@ class WodehouseTest(unittest.TestCase):
     def test_define_in_module_adds_to_module_scope(self):
         # given
         gs = create_global_scope()
-        scope = create_module_scope(enclosing_scope=gs)
+        scope = create_module_scope(global_scope=gs)
         # when
         result = eval_str("(define x 3)", scope)
         # then
@@ -881,7 +881,7 @@ class WodehouseTest(unittest.TestCase):
     def test_define_with_undefined_symbol_raises(self):
         # given
         gs = create_global_scope()
-        scope = create_module_scope(enclosing_scope=gs)
+        scope = create_module_scope(global_scope=gs)
         # expect
         self.assertRaisesRegex(
             Exception,
@@ -892,7 +892,7 @@ class WodehouseTest(unittest.TestCase):
     def test_define_with_defined_symbol_returned_value(self):
         # given
         gs = create_global_scope()
-        scope = create_module_scope(enclosing_scope=gs)
+        scope = create_module_scope(global_scope=gs)
         scope['y'] = WString("abc")
         # when
         result = eval_str("(define x y)", scope)
@@ -904,7 +904,7 @@ class WodehouseTest(unittest.TestCase):
     def test_define_with_quoted_symbol(self):
         # given
         gs = create_global_scope()
-        scope = create_module_scope(enclosing_scope=gs)
+        scope = create_module_scope(global_scope=gs)
         # when
         result = eval_str("(define x 'y)", scope)
         # then
@@ -915,7 +915,7 @@ class WodehouseTest(unittest.TestCase):
     def test_define_with_doubly_quoted_symbol(self):
         # given
         gs = create_global_scope()
-        scope = create_module_scope(enclosing_scope=gs)
+        scope = create_module_scope(global_scope=gs)
         # when
         result = eval_str("(define x ''y)", scope)
         # then
@@ -1095,7 +1095,7 @@ class WodehouseTest(unittest.TestCase):
         # given
         gs = WScope()
         # when
-        result = w_exec_src(src="", filename="<test>", enclosing_scope=gs)
+        result = w_exec_src(src="", filename="<test>", global_scope=gs)
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, WScope)
@@ -1120,10 +1120,10 @@ class WodehouseTest(unittest.TestCase):
         })
         # when
         result = w_exec_src("(import \"file\" x)", filename="<test>",
-                            enclosing_scope=gs)
+                            global_scope=gs)
         # then
         self.assertIsInstance(result, WScope)
-        self.assertEqual(8, len(result))
+        self.assertEqual(6, len(result))
         self.assertIn('__module__', result)
         self.assertIs(result, result['__module__'])
         self.assertIn('file', result)
@@ -1143,7 +1143,7 @@ class WodehouseTest(unittest.TestCase):
         gs['import'] = Import(loader=loader)
         # when
         result = w_exec_src("(import \"file\" x)", filename="<test>",
-                            enclosing_scope=gs)
+                            global_scope=gs)
         # then
         self.assertIsInstance(result, WScope)
         self.assertIn('x', result)
@@ -1164,7 +1164,7 @@ class WodehouseTest(unittest.TestCase):
         gs['import'] = Import(loader=loader)
         # when
         result = w_exec_src("(import \"file\" x) (define y 3) (define z (x))",
-                            filename="<test>", enclosing_scope=gs)
+                            filename="<test>", global_scope=gs)
         # then
         self.assertIsInstance(result, WScope)
         self.assertIn('x', result)

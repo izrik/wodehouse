@@ -58,15 +58,15 @@ def list_scope(scope):
     return WList(*(key for key in scope.keys()))
 
 
-def create_module_scope(enclosing_scope=None, name=None, filename=None):
-    ms = WScope(enclosing_scope=enclosing_scope)
+def create_module_scope(global_scope=None, name=None, filename=None):
+    ms = WScope(global_scope=global_scope)
     ms['__module__'] = ms
     if name:
         ms['__name__'] = WString(name)
     if filename:
         ms['__file__'] = WString(filename)
-    if enclosing_scope is not None:
-        ms['__global__'] = enclosing_scope
+    if global_scope is not None:
+        ms['__global__'] = global_scope
     return ms
 
 

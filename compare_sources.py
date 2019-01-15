@@ -19,7 +19,7 @@ def gather(module):
         if hasattr(v, '__call__') and hasattr(v, '__doc__') and v.__doc__:
             src2 = v.__doc__
             # print(f'Reading docstring for {v} ... ', end='')
-            ms = w_exec_src(src2, gs)
+            ms = w_exec_src(src2, global_scope=gs)
             for k2, v2 in ms.dict.items():
                 if not isinstance(v2, WFunction):
                     continue
@@ -30,7 +30,7 @@ def gather(module):
 gather(functions.read)
 gather(functions.eval)
 
-ms = w_exec_src(src, enclosing_scope=gs)
+ms = w_exec_src(src, global_scope=gs)
 
 for k, v in ms.dict.items():
     if not isinstance(v, WFunction):

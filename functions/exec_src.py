@@ -5,9 +5,9 @@ from functions.scope import create_module_scope
 from wtypes.stream import WStream
 
 
-def w_exec_src(src, enclosing_scope, filename=None):
-    ms = create_module_scope(
-        enclosing_scope=enclosing_scope, name=filename, filename=filename)
+def w_exec_src(src, global_scope, filename=None):
+    ms = create_module_scope(global_scope=global_scope, name=filename,
+                             filename=filename)
     stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)
     while stream.has_chars():

@@ -104,7 +104,7 @@ def run_file(filename):
     with open(filename) as f:
         src = f.read()
     gs = create_global_scope()
-    rv = w_exec_src(src, enclosing_scope=gs, filename=filename)
+    rv = w_exec_src(src, global_scope=gs, filename=filename)
     if is_exception(rv):
         def format_stacktrace(_stack):
             frames = []
