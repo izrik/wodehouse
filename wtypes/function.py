@@ -10,3 +10,6 @@ class WFunction(WObject):
         self.check_args = True
         self.enclosing_scope = enclosing_scope
         self.name = None
+
+    def __str__(self):
+        return str(self.name)

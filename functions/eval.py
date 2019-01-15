@@ -111,6 +111,7 @@ def w_eval(expr, scope, stack=None):
             # TODO: more checks (e.g. make sure second is there)
             return expr.second
         callee = w_eval(head, scope, stack=stack)
+        stack.callee = callee
         if is_exception(callee, stack):
             return callee
         args = expr.remaining

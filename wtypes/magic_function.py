@@ -20,8 +20,5 @@ class WMagicFunction(WFunction):
         self.name = name
         self.check_args = check_args
 
-    def __str__(self):
-        return str(self.name)
-
     def call_magic_function(self, *args, **kwargs):
         return self.f(*args, **kwargs)
