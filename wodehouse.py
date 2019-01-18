@@ -74,7 +74,7 @@ def repl(prompt=None):
     if prompt is None:
         prompt = '>>> '
     gs = create_global_scope()
-    scope = create_module_scope(enclosing_scope=gs, name='__main__',
+    scope = create_module_scope(global_scope=gs, name='__main__',
                                 filename='__repl__')
     while True:
         try:
