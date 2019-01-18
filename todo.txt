@@ -4,6 +4,7 @@ types and subtypes
 attribute access syntax
 file i/o
 argparse
+    sys.argv
 self-hosted
 jit
 execution engine
