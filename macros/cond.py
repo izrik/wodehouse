@@ -27,8 +27,7 @@ class Cond(WMagicMacro):
         def condition_evaluated(_retval, _exprs):
             def _condition_evaluated(_cond_result):
                 if _cond_result is WBoolean.true:
-                    return WControl(expr=_retval,
-                                    callback=lambda _e: (_e, scope))
+                    return _retval
                 if _cond_result is WBoolean.false:
                     return run_next_expr(_exprs)
                 raise Exception(

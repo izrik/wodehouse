@@ -80,30 +80,75 @@ def w_eval(expr, scope, stack=None):
     stack = WStackFrame(expr=expr, prev=stack)
 
     def eval_for_magic(rv, s):
-        if isinstance(rv, WControl):
-            if is_exception(rv, stack):
-                return rv
-            if rv.callback:
-                if rv.expr is None:
-                    raise Exception(f'No value given for the '
-                                    f'callback: {rv.callback}')
-                s2 = s
-                if rv.scope is not None:
-                    s2 = rv.scope
-                e2 = w_eval(rv.expr, s2, stack=stack)
-                if is_exception(e2, stack):
-                    return e2
-                return eval_for_magic(rv.callback(e2), s)
-            if rv.expr is None:
-                raise Exception(f'Not sure what to do with the control: '
-                                f'{rv}')
-            return rv.expr
-        if isinstance(rv, WObject):
+        if is_exception(rv, stack):
             return rv
         if isinstance(rv, tuple):
             # magic macro returning (expr, scope)
-            return rv[0]
-        raise Exception(f'Invalid return from magic function: {rv}')
+            return WControl(expr=rv[0], scope=rv[1])
+        if not isinstance(rv, WObject):
+            raise Exception(f'Invalid return from magic function: '
+                            f'{rv} ({type(rv)}')
+        if not isinstance(rv, WControl):
+            return rv
+
+        if rv.callback:
+            if rv.expr is None:
+                raise Exception(f'No value given for the '
+                                f'callback: {rv.callback}')
+            s2 = s
+            if rv.scope is not None:
+                s2 = rv.scope
+            e2 = w_eval(rv.expr, s2, stack=stack)
+            if is_exception(e2, stack):
+                return e2
+            return eval_for_magic(rv.callback(e2), s)
+        if rv.expr is None:
+            raise Exception(f'Not sure what to do with the control: '
+                            f'{rv}')
+        return rv
+
+    def expand_macros(_expr, _scope):
+        if not isinstance(_expr, WList):
+            return _expr
+
+        _head = _expr.head
+
+        if _head == WSymbol.get('quote'):
+            return _expr
+
+        _evaled_head = w_eval(_head, _scope, stack=stack)
+        if is_exception(_evaled_head, stack):
+            return _evaled_head
+
+        _args = _expr.remaining
+        if not isinstance(_evaled_head, WMacro):
+            return WList(_evaled_head, *_args)
+
+        _rv = _evaled_head.call_macro(_args, scope=_scope)
+        if is_exception(_rv, _stack=stack):
+            return _rv
+        _rv2 = eval_for_magic(_rv, _scope)
+        if is_exception(_rv2, _stack=stack):
+            return _rv2
+
+        _expr2 = _rv2
+        if isinstance(_rv2, WControl):
+            _expr2 = _rv2.expr
+        _scope2 = _scope
+        if isinstance(_rv2, WControl) and _rv2.scope is not None:
+            _scope2 = _rv2.scope
+        return expand_macros(_expr2, _scope2)
+
+    rv = expand_macros(expr, scope)
+    if is_exception(rv, _stack=stack):
+        return rv
+
+    if isinstance(rv, WControl):
+        expr = rv.expr
+        if rv.scope is not None:
+            scope = rv.scope
+    else:
+        expr = rv
 
     if isinstance(expr, WList):
         head = expr.head

@@ -40,8 +40,7 @@ class Let(WMagicMacro):
 
         def assign_next_var(_vardefs):
             if len(_vardefs) < 1:
-                return WControl(expr=retval, scope=scope2,
-                                callback=lambda _e: _e)
+                return WControl(expr=retval, scope=scope2)
             _vardef = _vardefs.head
             _name, _expr = _vardef
             return WControl(expr=_expr, scope=scope2,

@@ -19,14 +19,11 @@ class If(WMagicMacro):
 
         def callback(_cond_result):
             if _cond_result is WBoolean.true:
-                _expr = true_retval
-            elif _cond_result is WBoolean.false:
-                _expr = false_retval
-            else:
-                raise Exception(
-                    "Condition evaluated to a non-boolean value: "
-                    "\"{}\" ({})".format(_cond_result, type(_cond_result)))
-
-            return WControl(expr=_expr, callback=lambda _e: _e)
+                return true_retval
+            if _cond_result is WBoolean.false:
+                return false_retval
+            raise Exception(
+                "Condition evaluated to a non-boolean value: "
+                "\"{}\" ({})".format(_cond_result, type(_cond_result)))
 
         return WControl(expr=condition, callback=callback)

@@ -1,4 +1,3 @@
-
 from wtypes.object import WObject
 
 
@@ -14,6 +13,7 @@ class WControl(WObject):
     The stack attribute is used for informational purposes in other parts of
     the program.
     """
+
     def __init__(self, expr=None, scope=None, callback=None, exception=None,
                  stack=None):
         """Initialize self."""
@@ -23,3 +23,16 @@ class WControl(WObject):
         self.callback = callback
         self.exception = exception
         self.stack = stack
+
+    def likely_action(self):
+        if self.exception is not None:
+            return 'return exception'
+        if self.callback is not None:
+            if self.scope is not None:
+                return 'eval expr with scope and pass to callback'
+            return 'eval expr and pass to callback'
+        if self.expr is not None:
+            if self.scope:
+                return 'macro returns expr and scope'
+            return 'return expr as-is'
+        return 'unknown'
