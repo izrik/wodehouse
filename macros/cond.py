@@ -2,13 +2,10 @@ from wtypes.control import WEvalRequired
 from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
-from wtypes.scope import WScope
 
 
 class Cond(WMagicMacro):
     def call_magic_macro(self, exprs, scope):
-        if scope is None:
-            scope = WScope()
         for expr in exprs:
             if not isinstance(expr, WList) or len(expr) != 2:
                 raise Exception(
