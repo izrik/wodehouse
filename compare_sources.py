@@ -16,7 +16,8 @@ gs = create_global_scope()
 
 def gather(module):
     for k, v in list(module.__dict__.items()):
-        if hasattr(v, '__call__') and hasattr(v, '__doc__') and v.__doc__:
+        if hasattr(v, '__call__') and hasattr(v, '__doc__') and \
+                v.__doc__ and v.__module__ == module.__name__:
             src2 = v.__doc__
             # print(f'Reading docstring for {v} ... ', end='')
             ms = w_exec_src(src2, global_scope=gs)
