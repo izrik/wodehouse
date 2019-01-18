@@ -1,5 +1,5 @@
 from functions.str import w_str
-from wtypes.control import WControl
+from wtypes.control import WRaisedException
 from wtypes.exception import WException
 from wtypes.list import WList
 from wtypes.number import WNumber
@@ -54,5 +54,5 @@ def div(*operands):
         try:
             x /= operand.value
         except ZeroDivisionError:
-            return WControl(exception=WException('Division by zero'))
+            return WRaisedException(exception=WException('Division by zero'))
     return WNumber(x)

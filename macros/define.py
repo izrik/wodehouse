@@ -1,4 +1,4 @@
-from wtypes.control import WControl
+from wtypes.control import WEvalRequired, WReturnValue
 from wtypes.function import WFunction
 from wtypes.list import WList
 from wtypes.macro import WMacro
@@ -27,6 +27,6 @@ class Define(WMagicMacro):
             if isinstance(_value, (WFunction, WMacro)):
                 _value.name = name
             scope[name] = _value
-            return WControl(expr=WList(WSymbol.get('quote'), _value))
+            return WReturnValue(expr=WList(WSymbol.get('quote'), _value))
 
-        return WControl(expr=expr, callback=callback)
+        return WEvalRequired(expr=expr, callback=callback)

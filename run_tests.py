@@ -7,7 +7,7 @@ import functions.eval
 from functions.eval import w_eval, eval_str
 from functions.exec_src import w_exec_src
 from functions.scope import create_global_scope, create_module_scope
-from wtypes.control import WControl
+from wtypes.control import WRaisedException
 from wtypes.exception import WException
 from wtypes.function import WFunction
 from functions.io import w_print
@@ -838,7 +838,7 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str("(assert false)", create_global_scope())
         # then
         self.assertIsNotNone(result)
-        self.assertIsInstance(result, WControl)
+        self.assertIsInstance(result, WRaisedException)
         self.assertIsNotNone(result.exception)
         self.assertIsInstance(result.exception, WException)
         self.assertEqual('Assertion failed: "false"',
@@ -849,7 +849,7 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str("(assert (< 3 1))", create_global_scope())
         # then
         self.assertIsNotNone(result)
-        self.assertIsInstance(result, WControl)
+        self.assertIsInstance(result, WRaisedException)
         self.assertIsNotNone(result.exception)
         self.assertIsInstance(result.exception, WException)
         self.assertEqual('Assertion failed: "(< 3 1)"',
@@ -975,7 +975,7 @@ class WodehouseTest(unittest.TestCase):
                           create_global_scope())
         # then
         self.assertIsNotNone(result)
-        self.assertIsInstance(result, WControl)
+        self.assertIsInstance(result, WRaisedException)
         self.assertIsNotNone(result.exception)
         self.assertIsInstance(result.exception, WException)
         self.assertEqual('this is the description',
@@ -1282,7 +1282,7 @@ class WodehouseTest(unittest.TestCase):
         result = eval_str('(/ 1 0)', create_global_scope())
         # then
         self.assertIsNotNone(result)
-        self.assertIsInstance(result, WControl)
+        self.assertIsInstance(result, WRaisedException)
         self.assertIsNotNone(result.exception)
         self.assertIsInstance(result.exception, WException)
 

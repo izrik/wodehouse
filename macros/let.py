@@ -1,5 +1,5 @@
 
-from wtypes.control import WControl
+from wtypes.control import WEvalRequired, WMacroExpansion
 from wtypes.magic_macro import WMagicMacro
 from wtypes.list import WList
 from wtypes.scope import WScope
@@ -40,11 +40,13 @@ class Let(WMagicMacro):
 
         def assign_next_var(_vardefs):
             if len(_vardefs) < 1:
-                return WControl(expr=retval, scope=scope2)
+                return WMacroExpansion(expr=retval, scope=scope2)
             _vardef = _vardefs.head
             _name, _expr = _vardef
-            return WControl(expr=_expr, scope=scope2,
-                            callback=var_evaluated(_name, _vardefs.remaining))
+            return WEvalRequired(
+                expr=_expr,
+                scope=scope2,
+                callback=var_evaluated(_name, _vardefs.remaining))
 
         def var_evaluated(_name, _vardefs):
             def _var_evaluated(_value):

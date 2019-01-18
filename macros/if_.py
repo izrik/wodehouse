@@ -1,5 +1,5 @@
 
-from wtypes.control import WControl
+from wtypes.control import WEvalRequired
 from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 from wtypes.scope import WScope
@@ -26,4 +26,4 @@ class If(WMagicMacro):
                 "Condition evaluated to a non-boolean value: "
                 "\"{}\" ({})".format(_cond_result, type(_cond_result)))
 
-        return WControl(expr=condition, callback=callback)
+        return WEvalRequired(expr=condition, callback=callback)

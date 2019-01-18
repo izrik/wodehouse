@@ -1,5 +1,6 @@
 from wtypes.callstack import WStackFrame
-from wtypes.control import WControl
+from wtypes.control import WControl, WRaisedException, WMacroExpansion, \
+    WReturnValue
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
 from functions.read import parse
@@ -84,11 +85,15 @@ def w_eval(expr, scope, stack=None):
             return rv
         if isinstance(rv, tuple):
             # magic macro returning (expr, scope)
-            return WControl(expr=rv[0], scope=rv[1])
+            return WMacroExpansion(expr=rv[0], scope=rv[1])
         if not isinstance(rv, WObject):
             raise Exception(f'Invalid return from magic function: '
                             f'{rv} ({type(rv)}')
         if not isinstance(rv, WControl):
+            return rv
+        if isinstance(rv, WReturnValue):
+            return rv
+        if isinstance(rv, WMacroExpansion):
             return rv
 
         if rv.callback:
@@ -108,7 +113,16 @@ def w_eval(expr, scope, stack=None):
         return rv
 
     def expand_macros(_expr, _scope):
+        if isinstance(_expr, WControl):
+            raise Exception(f'A control object was passed to expand_macros: '
+                            f'{_expr} ({type(_expr)})')
+        if _scope is not None and not isinstance(_scope, WScope):
+            raise Exception('A non-scope object was passed to expand_macros '
+                            f'as the scope: {_scope} ({type(_scope)})')
+
         if not isinstance(_expr, WList):
+            if _scope is not None:
+                return WMacroExpansion(_expr, _scope)
             return _expr
 
         _head = _expr.head
@@ -122,7 +136,10 @@ def w_eval(expr, scope, stack=None):
 
         _args = _expr.remaining
         if not isinstance(_evaled_head, WMacro):
-            return WList(_evaled_head, *_args)
+            _new_expr = WList(_evaled_head, *_args)
+            if _scope is not None:
+                return WMacroExpansion(_expr, _scope)
+            return _new_expr
 
         _rv = _evaled_head.call_macro(_args, scope=_scope)
         if is_exception(_rv, _stack=stack):
@@ -132,10 +149,10 @@ def w_eval(expr, scope, stack=None):
             return _rv2
 
         _expr2 = _rv2
-        if isinstance(_rv2, WControl):
+        if isinstance(_rv2, (WReturnValue, WMacroExpansion)):
             _expr2 = _rv2.expr
         _scope2 = _scope
-        if isinstance(_rv2, WControl) and _rv2.scope is not None:
+        if isinstance(_rv2, WMacroExpansion) and _rv2.scope is not None:
             _scope2 = _rv2.scope
         return expand_macros(_expr2, _scope2)
 
@@ -143,12 +160,17 @@ def w_eval(expr, scope, stack=None):
     if is_exception(rv, _stack=stack):
         return rv
 
-    if isinstance(rv, WControl):
+    if isinstance(rv, WMacroExpansion):
         expr = rv.expr
         if rv.scope is not None:
             scope = rv.scope
-    else:
+    elif isinstance(rv, WReturnValue):
+        expr = rv.expr
+    elif not isinstance(rv, WControl):
         expr = rv
+    else:
+        raise(f'Something strange returned from expand_macros: '
+              f'{rv} ({type(rv)})')
 
     if isinstance(expr, WList):
         head = expr.head
@@ -224,7 +246,7 @@ def eval_str(input_s, scope=None):
 
 
 def is_exception(rv, _stack=None):
-    if isinstance(rv, WControl) and rv.exception is not None:
+    if isinstance(rv, WRaisedException) and rv.exception is not None:
         if rv.stack is None:
             rv.stack = _stack
         return True

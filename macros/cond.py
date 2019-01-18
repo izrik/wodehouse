@@ -1,4 +1,4 @@
-from wtypes.control import WControl
+from wtypes.control import WEvalRequired
 from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
@@ -20,9 +20,9 @@ class Cond(WMagicMacro):
                 raise Exception("No condition evaluated to true.")
             _expr = _exprs.head
             condition, retval = _expr.values
-            return WControl(expr=condition,
-                            callback=condition_evaluated(retval,
-                                                         _exprs.remaining))
+            return WEvalRequired(
+                expr=condition,
+                callback=condition_evaluated(retval, _exprs.remaining))
 
         def condition_evaluated(_retval, _exprs):
             def _condition_evaluated(_cond_result):
@@ -33,6 +33,7 @@ class Cond(WMagicMacro):
                 raise Exception(
                     "Condition evaluated to a non-boolean value: "
                     "\"{}\" ({})".format(_cond_result, type(_cond_result)))
+
             return _condition_evaluated
 
         return run_next_expr(exprs)
