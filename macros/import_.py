@@ -51,10 +51,10 @@ class Import(WMagicMacro):
             else:
                 from functions.exec_src import w_exec_src
                 gs = scope.get_global_scope()
-                imported_ms = w_exec_src(src, global_scope=gs,
-                                         filename=filename)
-                if is_exception(imported_ms):
-                    return imported_ms
+                rv = w_exec_src(src, global_scope=gs, filename=filename)
+                if is_exception(rv):
+                    return rv
+                imported_ms = rv
                 _global_import_cache[h] = imported_ms
 
             basename = os.path.splitext(filename.value)[0]
