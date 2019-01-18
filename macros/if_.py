@@ -1,5 +1,5 @@
 
-from wtypes.control import WEvalRequired
+from wtypes.control import WEvalRequired, WReturnValue
 from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 from wtypes.scope import WScope
@@ -19,9 +19,9 @@ class If(WMagicMacro):
 
         def callback(_cond_result):
             if _cond_result is WBoolean.true:
-                return true_retval
+                return WReturnValue(true_retval)
             if _cond_result is WBoolean.false:
-                return false_retval
+                return WReturnValue(false_retval)
             raise Exception(
                 "Condition evaluated to a non-boolean value: "
                 "\"{}\" ({})".format(_cond_result, type(_cond_result)))
