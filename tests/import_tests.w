@@ -1,6 +1,6 @@
 
 (assert (not (in 'example (list_scope __module__))))
-(import "example.w")
+(import example)
 (assert (in 'example (list_scope __module__)))
 (assert (isinstance example 'Scope))
 #(assert (eq (list_scope example) '(import __module__ something define)))
@@ -15,7 +15,7 @@
 # given
 (assert (not (in 'something (list_scope __module__))))
 # when
-(import "example.w" something)
+(import example something)
 # then
 (assert (in 'something (list_scope __module__)))
 (assert (eq something "abc"))
@@ -26,7 +26,7 @@
 (define example_one example)
 (assert (eq example example_one))
 # when
-(import "example.w")
+(import example)
 # then
 (define example_two example)
 (assert (eq example_one example_two))

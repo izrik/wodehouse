@@ -1,4 +1,4 @@
-(import "wodehouse.w" read_string read_string_char)
+(import wodehouse read_string read_string_char)
 
 (assert
     (eq (read_string_char (stream "\""))

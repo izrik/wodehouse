@@ -1,4 +1,4 @@
-(import "wodehouse.w" read_list)
+(import wodehouse read_list)
 
 (assert
     (eq (read_list (stream "()"))

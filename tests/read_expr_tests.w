@@ -1,4 +1,4 @@
-(import "wodehouse.w" read_expr)
+(import wodehouse read_expr)
 
 (assert
     (eq (read_expr (stream "123"))

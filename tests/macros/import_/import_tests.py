@@ -9,19 +9,26 @@ from wtypes.scope import WScope
 from wtypes.symbol import WSymbol
 
 
+class StaticLoader(Import.DefaultLoader):
+    def __init__(self, s):
+        self.s = s
+
+    def load(self, module_name):
+        return self.s
+
+
 class ImportTest(TestCase):
 
     def test_import_imports_names(self):
         # given
-        def loader(filename):
-            return "(define x 1) (define y 2)"
+        loader = StaticLoader("(define x 1) (define y 2)")
 
         gs = WScope({
             'import': Import(loader=loader),
             'define': Define(),
         })
         # when
-        result = w_exec_src("(import \"file\" x)", filename="<test>",
+        result = w_exec_src("(import file x)", filename="<test>",
                             global_scope=gs)
         # then
         self.assertIsInstance(result, WScope)
@@ -38,13 +45,12 @@ class ImportTest(TestCase):
 
     def test_import_imported_names_quoted_symbols_are_not_resolved(self):
         # given
-        def loader(filename):
-            return "(define x 'y) (define y 2)"
+        loader = StaticLoader("(define x 'y) (define y 2)")
 
         gs = create_global_scope()
         gs['import'] = Import(loader=loader)
         # when
-        result = w_exec_src("(import \"file\" x)", filename="<test>",
+        result = w_exec_src("(import file x)", filename="<test>",
                             global_scope=gs)
         # then
         self.assertIsInstance(result, WScope)
@@ -54,18 +60,17 @@ class ImportTest(TestCase):
 
     def test_defining_names_in_importing_files_not_affect_imported_files(self):
         # given
-        def loader(filename):
-            return """
+        loader = StaticLoader("""
                 (define x
                 (lambda () y))
 
                 (define y 2)
-            """
+            """)
 
         gs = create_global_scope()
         gs['import'] = Import(loader=loader)
         # when
-        result = w_exec_src("(import \"file\" x) (define y 3) (define z (x))",
+        result = w_exec_src("(import file x) (define y 3) (define z (x))",
                             filename="<test>", global_scope=gs)
         # then
         self.assertIsInstance(result, WScope)
