@@ -83,9 +83,6 @@ def w_eval(expr, scope, stack=None):
     def eval_for_magic(rv, s):
         if is_exception(rv, stack):
             return rv
-        if isinstance(rv, tuple):
-            # magic macro returning (expr, scope)
-            return WMacroExpansion(expr=rv[0], scope=rv[1])
         if not isinstance(rv, WObject):
             raise Exception(f'Invalid return from magic function: '
                             f'{rv} ({type(rv)}')

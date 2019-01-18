@@ -1,3 +1,4 @@
+from wtypes.control import WReturnValue
 from wtypes.function import WFunction
 from wtypes.magic_macro import WMagicMacro
 from wtypes.list import WList
@@ -26,4 +27,4 @@ class WLambda(WMagicMacro):
                 "symbols.")
         expr = exprs[1]
 
-        return WFunction(args, expr, enclosing_scope=scope), scope
+        return WReturnValue(WFunction(args, expr, enclosing_scope=scope))

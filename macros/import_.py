@@ -2,7 +2,7 @@ import os
 
 from functions.eval import is_exception
 from functions.hash import w_hash
-from wtypes.control import WEvalRequired
+from wtypes.control import WEvalRequired, WReturnValue
 from wtypes.magic_macro import WMagicMacro
 from wtypes.scope import WScope
 from wtypes.string import WString
@@ -61,6 +61,6 @@ class Import(WMagicMacro):
             scope[basename] = imported_ms
             for impname in import_names:
                 scope[impname] = imported_ms[impname]
-            return imported_ms, scope
+            return WReturnValue(imported_ms)
 
         return WEvalRequired(expr=filename, callback=callback)
