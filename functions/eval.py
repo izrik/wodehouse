@@ -84,27 +84,27 @@ def w_eval(expr, scope, stack=None):
         return rv
 
     if isinstance(rv, WMacroExpansion):
-        expr = rv.expr
+        expanded_expr = rv.expr
         if rv.scope is not None:
             scope = rv.scope
     elif isinstance(rv, WReturnValue):
-        expr = rv.expr
+        expanded_expr = rv.expr
     elif not isinstance(rv, WControl):
-        expr = rv
+        expanded_expr = rv
     else:
         raise Exception(f'Something strange returned from expand_macros: '
                         f'{rv} ({type(rv)})')
 
-    if isinstance(expr, WList):
-        head = expr.head
+    if isinstance(expanded_expr, WList):
+        head = expanded_expr.head
         if head == WSymbol.get('quote'):
             # TODO: more checks (e.g. make sure second is there)
-            return expr.second
+            return expanded_expr.second
         callee = w_eval(head, scope, stack=stack)
         stack.callee = callee
         if is_exception(callee, stack):
             return callee
-        args = expr.remaining
+        args = expanded_expr.remaining
         if not isinstance(callee, WFunction):
             raise Exception(
                 'Callee is not a function. Got "{}" ({}) instead.'.format(
@@ -134,19 +134,20 @@ def w_eval(expr, scope, stack=None):
         frv = w_eval(callee.expr, fscope, stack=stack)
         is_exception(frv, stack)  # set the stack attribute
         return frv
-    if isinstance(expr, WSymbol):
+    if isinstance(expanded_expr, WSymbol):
         scope2 = scope
-        if expr not in scope2:
+        if expanded_expr not in scope2:
             scope2 = scope2.get_global_scope()
-        if scope2 is None or expr not in scope2:
+        if scope2 is None or expanded_expr not in scope2:
             raise NameError(
-                'No object found by the name of "{}"'.format(expr.name))
-        value = scope2[expr]
+                f'No object found by the name of "{expanded_expr.name}"')
+        value = scope2[expanded_expr]
         return value
-    if isinstance(expr, (WNumber, WString, WBoolean, WFunction, WMacro,
-                         WScope)):
-        return expr
-    raise Exception('Unknown object type: "{}" ({})'.format(expr, type(expr)))
+    if isinstance(expanded_expr, (WNumber, WString, WBoolean, WFunction,
+                                  WMacro, WScope)):
+        return expanded_expr
+    raise Exception(f'Unknown object type: '
+                    f'"{expanded_expr}" ({type(expanded_expr)})')
 
 
 _eval_source = w_eval.__doc__
