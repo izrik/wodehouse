@@ -165,8 +165,8 @@ def w_eval(expr, scope, stack=None):
     elif not isinstance(rv, WControl):
         expr = rv
     else:
-        raise(f'Something strange returned from expand_macros: '
-              f'{rv} ({type(rv)})')
+        raise Exception(f'Something strange returned from expand_macros: '
+                        f'{rv} ({type(rv)})')
 
     if isinstance(expr, WList):
         head = expr.head
