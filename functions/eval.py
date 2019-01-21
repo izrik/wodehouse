@@ -123,14 +123,14 @@ def w_eval(expr, scope, stack=None):
             raise Exception(
                 'Function expected {} args, got {} instead.'.format(
                     len(callee.parameters), len(evaled_args)))
-        fscope = WScope(enclosing_scope=callee.enclosing_scope)
-        for i, argname in enumerate(callee.parameters):
-            fscope[argname] = evaled_args[i]
 
         if isinstance(callee, WMagicFunction):
             rv1 = callee.call_magic_function(*evaled_args)
             return eval_for_magic(rv1, scope, stack=stack)
 
+        fscope = WScope(enclosing_scope=callee.enclosing_scope)
+        for i, argname in enumerate(callee.parameters):
+            fscope[argname] = evaled_args[i]
         frv = w_eval(callee.expr, fscope, stack=stack)
         is_exception(frv, stack)  # set the stack attribute
         return frv
