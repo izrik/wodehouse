@@ -1,6 +1,6 @@
 from wtypes.callstack import WStackFrame
 from wtypes.control import WControl, WRaisedException, WMacroExpansion, \
-    WReturnValue
+    WReturnValue, WEvalRequired
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
 from functions.read import parse
@@ -91,6 +91,9 @@ def w_eval(expr, scope, stack=None):
             return rv
         if isinstance(rv, WMacroExpansion):
             return rv
+        if not isinstance(rv, WEvalRequired):
+            raise Exception(f'Invalid return from magic function: '
+                            f'{rv} ({type(rv)}')
 
         if rv.callback:
             if rv.expr is None:
