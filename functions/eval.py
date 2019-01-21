@@ -80,7 +80,7 @@ def w_eval(expr, scope, stack=None):
     stack = WStackFrame(expr=expr, prev=stack)
 
     rv = expand_macros(expr, scope, stack=stack)
-    if is_exception(rv, _stack=stack):
+    if is_exception(rv, stack=stack):
         return rv
 
     if isinstance(rv, WMacroExpansion):
@@ -215,10 +215,10 @@ def expand_macros(expr, scope, stack):
         return new_expr
 
     rv = evaled_head.call_macro(args, scope=scope)
-    if is_exception(rv, _stack=stack):
+    if is_exception(rv, stack=stack):
         return rv
     rv2 = eval_for_magic(rv, scope, stack=stack)
-    if is_exception(rv2, _stack=stack):
+    if is_exception(rv2, stack=stack):
         return rv2
 
     expr2 = rv2
@@ -241,9 +241,9 @@ def eval_str(input_s, scope=None):
     return value
 
 
-def is_exception(rv, _stack=None):
+def is_exception(rv, stack=None):
     if isinstance(rv, WRaisedException) and rv.exception is not None:
         if rv.stack is None:
-            rv.stack = _stack
+            rv.stack = stack
         return True
     return False
