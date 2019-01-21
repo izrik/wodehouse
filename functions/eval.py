@@ -79,38 +79,6 @@ def w_eval(expr, scope, stack=None):
             'Got "{}" ({}).'.format(expr, type(expr)))
     stack = WStackFrame(expr=expr, prev=stack)
 
-    def eval_for_magic(rv, s):
-        if is_exception(rv, stack):
-            return rv
-        if not isinstance(rv, WObject):
-            raise Exception(f'Invalid return from magic function: '
-                            f'{rv} ({type(rv)}')
-        if not isinstance(rv, WControl):
-            return rv
-        if isinstance(rv, WReturnValue):
-            return rv
-        if isinstance(rv, WMacroExpansion):
-            return rv
-        if not isinstance(rv, WEvalRequired):
-            raise Exception(f'Invalid return from magic function: '
-                            f'{rv} ({type(rv)}')
-
-        if rv.callback:
-            if rv.expr is None:
-                raise Exception(f'No value given for the '
-                                f'callback: {rv.callback}')
-            s2 = s
-            if rv.scope is not None:
-                s2 = rv.scope
-            e2 = w_eval(rv.expr, s2, stack=stack)
-            if is_exception(e2, stack):
-                return e2
-            return eval_for_magic(rv.callback(e2), s)
-        if rv.expr is None:
-            raise Exception(f'Not sure what to do with the control: '
-                            f'{rv}')
-        return rv
-
     def expand_macros(_expr, _scope):
         if isinstance(_expr, WControl):
             raise Exception(f'A control object was passed to expand_macros: '
@@ -143,7 +111,7 @@ def w_eval(expr, scope, stack=None):
         _rv = _evaled_head.call_macro(_args, scope=_scope)
         if is_exception(_rv, _stack=stack):
             return _rv
-        _rv2 = eval_for_magic(_rv, _scope)
+        _rv2 = eval_for_magic(_rv, _scope, stack=stack)
         if is_exception(_rv2, _stack=stack):
             return _rv2
 
@@ -205,7 +173,7 @@ def w_eval(expr, scope, stack=None):
 
         if isinstance(callee, WMagicFunction):
             rv1 = callee.call_magic_function(*evaled_args)
-            return eval_for_magic(rv1, scope)
+            return eval_for_magic(rv1, scope, stack=stack)
 
         frv = w_eval(callee.expr, fscope, stack=stack)
         is_exception(frv, stack)  # set the stack attribute
@@ -226,6 +194,39 @@ def w_eval(expr, scope, stack=None):
 
 
 _eval_source = w_eval.__doc__
+
+
+def eval_for_magic(control, scope, stack):
+    if is_exception(control, stack):
+        return control
+    if not isinstance(control, WObject):
+        raise Exception(f'Invalid return from magic function: '
+                        f'{control} ({type(control)}')
+    if not isinstance(control, WControl):
+        return control
+    if isinstance(control, WReturnValue):
+        return control
+    if isinstance(control, WMacroExpansion):
+        return control
+    if not isinstance(control, WEvalRequired):
+        raise Exception(f'Invalid return from magic function: '
+                        f'{control} ({type(control)}')
+
+    if control.callback:
+        if control.expr is None:
+            raise Exception(f'No value given for the '
+                            f'callback: {control.callback}')
+        scope2 = scope
+        if control.scope is not None:
+            scope2 = control.scope
+        control2 = w_eval(control.expr, scope2, stack=stack)
+        if is_exception(control2, stack):
+            return control2
+        return eval_for_magic(control.callback(control2), scope, stack=stack)
+    if control.expr is None:
+        raise Exception(f'Not sure what to do with the control: '
+                        f'{control}')
+    return control
 
 
 def eval_str(input_s, scope=None):
