@@ -83,10 +83,11 @@ def w_eval(expr, scope, stack=None):
     if is_exception(rv, stack=stack):
         return rv
 
+    expanded_scope = scope
     if isinstance(rv, WMacroExpansion):
         expanded_expr = rv.expr
         if rv.scope is not None:
-            scope = rv.scope
+            expanded_scope = rv.scope
     elif isinstance(rv, WReturnValue):
         expanded_expr = rv.expr
     elif not isinstance(rv, WControl):
@@ -100,7 +101,7 @@ def w_eval(expr, scope, stack=None):
         if head == WSymbol.get('quote'):
             # TODO: more checks (e.g. make sure second is there)
             return expanded_expr.second
-        callee = w_eval(head, scope, stack=stack)
+        callee = w_eval(head, expanded_scope, stack=stack)
         stack.callee = callee
         if is_exception(callee, stack):
             return callee
@@ -112,7 +113,7 @@ def w_eval(expr, scope, stack=None):
 
         evaled_args = []
         for arg in args:
-            evaled_arg = w_eval(arg, scope, stack=stack)
+            evaled_arg = w_eval(arg, expanded_scope, stack=stack)
             if is_exception(evaled_arg, stack):
                 return evaled_arg
             evaled_args.append(evaled_arg)
@@ -126,7 +127,7 @@ def w_eval(expr, scope, stack=None):
 
         if isinstance(callee, WMagicFunction):
             rv1 = callee.call_magic_function(*evaled_args)
-            return eval_for_magic(rv1, scope, stack=stack)
+            return eval_for_magic(rv1, expanded_scope, stack=stack)
 
         fscope = WScope(enclosing_scope=callee.enclosing_scope)
         for i, argname in enumerate(callee.parameters):
@@ -135,7 +136,7 @@ def w_eval(expr, scope, stack=None):
         is_exception(frv, stack)  # set the stack attribute
         return frv
     if isinstance(expanded_expr, WSymbol):
-        scope2 = scope
+        scope2 = expanded_scope
         if expanded_expr not in scope2:
             scope2 = scope2.get_global_scope()
         if scope2 is None or expanded_expr not in scope2:
