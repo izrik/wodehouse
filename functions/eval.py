@@ -79,51 +79,7 @@ def w_eval(expr, scope, stack=None):
             'Got "{}" ({}).'.format(expr, type(expr)))
     stack = WStackFrame(expr=expr, prev=stack)
 
-    def expand_macros(_expr, _scope):
-        if isinstance(_expr, WControl):
-            raise Exception(f'A control object was passed to expand_macros: '
-                            f'{_expr} ({type(_expr)})')
-        if _scope is not None and not isinstance(_scope, WScope):
-            raise Exception('A non-scope object was passed to expand_macros '
-                            f'as the scope: {_scope} ({type(_scope)})')
-
-        if not isinstance(_expr, WList):
-            if _scope is not None:
-                return WMacroExpansion(_expr, _scope)
-            return _expr
-
-        _head = _expr.head
-
-        if _head == WSymbol.get('quote'):
-            return _expr
-
-        _evaled_head = w_eval(_head, _scope, stack=stack)
-        if is_exception(_evaled_head, stack):
-            return _evaled_head
-
-        _args = _expr.remaining
-        if not isinstance(_evaled_head, WMacro):
-            _new_expr = WList(_evaled_head, *_args)
-            if _scope is not None:
-                return WMacroExpansion(_expr, _scope)
-            return _new_expr
-
-        _rv = _evaled_head.call_macro(_args, scope=_scope)
-        if is_exception(_rv, _stack=stack):
-            return _rv
-        _rv2 = eval_for_magic(_rv, _scope, stack=stack)
-        if is_exception(_rv2, _stack=stack):
-            return _rv2
-
-        _expr2 = _rv2
-        if isinstance(_rv2, (WReturnValue, WMacroExpansion)):
-            _expr2 = _rv2.expr
-        _scope2 = _scope
-        if isinstance(_rv2, WMacroExpansion) and _rv2.scope is not None:
-            _scope2 = _rv2.scope
-        return expand_macros(_expr2, _scope2)
-
-    rv = expand_macros(expr, scope)
+    rv = expand_macros(expr, scope, stack=stack)
     if is_exception(rv, _stack=stack):
         return rv
 
@@ -179,13 +135,13 @@ def w_eval(expr, scope, stack=None):
         is_exception(frv, stack)  # set the stack attribute
         return frv
     if isinstance(expr, WSymbol):
-        _scope = scope
-        if expr not in _scope:
-            _scope = _scope.get_global_scope()
-        if _scope is None or expr not in _scope:
+        scope2 = scope
+        if expr not in scope2:
+            scope2 = scope2.get_global_scope()
+        if scope2 is None or expr not in scope2:
             raise NameError(
                 'No object found by the name of "{}"'.format(expr.name))
-        value = _scope[expr]
+        value = scope2[expr]
         return value
     if isinstance(expr, (WNumber, WString, WBoolean, WFunction, WMacro,
                          WScope)):
@@ -227,6 +183,51 @@ def eval_for_magic(control, scope, stack):
         raise Exception(f'Not sure what to do with the control: '
                         f'{control}')
     return control
+
+
+def expand_macros(expr, scope, stack):
+    if isinstance(expr, WControl):
+        raise Exception(f'A control object was passed to expand_macros: '
+                        f'{expr} ({type(expr)})')
+    if scope is not None and not isinstance(scope, WScope):
+        raise Exception('A non-scope object was passed to expand_macros '
+                        f'as the scope: {scope} ({type(scope)})')
+
+    if not isinstance(expr, WList):
+        if scope is not None:
+            return WMacroExpansion(expr, scope)
+        return expr
+
+    head = expr.head
+
+    if head == WSymbol.get('quote'):
+        return expr
+
+    evaled_head = w_eval(head, scope, stack=stack)
+    if is_exception(evaled_head, stack):
+        return evaled_head
+
+    args = expr.remaining
+    if not isinstance(evaled_head, WMacro):
+        new_expr = WList(evaled_head, *args)
+        if scope is not None:
+            return WMacroExpansion(expr, scope)
+        return new_expr
+
+    rv = evaled_head.call_macro(args, scope=scope)
+    if is_exception(rv, _stack=stack):
+        return rv
+    rv2 = eval_for_magic(rv, scope, stack=stack)
+    if is_exception(rv2, _stack=stack):
+        return rv2
+
+    expr2 = rv2
+    if isinstance(rv2, (WReturnValue, WMacroExpansion)):
+        expr2 = rv2.expr
+    scope2 = scope
+    if isinstance(rv2, WMacroExpansion) and rv2.scope is not None:
+        scope2 = rv2.scope
+    return expand_macros(expr2, scope2, stack=stack)
 
 
 def eval_str(input_s, scope=None):
