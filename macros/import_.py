@@ -1,12 +1,11 @@
-
 from functions.eval import is_exception
-from functions.hash import w_hash
 from wtypes.control import WReturnValue
 from wtypes.magic_macro import WMagicMacro
 from wtypes.scope import WScope
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
+# TODO: make this something other than a static global variable
 _global_import_cache = WScope()
 
 
@@ -46,20 +45,18 @@ class Import(WMagicMacro):
                     "Got \"{}\" ({}) instead.".format(impname,
                                                       type(impname)))
 
-        src = WString(self.loader.load(module_name))
-
-        h = w_hash(src)
-        if h in _global_import_cache:
-            imported_ms = _global_import_cache[h]
+        if module_name in _global_import_cache:
+            imported_ms = _global_import_cache[module_name]
         else:
             from functions.exec_src import w_exec_src
             gs = scope.get_global_scope()
             filename = self.loader.get_filename_from_module_name(module_name)
+            src = WString(self.loader.load(module_name))
             rv = w_exec_src(src, global_scope=gs, filename=filename)
             if is_exception(rv):
                 return rv
             imported_ms = rv
-            _global_import_cache[h] = imported_ms
+            _global_import_cache[module_name] = imported_ms
 
         scope[module_name] = imported_ms
         for impname in import_names:

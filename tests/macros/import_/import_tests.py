@@ -4,6 +4,7 @@ from functions.exec_src import w_exec_src
 from functions.scope import create_global_scope
 from macros.define import Define
 from macros.import_ import Import
+import macros.import_
 from wtypes.function import WFunction
 from wtypes.scope import WScope
 from wtypes.symbol import WSymbol
@@ -21,6 +22,7 @@ class ImportTest(TestCase):
 
     def test_import_imports_names(self):
         # given
+        macros.import_._global_import_cache = WScope()  # clear the cache
         loader = StaticLoader("(define x 1) (define y 2)")
 
         gs = WScope({
@@ -45,6 +47,7 @@ class ImportTest(TestCase):
 
     def test_import_imported_names_quoted_symbols_are_not_resolved(self):
         # given
+        macros.import_._global_import_cache = WScope()  # clear the cache
         loader = StaticLoader("(define x 'y) (define y 2)")
 
         gs = create_global_scope()
@@ -60,6 +63,7 @@ class ImportTest(TestCase):
 
     def test_defining_names_in_importing_files_not_affect_imported_files(self):
         # given
+        macros.import_._global_import_cache = WScope()  # clear the cache
         loader = StaticLoader("""
                 (define x
                 (lambda () y))
