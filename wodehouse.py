@@ -109,25 +109,31 @@ def run_file(filename):
         def format_stacktrace(_stack):
             frames = []
             while _stack is not None:
-                pos = _stack.expr.position
+                expr = _stack.expanded_expr
+                if not expr:
+                    expr = _stack.expr
+                if not expr:
+                    _stack = _stack.prev
+                    continue
+                pos = expr.position
                 filename = pos.filename or '<unknown>'
                 line = pos.line or '<unknown>'
-                expansion = str(_stack.expr)
+                expansion = pos.get_source_line()
                 if len(expansion) > 64:
                     expansion = expansion[0:60] + ' ...'
                 frames.append(
-                    f'File {filename}, line {line}, in '
-                    f'{_stack.get_callable()}\n'
-                    f'  {expansion}')
+                    f'  File "{filename}", line {line}, in '
+                    f'{_stack.get_location()}\n'
+                    f'    {expansion}')
                 _stack = _stack.prev
             frames.reverse()
             return '\n'.join(frames)
 
         stacktrace = format_stacktrace(rv.stack)
-        print(f'Un-caught exception caused termination: '
-              f'"{rv.exception.message}"')
         print('Stacktrace (most recent call last):')
         print(stacktrace)
+        print(f'Un-caught exception caused termination: '
+              f'"{rv.exception.message}"')
 
 
 def main():

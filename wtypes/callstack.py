@@ -1,24 +1,31 @@
-from wtypes.function import WFunction
-from wtypes.macro import WMacro
-from wtypes.magic_function import WMagicFunction
-from wtypes.magic_macro import WMagicMacro
 from wtypes.object import WObject
 
 
 class WStackFrame(WObject):
-    def __init__(self, expr, prev):
-        super().__init__()
-        self.expr = expr
-        self.prev = prev
-        self.callee = None
 
-    def get_callable(self):
-        if self.callee is not None:
-            return self.callee
-        head = self.expr.head
-        if not isinstance(head, (WMagicFunction, WMagicMacro)) and \
-                isinstance(head, (WFunction, WMacro)):
-            return head
-        if self.prev is None:
-            return '<module>'
-        return self.prev.get_callable()
+    location = None
+    expr = None
+    scope = None
+    expanded_expr = None
+    expanded_scope = None
+    callee = None
+    args = None
+    evaled_args = None
+    fscope = None
+
+    def __str__(self):
+        return f'location={self.location}, expr={self.expr}, ' \
+               f'scope={self.scope}, expanded_expr={self.expanded_expr}, ' \
+               f'expanded_scope={self.expanded_scope}, ' \
+               f'callee={self.callee}, args={self.args}, ' \
+               f'evaled_args={self.evaled_args}, fscope={self.fscope}'
+
+    def __init__(self, location, prev):
+        super().__init__()
+        self.location = location
+        self.prev = prev
+
+    def get_location(self):
+        if self.location is not None:
+            return self.location
+        return '<module>'

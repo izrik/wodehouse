@@ -77,7 +77,11 @@ def w_eval(expr, scope, stack=None):
         raise Exception(
             'Non-domain value escaped from containment! '
             'Got "{}" ({}).'.format(expr, type(expr)))
-    stack = WStackFrame(expr=expr, prev=stack)
+    if stack is None:
+        stack = WStackFrame(location=None, prev=stack)
+
+    stack.expr = expr
+    stack.scope = scope
 
     rv = expand_macros(expr, scope, stack=stack)
     if is_exception(rv, stack=stack):
@@ -96,27 +100,36 @@ def w_eval(expr, scope, stack=None):
         raise Exception(f'Something strange returned from expand_macros: '
                         f'{rv} ({type(rv)})')
 
+    stack.expanded_expr = expanded_expr
+    stack.expanded_scope = expanded_scope
+
     if isinstance(expanded_expr, WList):
         head = expanded_expr.head
         if head == WSymbol.get('quote'):
             # TODO: more checks (e.g. make sure second is there)
             return expanded_expr.second
-        callee = w_eval(head, expanded_scope, stack=stack)
-        stack.callee = callee
-        if is_exception(callee, stack):
+
+        cstack = WStackFrame(location=stack.location, prev=stack.prev)
+        callee = w_eval(head, expanded_scope, stack=cstack)
+        if is_exception(callee, cstack):
             return callee
-        args = expanded_expr.remaining
         if not isinstance(callee, WFunction):
             raise Exception(
                 'Callee is not a function. Got "{}" ({}) instead.'.format(
                     callee, type(callee)))
+        stack.callee = callee
+
+        args = expanded_expr.remaining
+        stack.args = args
 
         evaled_args = []
         for arg in args:
-            evaled_arg = w_eval(arg, expanded_scope, stack=stack)
-            if is_exception(evaled_arg, stack):
+            astack = WStackFrame(location=stack.location, prev=stack.prev)
+            evaled_arg = w_eval(arg, expanded_scope, stack=astack)
+            if is_exception(evaled_arg, astack):
                 return evaled_arg
             evaled_args.append(evaled_arg)
+        stack.evaled_args = evaled_args
 
         if (callee.check_args and
                 callee.num_parameters is not None and
@@ -125,15 +138,18 @@ def w_eval(expr, scope, stack=None):
                 'Function expected {} args, got {} instead.'.format(
                     len(callee.parameters), len(evaled_args)))
 
+        fstack = WStackFrame(location=callee, prev=stack)
+
         if isinstance(callee, WMagicFunction):
             rv1 = callee.call_magic_function(*evaled_args)
-            return eval_for_magic(rv1, expanded_scope, stack=stack)
+            return eval_for_magic(rv1, expanded_scope, stack=fstack)
 
         fscope = WScope(enclosing_scope=callee.enclosing_scope)
         for i, argname in enumerate(callee.parameters):
             fscope[argname] = evaled_args[i]
-        frv = w_eval(callee.expr, fscope, stack=stack)
-        is_exception(frv, stack)  # set the stack attribute
+        stack.fscope = fscope
+        frv = w_eval(callee.expr, fscope, stack=fstack)
+        is_exception(frv, fstack)  # set the stack attribute
         return frv
     if isinstance(expanded_expr, WSymbol):
         scope2 = expanded_scope
@@ -205,8 +221,9 @@ def expand_macros(expr, scope, stack):
     if head == WSymbol.get('quote'):
         return expr
 
-    evaled_head = w_eval(head, scope, stack=stack)
-    if is_exception(evaled_head, stack):
+    hstack = WStackFrame(location=stack.location, prev=stack.prev)
+    evaled_head = w_eval(head, scope, stack=hstack)
+    if is_exception(evaled_head, hstack):
         return evaled_head
 
     args = expr.remaining
@@ -216,11 +233,12 @@ def expand_macros(expr, scope, stack):
             return WMacroExpansion(expr, scope)
         return new_expr
 
+    mstack = WStackFrame(location=evaled_head, prev=stack.prev)
     rv = evaled_head.call_macro(args, scope=scope)
-    if is_exception(rv, stack=stack):
+    if is_exception(rv, stack=mstack):
         return rv
-    rv2 = eval_for_magic(rv, scope, stack=stack)
-    if is_exception(rv2, stack=stack):
+    rv2 = eval_for_magic(rv, scope, stack=mstack)
+    if is_exception(rv2, stack=mstack):
         return rv2
 
     expr2 = rv2
