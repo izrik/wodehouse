@@ -3,4 +3,7 @@ from wtypes.exception import WException
 
 
 def w_raise(description):
-    return WRaisedException(exception=WException(description))
+    exc = description
+    if not isinstance(exc, WException):
+        exc = WException(description)
+    return WRaisedException(exception=exc)

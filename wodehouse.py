@@ -85,8 +85,15 @@ def repl(prompt=None):
                 break
             if input_s.strip() == '':
                 continue
-            value = eval_str(input_s, scope)
-            repl_print(value)
+            rv = eval_str(input_s, scope)
+            if is_exception(rv):
+                stacktrace = format_stacktrace(rv.stack,
+                                               default_filename='<stdin>')
+                print('Stacktrace (most recent call last):')
+                print(stacktrace)
+                print(f'Exception: {rv.exception.message.value}')
+            else:
+                repl_print(rv)
         except EOFError:
             print('')
             break
@@ -100,40 +107,42 @@ def repl(prompt=None):
                 print('  ' + line, end='')
 
 
+def format_stacktrace(stack, default_filename=None):
+    if default_filename is None:
+        default_filename = '<unknown>'
+    frames = []
+    while stack is not None:
+        expr = stack.expanded_expr
+        if not expr:
+            expr = stack.expr
+        if not expr:
+            stack = stack.prev
+            continue
+        pos = expr.position
+        filename = pos.filename or default_filename
+        line = pos.line or '<unknown>'
+        expansion = pos.get_source_line().strip()
+        if len(expansion) > 64:
+            expansion = expansion[0:60] + ' ...'
+        frames.append(
+            f'  File "{filename}", line {line}, in '
+            f'{stack.get_location()}\n'
+            f'    {expansion}')
+        stack = stack.prev
+    frames.reverse()
+    return '\n'.join(frames)
+
+
 def run_file(filename):
     with open(filename) as f:
         src = f.read()
     gs = create_global_scope()
     rv = w_exec_src(src, global_scope=gs, filename=filename)
     if is_exception(rv):
-        def format_stacktrace(_stack):
-            frames = []
-            while _stack is not None:
-                expr = _stack.expanded_expr
-                if not expr:
-                    expr = _stack.expr
-                if not expr:
-                    _stack = _stack.prev
-                    continue
-                pos = expr.position
-                filename = pos.filename or '<unknown>'
-                line = pos.line or '<unknown>'
-                expansion = pos.get_source_line()
-                if len(expansion) > 64:
-                    expansion = expansion[0:60] + ' ...'
-                frames.append(
-                    f'  File "{filename}", line {line}, in '
-                    f'{_stack.get_location()}\n'
-                    f'    {expansion}')
-                _stack = _stack.prev
-            frames.reverse()
-            return '\n'.join(frames)
-
         stacktrace = format_stacktrace(rv.stack)
         print('Stacktrace (most recent call last):')
         print(stacktrace)
-        print(f'Un-caught exception caused termination: '
-              f'"{rv.exception.message}"')
+        print(f'Exception: {rv.exception.message.value}')
 
 
 def main():
