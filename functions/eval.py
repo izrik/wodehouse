@@ -1,6 +1,7 @@
+from functions.exec_src import w_exec_src
 from wtypes.callstack import WStackFrame
 from wtypes.control import WControl, WRaisedException, WMacroExpansion, \
-    WReturnValue, WEvalRequired
+    WReturnValue, WEvalRequired, WExecSrcRequired
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
 from functions.read import parse
@@ -78,7 +79,7 @@ def w_eval(expr, scope, stack=None):
             'Non-domain value escaped from containment! '
             'Got "{}" ({}).'.format(expr, type(expr)))
     if stack is None:
-        stack = WStackFrame(location=None, prev=stack)
+        stack = WStackFrame(location=None, prev=None)
 
     stack.expr = expr
     stack.scope = scope
@@ -182,9 +183,16 @@ def eval_for_magic(control, scope, stack):
         return control
     if isinstance(control, WMacroExpansion):
         return control
-    if not isinstance(control, WEvalRequired):
+    if not isinstance(control, (WEvalRequired, WExecSrcRequired)):
         raise Exception(f'Invalid return from magic function: '
                         f'{control} ({type(control)}')
+
+    if isinstance(control, WExecSrcRequired):
+        ms = w_exec_src(src=control.src, global_scope=control.global_scope,
+                        filename=control.filename, prevstack=stack)
+        if is_exception(ms, stack):
+            return ms
+        return eval_for_magic(control.callback(ms), scope, stack)
 
     if control.callback:
         if control.expr is None:
@@ -193,10 +201,13 @@ def eval_for_magic(control, scope, stack):
         scope2 = scope
         if control.scope is not None:
             scope2 = control.scope
-        control2 = w_eval(control.expr, scope2, stack=stack)
-        if is_exception(control2, stack):
+        stack2 = stack
+        if control.hide_callee_stack_frame:
+            stack2 = stack2.prev
+        control2 = w_eval(control.expr, scope2, stack=stack2)
+        if is_exception(control2, stack2):
             return control2
-        return eval_for_magic(control.callback(control2), scope, stack=stack)
+        return eval_for_magic(control.callback(control2), scope, stack=stack2)
     if control.expr is None:
         raise Exception(f'Not sure what to do with the control: '
                         f'{control}')
@@ -233,7 +244,7 @@ def expand_macros(expr, scope, stack):
             return WMacroExpansion(expr, scope)
         return new_expr
 
-    mstack = WStackFrame(location=evaled_head, prev=stack.prev)
+    mstack = WStackFrame(location=evaled_head, prev=stack)
     rv = evaled_head.call_macro(args, scope=scope)
     if is_exception(rv, stack=mstack):
         return rv

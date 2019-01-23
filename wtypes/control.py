@@ -14,11 +14,22 @@ class WRaisedException(WControl):
 
 
 class WEvalRequired(WControl):
-    def __init__(self, expr, callback, scope=None):
+    def __init__(self, expr, callback, scope=None,
+                 hide_callee_stack_frame=False):
         super().__init__()
         self.expr = expr
         self.callback = callback
         self.scope = scope
+        self.hide_callee_stack_frame = hide_callee_stack_frame
+
+
+class WExecSrcRequired(WControl):
+    def __init__(self, src, global_scope, filename, callback):
+        super().__init__()
+        self.src = src
+        self.global_scope = global_scope
+        self.filename = filename
+        self.callback = callback
 
 
 class WMacroExpansion(WControl):

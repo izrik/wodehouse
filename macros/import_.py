@@ -1,5 +1,5 @@
 from functions.eval import is_exception
-from wtypes.control import WReturnValue
+from wtypes.control import WReturnValue, WExecSrcRequired
 from wtypes.magic_macro import WMagicMacro
 from wtypes.scope import WScope
 from wtypes.string import WString
@@ -45,20 +45,26 @@ class Import(WMagicMacro):
                     "Got \"{}\" ({}) instead.".format(impname,
                                                       type(impname)))
 
+        def complete_module(imported_ms):
+            scope[module_name] = imported_ms
+            for impname in import_names:
+                scope[impname] = imported_ms[impname]
+            return WReturnValue(imported_ms)
+
         if module_name in _global_import_cache:
             imported_ms = _global_import_cache[module_name]
+            return complete_module(imported_ms)
         else:
-            from functions.exec_src import w_exec_src
             gs = scope.get_global_scope()
             filename = self.loader.get_filename_from_module_name(module_name)
             src = WString(self.loader.load(module_name))
-            rv = w_exec_src(src, global_scope=gs, filename=filename)
-            if is_exception(rv):
-                return rv
-            imported_ms = rv
-            _global_import_cache[module_name] = imported_ms
 
-        scope[module_name] = imported_ms
-        for impname in import_names:
-            scope[impname] = imported_ms[impname]
-        return WReturnValue(imported_ms)
+            def callback(rv):
+                if is_exception(rv):
+                    return rv
+                imported_ms = rv
+                _global_import_cache[module_name] = imported_ms
+                return complete_module(imported_ms)
+
+            return WExecSrcRequired(src, global_scope=gs, filename=filename,
+                                    callback=callback)

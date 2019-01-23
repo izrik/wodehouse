@@ -29,4 +29,5 @@ class Define(WMagicMacro):
             scope[name] = _value
             return WReturnValue(expr=WList(WSymbol.get('quote'), _value))
 
-        return WEvalRequired(expr=expr, callback=callback)
+        return WEvalRequired(expr=expr, callback=callback,
+                             hide_callee_stack_frame=True)
