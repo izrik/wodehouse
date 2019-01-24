@@ -54,7 +54,7 @@ def get_scope_value(scope, name_or_symbol):
     return scope[key]
 
 
-def list_scope(scope):
+def w_dir(scope):
     return WList(*(key for key in scope.keys()))
 
 
@@ -134,7 +134,7 @@ def create_global_scope():
         'new_scope_within': WMagicFunction(new_scope_within, scope,
                                            check_args=False),
         'get': WMagicFunction(get_scope_value, scope, name='get'),
-        'list_scope': WMagicFunction(list_scope, scope),
+        'dir': WMagicFunction(w_dir, scope),
         'in': WMagicFunction(w_in, scope, name='in'),
         'map': WMagicFunction(w_map, scope, name='map', check_args=False),
         'read_file': WMagicFunction(read_file, scope),
