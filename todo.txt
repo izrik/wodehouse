@@ -8,6 +8,7 @@ unittest
         packages/submodules
             attribute access syntax
     exception handling
+wlint
 self-hosted
 jit
 execution engine

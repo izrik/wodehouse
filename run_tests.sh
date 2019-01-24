@@ -7,4 +7,5 @@ coverage run --branch --source=$SOURCES -m unittest discover -s tests -p '*.py' 
 # TODO: coverage run -a --branch --source=$SOURCES ./wodehouse.py wodehouse.w -- tests/*tests.w && \
     coverage html && \
     flake8 *.py functions macros wtypes && \
+    # TODO: wlint
     ./compare_sources.py
