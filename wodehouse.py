@@ -31,17 +31,20 @@ requires
     syntax change: read_expr("'(1)") --> WList(1)
 
 """
-
+import argparse
 import sys
-import traceback
-from pathlib import Path
 
+import traceback
+
+import macros.import_
 from functions.eval import eval_str, is_exception
 from functions.exec_src import w_exec_src
 from functions.scope import create_global_scope, create_module_scope
+from modules.sys import create_sys_module
 from wtypes.list import WList
 from wtypes.number import WNumber
 from wtypes.string import WString
+from wtypes.symbol import WSymbol
 
 
 def repl_print(x):
@@ -70,10 +73,12 @@ def iter_by_two(i):
         yield item1, item2
 
 
-def repl(prompt=None):
+def repl(prompt=None, argv=None):
     if prompt is None:
         prompt = '>>> '
     gs = create_global_scope()
+    sys = create_sys_module(gs, argv=argv)
+    macros.import_._global_import_cache[WSymbol.get('sys')] = sys
     scope = create_module_scope(global_scope=gs, name='__main__',
                                 filename='__repl__')
     while True:
@@ -133,34 +138,62 @@ def format_stacktrace(stack, default_filename=None):
     return '\n'.join(frames)
 
 
-def run_file(filename):
+def run_file(filename, argv=None):
     with open(filename) as f:
         src = f.read()
+    return run_source(src, filename=filename, argv=argv)
+
+
+def run_source(src, filename=None, argv=None):
     gs = create_global_scope()
+    sys = create_sys_module(gs, argv=argv)
+    macros.import_._global_import_cache[WSymbol.get('sys')] = sys
     rv = w_exec_src(src, global_scope=gs, filename=filename)
     if is_exception(rv):
         stacktrace = format_stacktrace(rv.stack)
         print('Stacktrace (most recent call last):')
         print(stacktrace)
         print(f'Exception: {rv.exception.message.value}')
+        return rv.exception
+    return rv
 
 
 def main():
-    for arg in sys.argv[1:]:
-        path = Path(arg)
-        filenames = []
-        if path.is_file():
-            filenames = [arg]
-        elif path.is_dir():
-            for f in path.glob('*'):
-                if f.is_file():
-                    filenames.append(f)
+    argv = []
+    if len(sys.argv) > 1:
+        argv = sys.argv[1:]
 
-        for filename in filenames:
-            run_file(filename)
+    args = None
+    command = None
+    if len(argv) > 0 and argv[0] and argv[0].startswith('-'):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-c', '--command',
+                            help='program passed in as string')
+        parser.add_argument('--run-files', nargs='+')
+        args, remaining = parser.parse_known_args(argv)
+        command = args.command
+        argv = remaining
 
-    if len(sys.argv) < 2:
-        repl()
+    if command:
+        return run_source(command, filename='<string>', argv=argv)
+
+    if args and args.run_files:
+        rv = None
+        for filename in args.run_files:
+            rv = run_file(filename, argv=argv)
+        return rv
+
+    filename = None
+    if len(argv) > 0:
+        if argv[0] != '-' and argv[0].startswith('-'):
+            print(f'Unknown option: {argv[0]}')
+            return
+        filename = argv[0]
+
+    if filename is not None and filename != '-':
+        return run_file(filename, argv=argv)
+
+    repl(argv=argv)
 
 
 if __name__ == '__main__':
