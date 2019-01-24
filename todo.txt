@@ -4,10 +4,10 @@ types and subtypes
 unittest
     file i/o
     argparse
-        sys.argv
     discover
         packages/submodules
             attribute access syntax
+    exception handling
 self-hosted
 jit
 execution engine
