@@ -1,6 +1,7 @@
 homo-iconic?
     - no, not exactly
 types and subtypes
+user-defined macros
 unittest
     file i/o
     argparse
@@ -9,6 +10,10 @@ unittest
             attribute access syntax
     exception handling
 wlint
+floating-point w/ literals
+dicts
+sets
+list/dict/set comprehensions?
 self-hosted
 jit
 execution engine
