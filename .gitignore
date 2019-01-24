@@ -197,3 +197,4 @@ __pycache__/
 .coverage
 htmlcov/
 _scratch*
+instance/
