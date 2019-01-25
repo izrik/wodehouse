@@ -2,6 +2,7 @@ from functions.exec_src import w_exec_src
 from wtypes.callstack import WStackFrame
 from wtypes.control import WControl, WRaisedException, WMacroExpansion, \
     WReturnValue, WEvalRequired, WExecSrcRequired
+from wtypes.exception import WException
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
 from functions.read import parse
@@ -115,9 +116,11 @@ def w_eval(expr, scope, stack=None):
         if is_exception(callee, cstack):
             return callee
         if not isinstance(callee, WFunction):
-            raise Exception(
-                'Callee is not a function. Got "{}" ({}) instead.'.format(
-                    callee, type(callee)))
+            from functions.types import get_type
+            return WRaisedException(exception=WException(
+                f'Callee is not a function. '
+                f'Got "{callee}" ({get_type(callee)}) instead.'),
+                stack=stack)
         stack.callee = callee
 
         args = expanded_expr.remaining
@@ -158,8 +161,10 @@ def w_eval(expr, scope, stack=None):
         if expanded_expr not in scope2:
             scope2 = scope2.get_global_scope()
         if scope2 is None or expanded_expr not in scope2:
-            raise NameError(
-                f'No object found by the name of "{expanded_expr.name}"')
+            return WRaisedException(
+                exception=WException(
+                    f'No object found by the name of "{expanded_expr.name}"'),
+                stack=stack)
         value = scope2[expanded_expr]
         return value
     if isinstance(expanded_expr, (WNumber, WString, WBoolean, WFunction,
