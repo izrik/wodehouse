@@ -2,6 +2,8 @@ from unittest import TestCase
 
 from functions.eval import eval_str
 from functions.scope import create_module_scope, create_global_scope
+from wtypes.control import WRaisedException
+from wtypes.exception import WException
 from wtypes.number import WNumber
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
@@ -25,11 +27,14 @@ class DefineTest(TestCase):
         gs = create_global_scope()
         scope = create_module_scope(global_scope=gs)
         # expect
-        self.assertRaisesRegex(
-            Exception,
-            "No object found by the name of \"\"y\"\"",
-            eval_str,
-            "(define x y)", scope)
+        # when
+        rv = eval_str("(define x y)", scope)
+        # then
+        self.assertIsNotNone(rv)
+        self.assertIsInstance(rv, WRaisedException)
+        self.assertIsInstance(rv.exception, WException)
+        self.assertEqual("No object found by the name of \"\"y\"\"",
+                         rv.exception.message)
 
     def test_define_with_defined_symbol_returned_value(self):
         # given
