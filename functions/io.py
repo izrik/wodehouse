@@ -59,5 +59,7 @@ def w_format(fmt, *args):
 
 
 def read_file(path):
-    with open(path.value) as f:
+    if isinstance(path, WString):
+        path = path.value
+    with open(path) as f:
         return WString(f.read())
