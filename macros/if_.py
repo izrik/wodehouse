@@ -1,4 +1,3 @@
-
 from wtypes.control import WEvalRequired, WReturnValue
 from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
@@ -9,13 +8,17 @@ class If(WMagicMacro):
     def call_magic_macro(self, exprs, scope):
         if scope is None:
             scope = WScope()
-        if len(exprs) != 3:
+        if len(exprs) not in [2, 3]:
             raise Exception(
-                "Expected 3 arguments to if, got {} instead.".format(
+                "Expected 2 or 3 arguments to if, got {} instead.".format(
                     len(exprs)))
         condition = exprs[0]
         true_retval = exprs[1]
-        false_retval = exprs[2]
+        if len(exprs) > 2:
+            false_retval = exprs[2]
+        else:
+            from wtypes.list import WList
+            false_retval = WList()
 
         def callback(_cond_result):
             if _cond_result is WBoolean.true:
