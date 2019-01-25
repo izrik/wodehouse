@@ -1,6 +1,7 @@
 homo-iconic?
     - no, not exactly
-types and subtypes
+user-defined types
+    types and subtypes
 user-defined macros
 unittest
     file i/o
@@ -14,6 +15,9 @@ floating-point w/ literals
 dicts
 sets
 list/dict/set comprehensions?
+function arg default values
+function *args
+function **kwargs
 self-hosted
 jit
 execution engine
