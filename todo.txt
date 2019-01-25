@@ -12,6 +12,8 @@ unittest
     exception handling
 wlint
 floating-point w/ literals
+"""triple-quote multi-line strings"""
+__doc__
 dicts
 sets
 list/dict/set comprehensions?
@@ -22,3 +24,4 @@ self-hosted
 jit
 execution engine
 import compiled libraries
+multi-line input in repl
