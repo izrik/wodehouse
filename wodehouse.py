@@ -77,8 +77,8 @@ def repl(prompt=None, argv=None):
     if prompt is None:
         prompt = '>>> '
     gs = create_global_scope()
-    sys = create_sys_module(gs, argv=argv)
-    macros.import_._global_import_cache[WSymbol.get('sys')] = sys
+    w_sys = create_sys_module(gs, argv=argv)
+    macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
     scope = create_module_scope(global_scope=gs, name='__main__',
                                 filename='__repl__')
     while True:
@@ -146,8 +146,8 @@ def run_file(filename, argv=None):
 
 def run_source(src, filename=None, argv=None):
     gs = create_global_scope()
-    sys = create_sys_module(gs, argv=argv)
-    macros.import_._global_import_cache[WSymbol.get('sys')] = sys
+    w_sys = create_sys_module(gs, argv=argv)
+    macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
     rv = w_exec_src(src, global_scope=gs, filename=filename)
     if is_exception(rv):
         stacktrace = format_stacktrace(rv.stack)
