@@ -40,6 +40,7 @@ import macros.import_
 from functions.eval import eval_str, is_exception
 from functions.exec_src import w_exec_src
 from functions.scope import create_global_scope, create_module_scope
+from modules.argparse import create_argparse_module
 from modules.sys import create_sys_module
 from wtypes.list import WList
 from wtypes.number import WNumber
@@ -79,6 +80,8 @@ def repl(prompt=None, argv=None):
     gs = create_global_scope()
     w_sys = create_sys_module(gs, argv=argv)
     macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
+    w_argparse = create_argparse_module(gs)
+    macros.import_._global_import_cache[WSymbol.get('argparse')] = w_argparse
     scope = create_module_scope(global_scope=gs, name='__main__',
                                 filename='__repl__')
     while True:
@@ -148,6 +151,8 @@ def run_source(src, filename=None, argv=None):
     gs = create_global_scope()
     w_sys = create_sys_module(gs, argv=argv)
     macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
+    w_argparse = create_argparse_module(gs)
+    macros.import_._global_import_cache[WSymbol.get('argparse')] = w_argparse
     rv = w_exec_src(src, global_scope=gs, filename=filename)
     if is_exception(rv):
         stacktrace = format_stacktrace(rv.stack)
