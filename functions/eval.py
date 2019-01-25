@@ -142,7 +142,8 @@ def w_eval(expr, scope, stack=None):
         fstack = WStackFrame(location=callee, prev=stack)
 
         if isinstance(callee, WMagicFunction):
-            rv1 = callee.call_magic_function(*evaled_args)
+            rv1 = callee.call_magic_function(*evaled_args,
+                                             __current_scope__=expanded_scope)
             return eval_for_magic(rv1, expanded_scope, stack=fstack)
 
         fscope = WScope(enclosing_scope=callee.enclosing_scope)

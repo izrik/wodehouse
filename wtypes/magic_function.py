@@ -4,6 +4,8 @@ from wtypes.function import WFunction
 
 
 class WMagicFunction(WFunction):
+    special_names = {'__current_scope__'}
+
     def __init__(self, f, enclosing_scope, *, name=None, check_args=True):
         super().__init__([], None, enclosing_scope)
         self.f = f
@@ -19,6 +21,12 @@ class WMagicFunction(WFunction):
             name = f.__name__
         self.name = name
         self.check_args = check_args
+        self.sig = sig
+        self.pnames = set(p.name for p in self.sig.parameters.values())
+        self.names_to_remove = self.special_names.difference(self.pnames)
 
     def call_magic_function(self, *args, **kwargs):
-        return self.f(*args, **kwargs)
+        kwargs2 = dict(kwargs)
+        for name in self.names_to_remove:
+            del kwargs2[name]
+        return self.f(*args, **kwargs2)
