@@ -54,7 +54,9 @@ def get_scope_value(scope, name_or_symbol):
     return scope[key]
 
 
-def w_dir(scope):
+def w_dir(scope=None, *, __current_scope__):
+    if scope is None:
+        scope = __current_scope__
     return WList(*(key for key in scope.keys()))
 
 
