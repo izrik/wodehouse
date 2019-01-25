@@ -134,7 +134,7 @@ def create_global_scope():
         'new_scope_within': WMagicFunction(new_scope_within, scope,
                                            check_args=False),
         'get': WMagicFunction(get_scope_value, scope, name='get'),
-        'dir': WMagicFunction(w_dir, scope),
+        'dir': WMagicFunction(w_dir, scope, name='dir', check_args=False),
         'in': WMagicFunction(w_in, scope, name='in'),
         'map': WMagicFunction(w_map, scope, name='map', check_args=False),
         'read_file': WMagicFunction(read_file, scope),
