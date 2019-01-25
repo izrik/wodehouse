@@ -170,6 +170,7 @@ def main():
         parser.add_argument('-c', '--command',
                             help='program passed in as string')
         parser.add_argument('--run-files', nargs='+')
+        parser.add_argument('-v', '--verbose', action='store_true')
         args, remaining = parser.parse_known_args(argv)
         command = args.command
         argv = remaining
@@ -197,7 +198,11 @@ def main():
             add_file_or_dir(path)
 
         for file_to_run in files_to_run:
+            if args.verbose:
+                print(f'Running file {file_to_run} ... ', end='')
             rv = run_file(file_to_run, argv=argv)
+            if args.verbose:
+                print('done.')
         return rv
 
     filename = None
