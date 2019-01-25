@@ -179,8 +179,25 @@ def main():
 
     if args and args.run_files:
         rv = None
+        files_to_run = []
         for filename in args.run_files:
-            rv = run_file(filename, argv=argv)
+            from pathlib import Path
+            path = Path(filename)
+            if not path.exists():
+                raise FileNotFoundError(f'Could not find file "{filename}".')
+
+            def add_file_or_dir(_path):
+                f = str(_path)
+                if _path.is_file() and f.endswith('.w'):
+                    files_to_run.append(f)
+                elif _path.is_dir():
+                    for f in _path.glob('*'):
+                        add_file_or_dir(f)
+
+            add_file_or_dir(path)
+
+        for file_to_run in files_to_run:
+            rv = run_file(file_to_run, argv=argv)
         return rv
 
     filename = None
