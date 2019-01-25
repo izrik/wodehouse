@@ -1,4 +1,4 @@
-
+from macros.def_ import Def
 from wtypes.list import WList
 from wtypes.scope import WScope
 from wtypes.string import WString
@@ -157,5 +157,6 @@ def create_global_scope():
         'import': Import(),
         'exception': WMagicFunction(exception, scope, check_args=False),
         'help': WMagicFunction(w_help, scope, name='help'),
+        'def': Def(),
     })
     return scope
