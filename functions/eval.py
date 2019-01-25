@@ -106,6 +106,8 @@ def w_eval(expr, scope, stack=None):
     stack.expanded_scope = expanded_scope
 
     if isinstance(expanded_expr, WList):
+        if len(expanded_expr) == 0:
+            return expanded_expr
         head = expanded_expr.head
         if head == WSymbol.get('quote'):
             # TODO: more checks (e.g. make sure second is there)
@@ -232,6 +234,9 @@ def expand_macros(expr, scope, stack):
         if scope is not None:
             return WMacroExpansion(expr, scope)
         return expr
+
+    if len(expr) == 0:
+        return WMacroExpansion(expr, scope)
 
     head = expr.head
 
