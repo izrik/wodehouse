@@ -1,3 +1,6 @@
+(import sys argv)
+(import argparse parse_args)
+
 (define w_eval
 (lambda (expr scope)
     (cond
@@ -208,3 +211,30 @@
 (if (not (in (peek s) " \r\n\t#"))
     ""
     (+ (read_wsc_char s)))))
+
+(def run_file (filename argv)
+    (raise "Not implemented"))
+
+(def run_source (src filename argv)
+    (raise "Not implemented"))
+
+(def repl ()
+    (raise "Not implemented"))
+
+(def main ()
+    (let (parsed (parse_args
+                    '(
+                        (verbose ("-v" "--verbose") 0)
+                        (command ("-c" "--command") 1)
+                        #(run_files ("--run_files") 'n)
+                     )
+                     argv))
+         (let (argv (get parsed '__remaining_argv__))
+             (if (in 'command parsed)
+                (run_source (get parsed 'command) "<string>" argv)
+                (if (or (>= 0 (len argv)) (eq (car argv) "-"))
+                    (print 'repl)
+                    (run_file (car argv) (cdr argv)))))))
+
+# (if (eq __name__ "__main__")
+#     (main))
