@@ -22,6 +22,14 @@ class WBoolean(WObject):
             return self.value == other.value
         return False
 
+    @staticmethod
+    def from_value(value):
+        if isinstance(value, WBoolean):
+            return value
+        if value:
+            return WBoolean.true
+        return WBoolean.false
+
 
 WBoolean.true = WBoolean(True)
 WBoolean.false = WBoolean(False)
