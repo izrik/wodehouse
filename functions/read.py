@@ -306,14 +306,9 @@ def read_list(s):
     pos = s.get_position()
     s.get_next_char()
     while True:
-        while True:
-            if not s.has_chars():
-                raise Exception(
-                    'Ran out of characters before list was finished.')
-            ch = s.peek()
-            if ch not in string.whitespace:
-                break
-            s.get_next_char()
+        ch = s.peek()
+        if s.has_chars() and (ch.isspace() or ch == '#'):
+            read_whitespace_and_comments(s)
         if s.peek() == ')':
             s.get_next_char()
             break
