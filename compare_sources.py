@@ -3,6 +3,7 @@ import sys
 
 import macros.import_
 from functions.exec_src import w_exec_src
+from modules.argparse import create_argparse_module
 from modules.sys import create_sys_module
 from wtypes.function import WFunction
 import functions.read
@@ -37,6 +38,8 @@ gather(functions.eval)
 
 w_sys = create_sys_module(gs, argv=sys.argv[:1])
 macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
+w_argparse = create_argparse_module(gs)
+macros.import_._global_import_cache[WSymbol.get('argparse')] = w_argparse
 ms = w_exec_src(src, global_scope=gs)
 
 for k, v in ms.dict.items():
