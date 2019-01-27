@@ -3,6 +3,7 @@ from wtypes.exception import WException
 from wtypes.function import WFunction
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
+from wtypes.scope import WScope
 from wtypes.string import WString
 
 
@@ -46,14 +47,18 @@ def w_map(func, *exprlists):
 
 
 def w_in(expr, container):
+    if not isinstance(container, (WString, WList, WScope)):
+        return WRaisedException(
+            WException(
+                f'Container must be a string, list, or scope. '
+                f'Got "{container}" ({type(container)}) instead.'))
     if isinstance(expr, WString) and isinstance(container, WString):
         if expr.value in container.value:
             return WBoolean.true
         return WBoolean.false
-    if not isinstance(container, WList):
-        return WRaisedException(
-            WException(
-                f'Not a list: "{container}" ({type(container)})'))
+    if isinstance(container, WScope):
+        return WBoolean.from_value(expr in container)
+    # WList
     for item in container:
         if item is expr or item == expr:
             return WBoolean.true
