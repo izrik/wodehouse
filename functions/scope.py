@@ -1,3 +1,4 @@
+from functions.list import w_len
 from macros.def_ import Def
 from wtypes.list import WList
 from wtypes.scope import WScope
@@ -110,6 +111,7 @@ def create_global_scope():
         'let': Let(),
         'apply': Apply(),
         'list': WMagicFunction(list_func, scope, name='list'),
+        'len': WMagicFunction(w_len, scope, name='len'),
         'car': WMagicFunction(car, scope),
         'cdr': WMagicFunction(cdr, scope),
         'cons': WMagicFunction(cons, scope),
