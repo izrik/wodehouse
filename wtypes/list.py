@@ -34,6 +34,9 @@ class WList(WObject):
     def __getitem__(self, item):
         return self.values[item]
 
+    def __contains__(self, item):
+        return item in self.values
+
     @property
     def head(self):
         if not self.values:
