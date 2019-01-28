@@ -5,20 +5,22 @@ from wtypes.callstack import WStackFrame
 from wtypes.stream import WStream
 
 
-def w_exec_src(src, builtins_module, filename=None, prevstack=None):
+def w_exec_src(src, builtins_module, filename=None, prevstack=None,
+               scope=None):
     from functions.eval import w_eval, is_exception
-    ms = create_module_scope(builtins_module=builtins_module, name=filename,
-                             filename=filename)
+    if scope is None:
+        scope = create_module_scope(builtins_module=builtins_module,
+                                    name=filename, filename=filename)
     stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)
     while stream.has_chars():
         expr = read_expr(stream)
         estack = WStackFrame(location=None, prev=prevstack)
-        rv = w_eval(expr, ms, stack=estack)
+        rv = w_eval(expr, scope, stack=estack)
         if is_exception(rv, estack):
             return rv
         read_whitespace_and_comments(stream)
-    return ms
+    return scope
 
 
 def w_exec(*args):
