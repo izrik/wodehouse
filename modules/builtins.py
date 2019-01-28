@@ -42,6 +42,7 @@ def create_builtins_module(import_=None):
 
     module = WModule(name='builtins')
     from functions.io import w_list_dir
+    from functions.list import nth
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -102,5 +103,6 @@ def create_builtins_module(import_=None):
         'is_file': WMagicFunction(w_is_file, module, name='is_file'),
         'is_dir': WMagicFunction(w_is_dir, module, name='is_dir'),
         'list_dir': WMagicFunction(w_list_dir, module, name='list_dir'),
+        'nth': WMagicFunction(nth, module),
     })
     return module
