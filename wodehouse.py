@@ -75,6 +75,8 @@ def iter_by_two(i):
 
 
 def repl(prompt=None, argv=None):
+    """(def repl ()
+        (raise "Not implemented"))"""
     if prompt is None:
         prompt = '>>> '
     gs = create_global_scope()
@@ -142,12 +144,16 @@ def format_stacktrace(stack, default_filename=None):
 
 
 def run_file(filename, argv=None):
+    """(def run_file (filename argv)
+        (raise "Not implemented"))"""
     with open(filename) as f:
         src = f.read()
     return run_source(src, filename=filename, argv=argv)
 
 
 def run_source(src, filename=None, argv=None):
+    """(def run_source (src filename argv)
+        (raise "Not implemented"))"""
     gs = create_global_scope()
     w_sys = create_sys_module(gs, argv=argv)
     macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
@@ -164,6 +170,20 @@ def run_source(src, filename=None, argv=None):
 
 
 def main():
+    """(def main ()
+    (let (parsed (parse_args
+                    '(
+                        (verbose ("-v" "--verbose") 0)
+                        (command ("-c" "--command") 1)
+                        #(run_files ("--run_files") 'n)
+                     )
+                     argv))
+         (let (argv (get parsed '__remaining_argv__))
+             (if (in 'command parsed)
+                (run_source (get parsed 'command) "<string>" argv)
+                (if (or (>= 0 (len argv)) (eq (car argv) "-"))
+                    (print 'repl)
+                    (run_file (car argv) (cdr argv)))))))"""
     argv = []
     if len(sys.argv) > 1:
         argv = sys.argv[1:]

@@ -8,6 +8,7 @@ from modules.sys import create_sys_module
 from wtypes.function import WFunction
 import functions.read
 import functions.eval
+import wodehouse
 from functions.scope import create_global_scope
 from wtypes.symbol import WSymbol
 
@@ -35,6 +36,7 @@ def gather(module):
 
 gather(functions.read)
 gather(functions.eval)
+gather(wodehouse)
 
 w_sys = create_sys_module(gs, argv=sys.argv[:1])
 macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
@@ -42,12 +44,19 @@ w_argparse = create_argparse_module(gs)
 macros.import_._global_import_cache[WSymbol.get('argparse')] = w_argparse
 ms = w_exec_src(src, global_scope=gs)
 
+problem = False
 for k, v in ms.dict.items():
     if not isinstance(v, WFunction):
+        continue
+    if v.enclosing_scope is not ms:
         continue
     kk = str(k)
     if kk not in pyfuncs:
         print(f'compare_sources: {kk} NOT FOUND')
+        problem = True
         continue
     if v.expr != pyfuncs[kk].expr:
         print(f'compare_sources: {kk} DOES NOT MATCH')
+        problem = True
+if not problem:
+    print('compare_sources: Everything matches.')
