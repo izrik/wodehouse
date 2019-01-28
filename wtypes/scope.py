@@ -59,7 +59,7 @@ class WScope(WObject):
         return len(list(self.keys()))
 
     def __str__(self):
-        return f'WScope ({len(self)} keys)'
+        return f'WScope({len(self)} keys)'
 
     def keys(self):
         keys = set(self.dict.keys())
