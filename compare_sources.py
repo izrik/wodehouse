@@ -1,24 +1,19 @@
 #!/usr/bin/env python
 import sys
 
-import macros.import_
 from functions.exec_src import w_exec_src
-from modules.argparse import create_argparse_module
-from modules.sys import create_sys_module
 from wtypes.function import WFunction
 import functions.read
 import functions.eval
 import wodehouse
-from functions.scope import create_global_scope
-from wtypes.symbol import WSymbol
 
 with open('wodehouse.w') as f:
     src = f.read()
 
 pyfuncs = {}
 
-import_ = macros.import_.Import()
-gs = create_global_scope(import_=import_)
+runtime = wodehouse.Runtime(sys.argv[:1])
+gs = runtime.global_module
 
 
 def gather(module):
@@ -39,10 +34,6 @@ gather(functions.read)
 gather(functions.eval)
 gather(wodehouse)
 
-w_sys = create_sys_module(gs, argv=sys.argv[:1])
-import_.module_cache[WSymbol.get('sys')] = w_sys
-w_argparse = create_argparse_module(gs)
-import_.module_cache[WSymbol.get('argparse')] = w_argparse
 ms = w_exec_src(src, global_scope=gs)
 
 problem = False

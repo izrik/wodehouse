@@ -78,13 +78,8 @@ def repl(prompt=None, argv=None):
         (raise "Not implemented"))"""
     if prompt is None:
         prompt = '>>> '
-    from macros.import_ import Import
-    import_ = Import()
-    gs = create_global_scope(import_=import_)
-    w_sys = create_sys_module(gs, argv=argv)
-    import_.module_cache[WSymbol.get('sys')] = w_sys
-    w_argparse = create_argparse_module(gs)
-    import_.module_cache[WSymbol.get('argparse')] = w_argparse
+    runtime = Runtime(argv)
+    gs = runtime.global_module
     scope = create_module_scope(global_scope=gs, name='__main__',
                                 filename='__repl__')
     while True:
@@ -155,14 +150,9 @@ def run_file(filename, argv=None):
 def run_source(src, filename=None, argv=None):
     """(def run_source (src filename argv)
         (raise "Not implemented"))"""
-    from macros.import_ import Import
-    import_ = Import()
-    gs = create_global_scope(import_=import_)
-    w_sys = create_sys_module(gs, argv=argv)
-    import_.module_cache[WSymbol.get('sys')] = w_sys
-    w_argparse = create_argparse_module(gs)
-    import_.module_cache[WSymbol.get('argparse')] = w_argparse
-    rv = w_exec_src(src, global_scope=gs, filename=filename)
+    runtime = Runtime(argv)
+    rv = w_exec_src(src, global_scope=runtime.global_module,
+                    filename=filename)
     if is_exception(rv):
         stacktrace = format_stacktrace(rv.stack)
         print('Stacktrace (most recent call last):')
@@ -170,6 +160,18 @@ def run_source(src, filename=None, argv=None):
         print(f'Exception: {rv.exception.message.value}')
         return rv.exception
     return rv
+
+
+class Runtime:
+    def __init__(self, argv):
+        from macros.import_ import Import
+        self.import_ = Import()
+        cache = self.import_.module_cache
+        self.global_module = create_global_scope(import_=self.import_)
+        self.sys_module = create_sys_module(self.global_module, argv=argv)
+        cache[WSymbol.get('sys')] = self.sys_module
+        self.argparse_module = create_argparse_module(self.global_module)
+        cache[WSymbol.get('argparse')] = self.argparse_module
 
 
 def main():
