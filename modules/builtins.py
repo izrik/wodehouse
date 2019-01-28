@@ -35,11 +35,13 @@ def create_builtins_module(import_=None):
     from functions.scope import get_scope_value
     from functions.scope import w_dir
     from macros.def_ import Def
+    from functions.io import w_is_file, w_is_dir
 
     if import_ is None:
         import_ = Import()
 
     module = WModule(name='builtins')
+    from functions.io import w_list_dir
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -97,5 +99,8 @@ def create_builtins_module(import_=None):
         'exception': WMagicFunction(exception, module, check_args=False),
         'help': WMagicFunction(w_help, module, name='help'),
         'def': Def(),
+        'is_file': WMagicFunction(w_is_file, module, name='is_file'),
+        'is_dir': WMagicFunction(w_is_dir, module, name='is_dir'),
+        'list_dir': WMagicFunction(w_list_dir, module, name='list_dir'),
     })
     return module
