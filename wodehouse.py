@@ -38,9 +38,9 @@ import traceback
 
 from functions.eval import eval_str, is_exception
 from functions.exec_src import w_exec_src
-from functions.scope import create_module_scope
 from runtime import Runtime
 from wtypes.list import WList
+from wtypes.module import WModule
 from wtypes.number import WNumber
 from wtypes.string import WString
 
@@ -78,8 +78,7 @@ def repl(prompt=None, argv=None):
         prompt = '>>> '
     runtime = Runtime(argv)
     bm = runtime.builtins_module
-    scope = create_module_scope(builtins_module=bm, name='__main__',
-                                filename='__repl__')
+    scope = WModule(builtins_module=bm, name='__main__', filename='__repl__')
     while True:
         try:
             input_s = input(prompt)

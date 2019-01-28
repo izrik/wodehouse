@@ -1,7 +1,7 @@
 
 from functions.read import read_whitespace_and_comments, read_expr
-from functions.scope import create_module_scope
 from wtypes.callstack import WStackFrame
+from wtypes.module import WModule
 from wtypes.stream import WStream
 
 
@@ -9,8 +9,8 @@ def w_exec_src(src, builtins_module, filename=None, prevstack=None,
                scope=None):
     from functions.eval import w_eval, is_exception
     if scope is None:
-        scope = create_module_scope(builtins_module=builtins_module,
-                                    name=filename, filename=filename)
+        scope = WModule(builtins_module=builtins_module, name=filename,
+                        filename=filename)
     stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)
     while stream.has_chars():

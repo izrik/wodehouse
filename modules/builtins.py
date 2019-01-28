@@ -1,3 +1,5 @@
+from wtypes.module import WModule
+
 
 def create_builtins_module(import_=None):
     from functions.collections import w_map, w_in
@@ -33,12 +35,11 @@ def create_builtins_module(import_=None):
     from functions.scope import get_scope_value
     from functions.scope import w_dir
     from macros.def_ import Def
-    from functions.scope import create_module_scope
 
     if import_ is None:
         import_ = Import()
 
-    module = create_module_scope(name='builtins')
+    module = WModule(name='builtins')
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),

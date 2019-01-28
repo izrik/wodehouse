@@ -1,8 +1,8 @@
 import sys
 from itertools import takewhile
 
-from functions.scope import create_module_scope
 from wtypes.list import WList
+from wtypes.module import WModule
 
 
 def create_sys_module(builtins_module, argv=None):
@@ -13,7 +13,7 @@ def create_sys_module(builtins_module, argv=None):
     if argv is None:
         argv = list(takewhile(lambda x: x != '--', sys.argv[1:]))
     argv = w_from_py(argv)
-    mod = create_module_scope(builtins_module=builtins_module, name='sys')
+    mod = WModule(builtins_module=builtins_module, name='sys')
     mod['argv'] = argv
     return mod
 

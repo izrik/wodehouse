@@ -1,7 +1,5 @@
 from wtypes.list import WList
-from wtypes.module import WModule
 from wtypes.scope import WScope
-from wtypes.string import WString
 
 
 def new_scope(pairs=None):
@@ -58,15 +56,3 @@ def w_dir(scope=None, *, __current_scope__):
     if scope is None:
         scope = __current_scope__
     return WList(*(key for key in scope.keys()))
-
-
-def create_module_scope(builtins_module=None, name=None, filename=None):
-    ms = WModule(builtins_module=builtins_module)
-    ms['__module__'] = ms
-    if name:
-        ms['__name__'] = WString(name)
-    if filename:
-        ms['__file__'] = WString(filename)
-    if builtins_module is not None:
-        ms['__global__'] = builtins_module
-    return ms
