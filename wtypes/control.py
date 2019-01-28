@@ -24,10 +24,10 @@ class WEvalRequired(WControl):
 
 
 class WExecSrcRequired(WControl):
-    def __init__(self, src, global_scope, filename, callback):
+    def __init__(self, src, builtins_module, filename, callback):
         super().__init__()
         self.src = src
-        self.global_scope = global_scope
+        self.builtins_module = builtins_module
         self.filename = filename
         self.callback = callback
 

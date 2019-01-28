@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from functions.exec_src import w_exec_src
-from functions.scope import create_global_scope
+from functions.scope import create_builtins_module
 from macros.define import Define
 from macros.import_ import Import
 from wtypes.function import WFunction
@@ -23,13 +23,13 @@ class ImportTest(TestCase):
         # given
         loader = StaticLoader("(define x 1) (define y 2)")
 
-        gs = WScope({
+        bm = WScope({
             'import': Import(loader=loader),
             'define': Define(),
         })
         # when
         result = w_exec_src("(import file x)", filename="<test>",
-                            global_scope=gs)
+                            builtins_module=bm)
         # then
         self.assertIsInstance(result, WScope)
         self.assertEqual(6, len(result))
@@ -47,11 +47,11 @@ class ImportTest(TestCase):
         # given
         loader = StaticLoader("(define x 'y) (define y 2)")
 
-        gs = create_global_scope()
-        gs['import'] = Import(loader=loader)
+        bm = create_builtins_module()
+        bm['import'] = Import(loader=loader)
         # when
         result = w_exec_src("(import file x)", filename="<test>",
-                            global_scope=gs)
+                            builtins_module=bm)
         # then
         self.assertIsInstance(result, WScope)
         self.assertIn('x', result)
@@ -67,11 +67,11 @@ class ImportTest(TestCase):
                 (define y 2)
             """)
 
-        gs = create_global_scope()
-        gs['import'] = Import(loader=loader)
+        bm = create_builtins_module()
+        bm['import'] = Import(loader=loader)
         # when
         result = w_exec_src("(import file x) (define y 3) (define z (x))",
-                            filename="<test>", global_scope=gs)
+                            filename="<test>", builtins_module=bm)
         # then
         self.assertIsInstance(result, WScope)
         self.assertIn('x', result)

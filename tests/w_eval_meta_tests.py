@@ -3,7 +3,7 @@ from unittest import TestCase
 import functions.eval
 from functions.eval import w_eval, eval_str
 from functions.read import parse
-from functions.scope import create_global_scope
+from functions.scope import create_builtins_module
 from wtypes.function import WFunction
 
 
@@ -21,10 +21,10 @@ class EvalMetaTest(TestCase):
         # given
         eval_source = functions.eval._eval_source
         parsed_eval = parse(eval_source)
-        scope = create_global_scope()
-        scope['scope'] = scope
+        bm = create_builtins_module()
+        bm['scope'] = bm
         # when
-        compiled_eval = w_eval(parsed_eval, scope)
+        compiled_eval = w_eval(parsed_eval, bm)
         # then
         self.assertIsInstance(compiled_eval, WFunction)
 
@@ -32,11 +32,11 @@ class EvalMetaTest(TestCase):
         # given
         eval_source = functions.eval._eval_source
         parsed_eval = parse(eval_source)
-        scope = create_global_scope()
-        scope['scope'] = scope
-        compiled_eval = w_eval(parsed_eval, scope)
-        scope['w_eval'] = compiled_eval
+        bm = create_builtins_module()
+        bm['scope'] = bm
+        compiled_eval = w_eval(parsed_eval, bm)
+        bm['w_eval'] = compiled_eval
         # when
-        result = eval_str('(w_eval 2 scope)', scope)
+        result = eval_str('(w_eval 2 scope)', bm)
         # then
         self.assertEqual(2, result)

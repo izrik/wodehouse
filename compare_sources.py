@@ -13,7 +13,7 @@ with open('wodehouse.w') as f:
 pyfuncs = {}
 
 runtime = wodehouse.Runtime(sys.argv[:1])
-gs = runtime.global_module
+bm = runtime.builtins_module
 
 
 def gather(module):
@@ -22,7 +22,7 @@ def gather(module):
                 v.__doc__ and v.__module__ == module.__name__:
             src2 = v.__doc__
             # print(f'Reading docstring for {v} ... ', end='')
-            _ms = w_exec_src(src2, global_scope=gs)
+            _ms = w_exec_src(src2, builtins_module=bm)
             for k2, v2 in _ms.dict.items():
                 if not isinstance(v2, WFunction):
                     continue
@@ -34,7 +34,7 @@ gather(functions.read)
 gather(functions.eval)
 gather(wodehouse)
 
-ms = w_exec_src(src, global_scope=gs)
+ms = w_exec_src(src, builtins_module=bm)
 
 problem = False
 for k, v in ms.dict.items():

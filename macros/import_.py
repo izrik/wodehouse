@@ -53,7 +53,7 @@ class Import(WMagicMacro):
             imported_ms = self.module_cache[module_name]
             return complete_module(imported_ms)
         else:
-            gs = scope.get_global_scope()
+            bm = scope.get_builtins_module()
             filename = self.loader.get_filename_from_module_name(module_name)
             src = WString(self.loader.load(module_name))
 
@@ -64,5 +64,5 @@ class Import(WMagicMacro):
                 self.module_cache[module_name] = imported_ms
                 return complete_module(imported_ms)
 
-            return WExecSrcRequired(src, global_scope=gs, filename=filename,
+            return WExecSrcRequired(src, builtins_module=bm, filename=filename,
                                     callback=callback)

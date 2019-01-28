@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from functions.eval import eval_str
-from functions.scope import create_global_scope
+from functions.scope import create_builtins_module
 from wtypes.list import WList
 from wtypes.magic_function import WMagicFunction
 from wtypes.number import WNumber
@@ -23,7 +23,7 @@ class EvalStringTest(TestCase):
 
     def test_calls_functions(self):
         # given
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['onetwothree'] = WMagicFunction(lambda *args: WNumber(123),
                                               enclosing_scope=scope)
         # when

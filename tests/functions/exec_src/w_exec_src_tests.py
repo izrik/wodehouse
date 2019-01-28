@@ -8,9 +8,9 @@ class ExecSrcTest(TestCase):
 
     def test_w_exec_src_execs_src_and_returns_ms(self):
         # given
-        gs = WScope()
+        bm = WScope()
         # when
-        result = w_exec_src(src="", filename="<test>", global_scope=gs)
+        result = w_exec_src(src="", filename="<test>", builtins_module=bm)
         # then
         self.assertIsNotNone(result)
         self.assertIsInstance(result, WScope)
@@ -18,7 +18,7 @@ class ExecSrcTest(TestCase):
         self.assertIn('__module__', result)
         self.assertIs(result, result['__module__'])
         self.assertIn('__global__', result)
-        self.assertIs(gs, result['__global__'])
+        self.assertIs(bm, result['__global__'])
         self.assertIn('__name__', result)
         self.assertEqual("<test>", result['__name__'])
         self.assertIn('__file__', result)

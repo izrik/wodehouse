@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from functions.eval import eval_str
-from functions.scope import create_global_scope
+from functions.scope import create_builtins_module
 from wtypes.magic_function import WMagicFunction
 from wtypes.symbol import WSymbol
 
@@ -14,18 +14,18 @@ class CondTest(TestCase):
             Exception,
             "No condition evaluated to true.",
             eval_str,
-            "(cond)", create_global_scope())
+            "(cond)", create_builtins_module())
 
     def test_cond_condition_is_true_returns_corresponding_retval(self):
         # when
-        result = eval_str("(cond (true 'a))", create_global_scope())
+        result = eval_str("(cond (true 'a))", create_builtins_module())
         # then
         self.assertEqual(WSymbol.get('a'), result)
 
     def test_cond_condition_is_false_moves_to_next_condition(self):
         # when
         result = eval_str("(cond (false 'a) (true 'b))",
-                          create_global_scope())
+                          create_builtins_module())
         # then
         self.assertEqual(WSymbol.get('b'), result)
 
@@ -37,7 +37,7 @@ class CondTest(TestCase):
             evaled = True
             return WSymbol.get('f')
 
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['f'] = WMagicFunction(f, scope)
 
         # when
@@ -61,7 +61,7 @@ class CondTest(TestCase):
             evaled2 = True
             return WSymbol.get('f2')
 
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['f1'] = WMagicFunction(f1, scope)
         scope['f2'] = WMagicFunction(f2, scope)
 
@@ -87,7 +87,7 @@ class CondTest(TestCase):
             evaled2 = True
             return WSymbol.get('f2')
 
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['f1'] = WMagicFunction(f1, scope)
         scope['f2'] = WMagicFunction(f2, scope)
 

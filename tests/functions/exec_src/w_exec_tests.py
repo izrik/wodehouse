@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from functions.eval import eval_str
-from functions.scope import create_global_scope
+from functions.scope import create_builtins_module
 from wtypes.magic_function import WMagicFunction
 from wtypes.number import WNumber
 
@@ -15,7 +15,7 @@ class ExecTest(TestCase):
             i[0] += 1
             return WNumber(-1)
 
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['side_effect'] = WMagicFunction(side_effect,
                                               enclosing_scope=scope)
         # when
@@ -25,6 +25,6 @@ class ExecTest(TestCase):
 
     def test_exec_returns_the_last_expr(self):
         # when
-        result = eval_str("(exec 2 3 5 7 11)", create_global_scope())
+        result = eval_str("(exec 2 3 5 7 11)", create_builtins_module())
         # then
         self.assertEqual(11, result)

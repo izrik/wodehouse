@@ -161,7 +161,7 @@ def w_eval(expr, scope, stack=None):
     if isinstance(expanded_expr, WSymbol):
         scope2 = expanded_scope
         if expanded_expr not in scope2:
-            scope2 = scope2.get_global_scope()
+            scope2 = scope2.get_builtins_module()
         if scope2 is None or expanded_expr not in scope2:
             return WRaisedException(
                 exception=WException(
@@ -196,7 +196,8 @@ def eval_for_magic(control, scope, stack):
                         f'{control} ({type(control)}')
 
     if isinstance(control, WExecSrcRequired):
-        ms = w_exec_src(src=control.src, global_scope=control.global_scope,
+        ms = w_exec_src(src=control.src,
+                        builtins_module=control.builtins_module,
                         filename=control.filename, prevstack=stack)
         if is_exception(ms, stack):
             return ms

@@ -5,7 +5,8 @@ from wtypes.symbol import WSymbolAt, WSymbol
 
 
 class WScope(WObject):
-    def __init__(self, values=None, enclosing_scope=None, global_scope=None):
+    def __init__(self, values=None, enclosing_scope=None,
+                 builtins_module=None):
         super().__init__()
         if values is None:
             values = {}
@@ -13,7 +14,7 @@ class WScope(WObject):
         self.dict = {self.normalize_key(key): value
                      for key, value in values.items()}
         self.deleted = set()
-        self.global_scope = global_scope
+        self.builtins_module = builtins_module
 
     @staticmethod
     def normalize_key(key):
@@ -72,9 +73,9 @@ class WScope(WObject):
         for key, value in values.items():
             self[key] = value
 
-    def get_global_scope(self):
-        if self.global_scope is not None:
-            return self.global_scope
+    def get_builtins_module(self):
+        if self.builtins_module is not None:
+            return self.builtins_module
         if self.enclosing_scope is None:
             return None
-        return self.enclosing_scope.get_global_scope()
+        return self.enclosing_scope.get_builtins_module()

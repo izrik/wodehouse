@@ -38,7 +38,7 @@ import traceback
 
 from functions.eval import eval_str, is_exception
 from functions.exec_src import w_exec_src
-from functions.scope import create_global_scope, create_module_scope
+from functions.scope import create_builtins_module, create_module_scope
 from modules.argparse import create_argparse_module
 from modules.sys import create_sys_module
 from wtypes.list import WList
@@ -79,8 +79,8 @@ def repl(prompt=None, argv=None):
     if prompt is None:
         prompt = '>>> '
     runtime = Runtime(argv)
-    gs = runtime.global_module
-    scope = create_module_scope(global_scope=gs, name='__main__',
+    bm = runtime.builtins_module
+    scope = create_module_scope(builtins_module=bm, name='__main__',
                                 filename='__repl__')
     while True:
         try:
@@ -151,7 +151,7 @@ def run_source(src, filename=None, argv=None):
     """(def run_source (src filename argv)
         (raise "Not implemented"))"""
     runtime = Runtime(argv)
-    rv = w_exec_src(src, global_scope=runtime.global_module,
+    rv = w_exec_src(src, builtins_module=runtime.builtins_module,
                     filename=filename)
     if is_exception(rv):
         stacktrace = format_stacktrace(rv.stack)
@@ -167,10 +167,10 @@ class Runtime:
         from macros.import_ import Import
         self.import_ = Import()
         cache = self.import_.module_cache
-        self.global_module = create_global_scope(import_=self.import_)
-        self.sys_module = create_sys_module(self.global_module, argv=argv)
+        self.builtins_module = create_builtins_module(import_=self.import_)
+        self.sys_module = create_sys_module(self.builtins_module, argv=argv)
         cache[WSymbol.get('sys')] = self.sys_module
-        self.argparse_module = create_argparse_module(self.global_module)
+        self.argparse_module = create_argparse_module(self.builtins_module)
         cache[WSymbol.get('argparse')] = self.argparse_module
 
 

@@ -5,9 +5,9 @@ from wtypes.callstack import WStackFrame
 from wtypes.stream import WStream
 
 
-def w_exec_src(src, global_scope, filename=None, prevstack=None):
+def w_exec_src(src, builtins_module, filename=None, prevstack=None):
     from functions.eval import w_eval, is_exception
-    ms = create_module_scope(global_scope=global_scope, name=filename,
+    ms = create_module_scope(builtins_module=builtins_module, name=filename,
                              filename=filename)
     stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)

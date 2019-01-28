@@ -4,7 +4,7 @@ __src_file__ = None
 __src__ = None
 
 
-def create_argparse_module(global_module):
+def create_argparse_module(builtins_module):
     global __src_file__
     global __src__
 
@@ -12,6 +12,6 @@ def create_argparse_module(global_module):
     with open(__src_file__, 'r') as __f:
         __src__ = __f.read()
     from functions.exec_src import w_exec_src
-    mod = w_exec_src(__src__, global_scope=global_module,
+    mod = w_exec_src(__src__, builtins_module=builtins_module,
                      filename=__src_file__)
     return mod

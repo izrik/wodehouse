@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from functions.eval import eval_str
-from functions.scope import create_global_scope
+from functions.scope import create_builtins_module
 from wtypes.scope import WScope
 
 
@@ -10,10 +10,10 @@ class NewScopeWithinTest(TestCase):
     def test_new_scope_within_create_scope_object_with_enclosing_scope(self):
         # given
         p = WScope({'a': 3, 'b': 4, 'c': 5})
-        gs = create_global_scope()
-        gs['p'] = p
+        bm = create_builtins_module()
+        bm['p'] = p
         # when
-        result = eval_str("(new_scope_within p '((a 1) (b 2)))", gs)
+        result = eval_str("(new_scope_within p '((a 1) (b 2)))", bm)
         # then
         self.assertIsInstance(result, WScope)
         self.assertEqual(3, len(result))

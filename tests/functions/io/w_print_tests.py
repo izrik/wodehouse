@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from functions.eval import eval_str
 from functions.io import w_print
-from functions.scope import create_global_scope
+from functions.scope import create_builtins_module
 from wtypes.list import WList
 from wtypes.magic_function import WMagicFunction
 
@@ -13,7 +13,7 @@ class PrintTest(TestCase):
     def test_print_function(self):
         # given
         printer = Mock()
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when
@@ -24,7 +24,7 @@ class PrintTest(TestCase):
     def test_prints_integer(self):
         # given
         printer = Mock()
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when
@@ -36,7 +36,7 @@ class PrintTest(TestCase):
     def test_prints_string(self):
         # given
         printer = Mock()
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['print'] = WMagicFunction(
             lambda x: w_print(x, printer=printer),
             enclosing_scope=scope)
@@ -49,7 +49,7 @@ class PrintTest(TestCase):
     def test_prints_escaped_chars_correctly(self):
         # given
         printer = Mock()
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when
@@ -61,7 +61,7 @@ class PrintTest(TestCase):
     def test_prints_empty_list(self):
         # given
         printer = Mock()
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when
@@ -75,7 +75,7 @@ class PrintTest(TestCase):
     def test_prints_list(self):
         # given
         printer = Mock()
-        scope = create_global_scope()
+        scope = create_builtins_module()
         scope['print'] = WMagicFunction(lambda x: w_print(x, printer=printer),
                                         enclosing_scope=scope)
         # when

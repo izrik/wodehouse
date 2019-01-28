@@ -61,19 +61,19 @@ def w_dir(scope=None, *, __current_scope__):
     return WList(*(key for key in scope.keys()))
 
 
-def create_module_scope(global_scope=None, name=None, filename=None):
-    ms = WScope(global_scope=global_scope)
+def create_module_scope(builtins_module=None, name=None, filename=None):
+    ms = WScope(builtins_module=builtins_module)
     ms['__module__'] = ms
     if name:
         ms['__name__'] = WString(name)
     if filename:
         ms['__file__'] = WString(filename)
-    if global_scope is not None:
-        ms['__global__'] = global_scope
+    if builtins_module is not None:
+        ms['__global__'] = builtins_module
     return ms
 
 
-def create_global_scope(import_=None):
+def create_builtins_module(import_=None):
     from functions.collections import w_map, w_in
     from functions.convert import int_from_str
     from functions.exception import exception
