@@ -6,7 +6,7 @@ def create_builtins_module(import_=None):
     from functions.convert import int_from_str
     from functions.exception import exception
     from functions.exec_src import w_exec
-    from functions.io import w_print, w_format, read_file
+    from functions.io import w_print, read_file
     from functions.lisp import car, cdr, cons, atom
     from functions.list import list_func
     from functions.logical import w_not, w_or, w_and, less_than, \
@@ -14,7 +14,7 @@ def create_builtins_module(import_=None):
     from wtypes.magic_function import WMagicFunction
     from functions.math import add, sub, mult, div
     from functions.raise_ import w_raise
-    from functions.str import w_str
+    from functions.str import w_str, w_format
     from functions.stream import stream, stream_has_chars, \
         stream_get_next_char, stream_get_position, stream_peek
     from functions.symbol import symbol_at
