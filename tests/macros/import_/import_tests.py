@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from functions.exec_src import w_exec_src
-from functions.scope import create_builtins_module
+from modules.builtins import create_builtins_module
 from macros.define import Define
 from macros.import_ import Import
 from wtypes.function import WFunction

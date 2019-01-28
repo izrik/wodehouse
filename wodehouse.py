@@ -38,7 +38,8 @@ import traceback
 
 from functions.eval import eval_str, is_exception
 from functions.exec_src import w_exec_src
-from functions.scope import create_builtins_module, create_module_scope
+from functions.scope import create_module_scope
+from modules.builtins import create_builtins_module
 from modules.argparse import create_argparse_module
 from modules.sys import create_sys_module
 from wtypes.list import WList

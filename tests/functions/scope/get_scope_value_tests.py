@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from functions.eval import eval_str
-from functions.scope import create_builtins_module
+from modules.builtins import create_builtins_module
 
 
 class GetScopeValueTest(TestCase):

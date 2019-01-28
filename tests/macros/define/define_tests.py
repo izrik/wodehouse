@@ -1,7 +1,8 @@
 from unittest import TestCase
 
 from functions.eval import eval_str
-from functions.scope import create_module_scope, create_builtins_module
+from functions.scope import create_module_scope
+from modules.builtins import create_builtins_module
 from wtypes.control import WRaisedException
 from wtypes.exception import WException
 from wtypes.number import WNumber

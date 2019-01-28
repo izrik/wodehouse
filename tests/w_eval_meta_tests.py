@@ -3,7 +3,7 @@ from unittest import TestCase
 import functions.eval
 from functions.eval import w_eval, eval_str
 from functions.read import parse
-from functions.scope import create_builtins_module
+from modules.builtins import create_builtins_module
 from wtypes.function import WFunction
 
 

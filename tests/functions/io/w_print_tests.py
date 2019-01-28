@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from functions.eval import eval_str
 from functions.io import w_print
-from functions.scope import create_builtins_module
+from modules.builtins import create_builtins_module
 from wtypes.list import WList
 from wtypes.magic_function import WMagicFunction
 
