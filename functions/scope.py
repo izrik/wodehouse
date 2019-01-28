@@ -73,7 +73,7 @@ def create_module_scope(global_scope=None, name=None, filename=None):
     return ms
 
 
-def create_global_scope():
+def create_global_scope(import_=None):
     from functions.collections import w_map, w_in
     from functions.convert import int_from_str
     from functions.exception import exception
@@ -101,6 +101,9 @@ def create_global_scope():
     from macros.let import Let
     from wtypes.boolean import WBoolean
     from functions.help import w_help
+
+    if import_ is None:
+        import_ = Import()
 
     scope = WScope()
     scope.update({
@@ -156,7 +159,7 @@ def create_global_scope():
         'int_from_str': WMagicFunction(int_from_str, scope),
         'symbol_at': WMagicFunction(symbol_at, scope),
         'define': Define(),
-        'import': Import(),
+        'import': import_,
         'exception': WMagicFunction(exception, scope, check_args=False),
         'help': WMagicFunction(w_help, scope, name='help'),
         'def': Def(),
