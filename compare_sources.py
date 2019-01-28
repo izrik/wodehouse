@@ -17,7 +17,8 @@ with open('wodehouse.w') as f:
 
 pyfuncs = {}
 
-gs = create_global_scope()
+import_ = macros.import_.Import()
+gs = create_global_scope(import_=import_)
 
 
 def gather(module):
@@ -39,9 +40,9 @@ gather(functions.eval)
 gather(wodehouse)
 
 w_sys = create_sys_module(gs, argv=sys.argv[:1])
-macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
+import_.module_cache[WSymbol.get('sys')] = w_sys
 w_argparse = create_argparse_module(gs)
-macros.import_._global_import_cache[WSymbol.get('argparse')] = w_argparse
+import_.module_cache[WSymbol.get('argparse')] = w_argparse
 ms = w_exec_src(src, global_scope=gs)
 
 problem = False

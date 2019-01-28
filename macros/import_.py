@@ -5,9 +5,6 @@ from wtypes.scope import WScope
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
-# TODO: make this something other than a static global variable
-_global_import_cache = WScope()
-
 
 class Import(WMagicMacro):
     def __init__(self, loader=None):
@@ -15,6 +12,7 @@ class Import(WMagicMacro):
         if loader is None:
             loader = Import.DefaultLoader()
         self.loader = loader
+        self.module_cache = WScope()
 
     class DefaultLoader:
         def get_filename_from_module_name(self, module_name):
@@ -51,8 +49,8 @@ class Import(WMagicMacro):
                 scope[impname] = imported_ms[impname]
             return WReturnValue(imported_ms)
 
-        if module_name in _global_import_cache:
-            imported_ms = _global_import_cache[module_name]
+        if module_name in self.module_cache:
+            imported_ms = self.module_cache[module_name]
             return complete_module(imported_ms)
         else:
             gs = scope.get_global_scope()
@@ -63,7 +61,7 @@ class Import(WMagicMacro):
                 if is_exception(rv):
                     return rv
                 imported_ms = rv
-                _global_import_cache[module_name] = imported_ms
+                self.module_cache[module_name] = imported_ms
                 return complete_module(imported_ms)
 
             return WExecSrcRequired(src, global_scope=gs, filename=filename,

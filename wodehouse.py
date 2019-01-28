@@ -36,7 +36,6 @@ import sys
 
 import traceback
 
-import macros.import_
 from functions.eval import eval_str, is_exception
 from functions.exec_src import w_exec_src
 from functions.scope import create_global_scope, create_module_scope
@@ -79,11 +78,13 @@ def repl(prompt=None, argv=None):
         (raise "Not implemented"))"""
     if prompt is None:
         prompt = '>>> '
-    gs = create_global_scope()
+    from macros.import_ import Import
+    import_ = Import()
+    gs = create_global_scope(import_=import_)
     w_sys = create_sys_module(gs, argv=argv)
-    macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
+    import_.module_cache[WSymbol.get('sys')] = w_sys
     w_argparse = create_argparse_module(gs)
-    macros.import_._global_import_cache[WSymbol.get('argparse')] = w_argparse
+    import_.module_cache[WSymbol.get('argparse')] = w_argparse
     scope = create_module_scope(global_scope=gs, name='__main__',
                                 filename='__repl__')
     while True:
@@ -154,11 +155,13 @@ def run_file(filename, argv=None):
 def run_source(src, filename=None, argv=None):
     """(def run_source (src filename argv)
         (raise "Not implemented"))"""
-    gs = create_global_scope()
+    from macros.import_ import Import
+    import_ = Import()
+    gs = create_global_scope(import_=import_)
     w_sys = create_sys_module(gs, argv=argv)
-    macros.import_._global_import_cache[WSymbol.get('sys')] = w_sys
+    import_.module_cache[WSymbol.get('sys')] = w_sys
     w_argparse = create_argparse_module(gs)
-    macros.import_._global_import_cache[WSymbol.get('argparse')] = w_argparse
+    import_.module_cache[WSymbol.get('argparse')] = w_argparse
     rv = w_exec_src(src, global_scope=gs, filename=filename)
     if is_exception(rv):
         stacktrace = format_stacktrace(rv.stack)
