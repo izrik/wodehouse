@@ -2,4 +2,6 @@ from wtypes.scope import WScope
 
 
 class WModule(WScope):
-    pass
+    def __init__(self, values=None, enclosing_scope=None,
+                 builtins_module=None):
+        super().__init__(values, enclosing_scope, builtins_module)

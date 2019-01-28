@@ -1,4 +1,5 @@
 from wtypes.list import WList
+from wtypes.module import WModule
 from wtypes.scope import WScope
 from wtypes.string import WString
 
@@ -60,7 +61,7 @@ def w_dir(scope=None, *, __current_scope__):
 
 
 def create_module_scope(builtins_module=None, name=None, filename=None):
-    ms = WScope(builtins_module=builtins_module)
+    ms = WModule(builtins_module=builtins_module)
     ms['__module__'] = ms
     if name:
         ms['__name__'] = WString(name)
