@@ -14,7 +14,7 @@ class WModule(WScope):
         if filename:
             self['__file__'] = WString(filename)
         if builtins_module is not None:
-            self['__global__'] = builtins_module
+            self['__builtins__'] = builtins_module
 
     def __str__(self):
         if self.name:
