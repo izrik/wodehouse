@@ -39,4 +39,4 @@ def w_is_dir(path):
 
 def w_list_dir(path):
     _path = Path(w_str(path).value)
-    return WList(WString(_) for _ in os.listdir(_path))
+    return WList(*(WString(_) for _ in os.listdir(_path)))
