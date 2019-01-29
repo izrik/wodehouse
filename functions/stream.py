@@ -31,6 +31,8 @@ def stream_peek(s):
         raise TypeError(
             "Argument s should be a stream. "
             "Got \"{}\" ({}) instead.".format(s, type(s)))
+    if not s.has_chars():
+        return WString('')
     return WString(s.peek())
 
 
