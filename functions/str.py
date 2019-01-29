@@ -24,7 +24,7 @@ def w_str(arg):
     if isinstance(arg, WNumber):
         return WString(str(arg.value))
     if isinstance(arg, wtypes.symbol.WSymbol):
-        return WString(arg.name)
+        return w_str(arg.name)
     if isinstance(arg, WList):
         return WString(str(arg))
     if isinstance(arg, WFunction):

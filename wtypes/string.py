@@ -4,6 +4,9 @@ from wtypes.object import WObject
 class WString(WObject):
     def __init__(self, value, position=None):
         super().__init__(position=position)
+        if not isinstance(value, str):
+            raise TypeError('Argument to WString.__init__ must be a '
+                            'py-string.')
         self.value = value
 
     def __repr__(self):
