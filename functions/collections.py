@@ -5,6 +5,7 @@ from wtypes.boolean import WBoolean
 from wtypes.list import WList
 from wtypes.scope import WScope
 from wtypes.string import WString
+from wtypes.symbol import WSymbol
 
 
 def w_map(func, *exprlists):
@@ -30,7 +31,8 @@ def w_map(func, *exprlists):
     cars = WList(*list(exprlist.head for exprlist in e))
     cdrs = WList(*list(exprlist.remaining for exprlist in e))
 
-    func_with_args = WList(func, *cars)
+    quote = WSymbol.get('quote')
+    func_with_args = WList(func, *list(WList(quote, _) for _ in cars))
 
     def callback(result):
         nonlocal results
@@ -41,7 +43,9 @@ def w_map(func, *exprlists):
         e = cdrs
         cars = WList(*list(exprlist.head for exprlist in e))
         cdrs = WList(*list(exprlist.remaining for exprlist in e))
-        return WEvalRequired(expr=WList(func, *cars), callback=callback)
+        return WEvalRequired(
+            expr=WList(func, *list(WList(quote, _) for _ in cars)),
+            callback=callback)
 
     return WEvalRequired(expr=func_with_args, callback=callback)
 

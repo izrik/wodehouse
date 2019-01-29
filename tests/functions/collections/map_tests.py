@@ -12,7 +12,7 @@ class MapTest(TestCase):
     def test_maps_with_named_function(self):
         # when
         result = eval_str(
-            "(map car '('(1 2 3) '(a b c) '(\"a\" \"b\" \"c\")))",
+            "(map car '((1 2 3) (a b c) (\"a\" \"b\" \"c\")))",
             create_builtins_module())
         # then
         self.assertEqual([1, WSymbol.get('a'), 'a'], result)
