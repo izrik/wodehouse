@@ -65,7 +65,8 @@ def w_format(fmt, *args):
                     raise Exception(
                         "Not enough arguments for format string \"{}\". "
                         "Only got {} arguments.".format(fmt, len(_args)))
-                parts = parts.append(add(*current))
+                if len(current) > 0:
+                    parts = parts.append(add(*current))
                 parts = parts.append(w_str(args.head))
                 args = args.remaining
                 current = WList()
