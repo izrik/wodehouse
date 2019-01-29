@@ -7,6 +7,13 @@ from wtypes.string import WString
 from wtypes.symbol import WSymbol, WSymbolAt
 
 
+class RanOutOfCharactersException(Exception):
+    def __init__(self, message, stream, pos):
+        super().__init__(message)
+        self.stream = stream
+        self.pos = pos
+
+
 def parse(s):
     """
     (define parse
@@ -68,8 +75,9 @@ def read_whitespace_and_comments(s):
                 s.get_next_char()
                 ch = s.peek()
             if not s.has_chars():
-                raise Exception(
-                    "Ran out of characters before reading expression.")
+                raise RanOutOfCharactersException(
+                    "Ran out of characters before reading expression.",
+                    s, s.get_position())
         s.get_next_char()
         ch = s.peek()
 
@@ -105,8 +113,9 @@ def read_expr(s):
         read_whitespace_and_comments(s)
     ch = s.peek()
     if not s.has_chars():
-        raise Exception(
-            "Ran out of characters before reading expression.")
+        raise RanOutOfCharactersException(
+            "Ran out of characters before reading expression.",
+            s, s.get_position())
     if ch == '(':
         return read_list(s)
     if ch in string.digits:
@@ -170,7 +179,9 @@ def read_string(s):
             if ch == 't':
                 ch = '\t'
         chs.append(ch)
-    raise Exception('Ran out of characters before string was finished.')
+    raise RanOutOfCharactersException(
+        'Ran out of characters before string was finished.',
+        s, s.get_position())
 
 
 def read_symbol(s):

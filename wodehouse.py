@@ -71,17 +71,50 @@ def iter_by_two(i):
         yield item1, item2
 
 
-def repl(prompt=None, argv=None):
+def repl(argv=None, primary_prompt=None, secondary_prompt=None):
     """(def repl ()
         (raise "Not implemented"))"""
-    if prompt is None:
-        prompt = '>>> '
+    if primary_prompt is None:
+        primary_prompt = '>>> '
+    if secondary_prompt is None:
+        secondary_prompt = '... '
     runtime = Runtime(argv)
     bm = runtime.builtins_module
     scope = WModule(builtins_module=bm, name='__main__', filename='__repl__')
     while True:
         try:
-            input_s = input(prompt)
+            prompt = primary_prompt
+            buffer = ''
+
+            while True:
+                input_s = input(prompt)
+
+                if input_s is None:
+                    break
+
+                input_s = buffer + input_s + '\n'
+
+                if input_s.strip() == '':
+                    break
+
+                from functions.read import RanOutOfCharactersException
+                from wtypes.stream import WStream
+                from functions.read import parse
+                from functions.read import read_whitespace_and_comments
+                try:
+                    stream = WStream(input_s)
+                    parse(stream)
+                    if stream.has_chars():
+                        read_whitespace_and_comments(stream)
+                        if stream.has_chars():
+                            print('Warning: additional characters found at '
+                                  'end of input expression.')
+                except RanOutOfCharactersException:
+                    buffer = input_s
+                    prompt = secondary_prompt
+                    continue
+                break
+
             if input_s is None:
                 continue
             if input_s.strip() in ['quit', 'exit']:
