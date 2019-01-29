@@ -1,4 +1,5 @@
 from functions.str import w_str
+from functions.types import get_type
 from wtypes.control import WRaisedException
 from wtypes.exception import WException
 from wtypes.list import WList
@@ -9,10 +10,18 @@ from wtypes.string import WString
 def add(*operands):
     # TODO: thorough consideration of all operand type combinations
     # TODO: types to consider: number, string, list, boolean
-    if not operands:
+    if operands is None:
         return WNumber(0)
-    if len(operands) == 1 and isinstance(operands[0], WList):
-        operands = operands[0]
+    if not isinstance(operands, (tuple, list, WList)):
+        raise ValueError(f'Argument to + should be a list. '
+                         f'Get "{operands}" ({get_type(operands)}) instead.')
+    if len(operands) < 1:
+        return WNumber(0)
+    if isinstance(operands[0], WList):
+        x = []
+        for operand in operands:
+            x += operand
+        return WList(*x)
     if isinstance(operands[0], WNumber):
         x = 0
         for operand in operands:
