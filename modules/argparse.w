@@ -1,16 +1,32 @@
 
 # Parse command-line arguments
 # `params` takes the form
-#   (('name1 '(flag1a flag1b flag1c) nargs{0,1})
-#    ('name2 '(flag2a flag2b flag2c) nargs{0,1})
+#   (('name1 '(flag1a flag1b flag1c) nargs{0,1} default_value{optional})
+#    ('name2 '(flag2a flag2b flag2c) nargs{0,1} default_value{optional})
 #    ...
-#    ('nameN '(flagNa flagNb flagNc) nargs{0,1}))
+#    ('nameN '(flagNa flagNb flagNc) nargs{0,1} default_value{optional}))
 
 (def parse_args (params args)
     # TODO: if args not specified, use sys.argv
     #   TODO: (param default values) or (optional params)
     # TODO: check params
-    (parse_args_into_scope params args '()))
+    (parse_args_into_scope params args (get_defaults params)))
+
+(def get_default_value (param)
+    (if (>= (len param) 4)
+        (nth param 3)
+        (if (eq 0 (nth param 2))
+            false
+            '())))
+
+(def get_defaults (params)
+    (if (eq params '())
+        '()
+        (let (param (car params))
+            (let (pname (nth param 0))
+                 (pdefault (get_default_value param))
+                (cons (list pname pdefault) (get_defaults (cdr params)))))))
+
 
 (def parse_args_into_scope (params args pairs)
     (if (eq args '())
@@ -18,7 +34,7 @@
         (let (m (match_arg_to_params args params))
             (if (eq m '())
                 (new_scope (cons (list '__remaining_argv__ args) pairs))
-                (parse_args_into_scope params (car m) (cons (cdr m) pairs))))))
+                (parse_args_into_scope params (car m) (+ pairs (list (cdr m))))))))
 
 (def match_arg_to_params (args params)
     (if (eq params '())
