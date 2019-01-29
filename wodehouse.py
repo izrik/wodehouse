@@ -121,10 +121,15 @@ def format_stacktrace(stack, default_filename=None):
         if not expr:
             stack = stack.prev
             continue
+
+        filename = default_filename
+        line = '<unknown>'
+        expansion = '<unknown>'
         pos = expr.position
-        filename = pos.filename or default_filename
-        line = pos.line or '<unknown>'
-        expansion = pos.get_source_line().strip()
+        if pos:
+            filename = pos.filename or default_filename
+            line = pos.line or '<unknown>'
+            expansion = pos.get_source_line().strip()
         if len(expansion) > 64:
             expansion = expansion[0:60] + ' ...'
         frames.append(
