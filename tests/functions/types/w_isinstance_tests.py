@@ -9,13 +9,15 @@ class IsInstanceTest(TestCase):
 
     def test_isinstance_returns_true_when_match_number(self):
         # when
-        result = eval_str("(isinstance 123 'Number)", create_builtins_module())
+        result = eval_str("(isinstance 123 'Number)",
+                          create_builtins_module())
         # then
         self.assertIs(WBoolean.true, result)
 
     def test_isinstance_returns_true_when_match_number_type_list(self):
         # when
-        result = eval_str("(isinstance 123 '(Number))", create_builtins_module())
+        result = eval_str("(isinstance 123 '(Number))",
+                          create_builtins_module())
         # then
         self.assertIs(WBoolean.true, result)
 
@@ -59,7 +61,7 @@ class IsInstanceTest(TestCase):
         # then
         self.assertIs(WBoolean.true, result)
 
-    def test_isinstance_returns_true_when_match_function_with_magic_func(self):
+    def test_isinstance_returns_true_when_match_function_with_magicfunc(self):
         # when
         result = eval_str("(isinstance list 'Function)",
                           create_builtins_module())

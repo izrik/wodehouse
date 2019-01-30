@@ -23,7 +23,8 @@ class NewScopeTest(TestCase):
 
     def test_new_scope_args_become_keys_and_values(self):
         # when
-        result = eval_str("(new_scope '((a 1) (b 2)))", create_builtins_module())
+        result = eval_str("(new_scope '((a 1) (b 2)))",
+                          create_builtins_module())
         # then
         self.assertIsInstance(result, WScope)
         self.assertEqual(2, len(result))
