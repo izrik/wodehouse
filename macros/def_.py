@@ -1,3 +1,4 @@
+from functions.str import w_str
 from functions.types import get_type
 from wtypes.control import WReturnValue
 from wtypes.function import WFunction
@@ -28,6 +29,6 @@ class Def(WMagicMacro):
                 f'symbols. Got "{args}" ({get_type(args)}) instead.')
 
         f = WFunction(args, body, enclosing_scope=scope)
-        f.name = name
+        f.name = w_str(name)
         scope[name] = f
         return WReturnValue(expr=f)

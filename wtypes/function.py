@@ -14,4 +14,4 @@ class WFunction(WObject):
     def __str__(self):
         if self.name is None:
             return "<unnamed_function>"
-        return str(self.name)
+        return str(self.name.value)

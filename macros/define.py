@@ -1,3 +1,4 @@
+from functions.str import w_str
 from wtypes.control import WEvalRequired, WReturnValue
 from wtypes.function import WFunction
 from wtypes.list import WList
@@ -25,7 +26,7 @@ class Define(WMagicMacro):
 
         def callback(_value):
             if isinstance(_value, (WFunction, WMacro)):
-                _value.name = name
+                _value.name = w_str(name)
             scope[name] = _value
             return WReturnValue(expr=WList(WSymbol.get('quote'), _value))
 

@@ -1,6 +1,7 @@
 from inspect import signature
 
 from wtypes.function import WFunction
+from wtypes.string import WString
 
 
 class WMagicFunction(WFunction):
@@ -19,6 +20,8 @@ class WMagicFunction(WFunction):
         self.num_parameters = num_parameters
         if name is None:
             name = f.__name__
+        if isinstance(name, str):
+            name = WString(name)
         self.name = name
         self.check_args = check_args
         self.sig = sig
