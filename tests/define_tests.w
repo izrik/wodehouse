@@ -10,6 +10,8 @@
     (assert (in 'xyz (dir s)))
     (assert (eq (get s 'xyz) 123))))
 
+#####
+
 (define print_test_function_names false)
 
 (def check_item (key)
