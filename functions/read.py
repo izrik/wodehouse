@@ -65,7 +65,7 @@ def read_whitespace_and_comments(s):
 (lambda (s)
 (if (not (in (peek s) " \r\n\t#"))
     ""
-    (+ (read_wsc_char s)))))
+    (join "" (read_wsc_char s)))))
     """
     ch = s.peek()
     while s.has_chars() and (ch.isspace() or ch == '#'):
@@ -159,7 +159,7 @@ def read_string(s):
     (let (delim (get_next_char s))
     (exec
         (assert (eq "\"" delim))
-        (+ (read_string_char s))))))
+        (join "" (read_string_char s))))))
     """
     pos = s.get_position()
     delim = s.get_next_char()
@@ -245,7 +245,7 @@ def read_name(s):
         (format
             "Unexpected character at the beginning of a name: \"{}\""
              (peek s)))
-    (symbol_at (+ (read_name_char s)) (get_position s)))))
+    (symbol_at (join "" (read_name_char s)) (get_position s)))))
     """
     chs = []
     pos = s.get_position()
@@ -277,7 +277,7 @@ def read_integer_literal(s):
         (format
             "Unexpected character at the beginning of integer literal: \"{}\""
             (peek s)))
-    (int_from_str (+ (read_integer_literal_char s)) (get_position s)))))
+    (int_from_str (join "" (read_integer_literal_char s)) (get_position s)))))
     """
     chs = []
     pos = s.get_position()

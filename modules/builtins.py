@@ -1,4 +1,4 @@
-from functions.str import w_starts_with, w_ends_with
+from functions.str import w_starts_with, w_ends_with, w_join
 from wtypes.module import WModule
 
 
@@ -37,13 +37,13 @@ def create_builtins_module(import_=None):
     from functions.scope import w_dir
     from macros.def_ import Def
     from functions.io import w_is_file, w_is_dir
+    from functions.io import w_list_dir
+    from functions.list import nth
 
     if import_ is None:
         import_ = Import()
 
     module = WModule(name='builtins')
-    from functions.io import w_list_dir
-    from functions.list import nth
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -108,5 +108,6 @@ def create_builtins_module(import_=None):
         'starts_with': WMagicFunction(w_starts_with, module,
                                       name='starts_with'),
         'ends_with': WMagicFunction(w_ends_with, module, name='ends_with'),
+        'join': WMagicFunction(w_join, module, name='join'),
     })
     return module

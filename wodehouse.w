@@ -71,7 +71,7 @@
 (let (delim (get_next_char s))
 (exec
     (assert (eq "\"" delim))
-    (+ (read_string_char s))))))
+    (join "" (read_string_char s))))))
 
 
 (define read_symbol
@@ -113,7 +113,7 @@
         (format
             "Unexpected character at the beginning of a name: \"{}\""
              (peek s)))
-    (symbol_at (+ (read_name_char s)) (get_position s)))))
+    (symbol_at (join "" (read_name_char s)) (get_position s)))))
 
 (define read_integer_literal_char
 (lambda (s)
@@ -131,7 +131,7 @@
         (format
             "Unexpected character at the beginning of integer literal: \"{}\""
             (peek s)))
-    (int_from_str (+ (read_integer_literal_char s)) (get_position s)))))
+    (int_from_str (join "" (read_integer_literal_char s)) (get_position s)))))
 
 
 (define read_expr
@@ -210,7 +210,7 @@
 (lambda (s)
 (if (not (in (peek s) " \r\n\t#"))
     ""
-    (+ (read_wsc_char s)))))
+    (join "" (read_wsc_char s)))))
 
 (def run_file (filename argv)
     (raise "Not implemented"))

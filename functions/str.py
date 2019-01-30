@@ -107,3 +107,14 @@ def w_ends_with(s, prefix):
     if s.value.endswith(prefix.value):
         return WBoolean.true
     return WBoolean.false
+
+
+def w_join(delim, parts):
+    if not isinstance(delim, WString):
+        raise Exception(f'Argument "delim" to join should be a '
+                        f'string. Got "{delim}" ({type(delim)}) instead.')
+    if not isinstance(parts, wtypes.list.WList) or \
+            any(not isinstance(p, WString) for p in parts):
+        raise Exception(f'Argument "parts" to join should be a list of '
+                        f'strings. Got "{parts}" ({type(parts)}) instead.')
+    return WString(delim.value.join(p.value for p in parts))
