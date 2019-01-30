@@ -30,7 +30,7 @@ class PrintTest(TestCase):
         # when
         result = eval_str('(print 123)', scope)
         # then
-        printer.assert_called_once_with(123)
+        printer.assert_called_once_with(123, end=None)
         self.assertEqual(123, result)
 
     def test_prints_string(self):
@@ -43,7 +43,7 @@ class PrintTest(TestCase):
         # when
         result = eval_str('(print "Hello, world!")', scope)
         # then
-        printer.assert_called_once_with('Hello, world!')
+        printer.assert_called_once_with('Hello, world!', end=None)
         self.assertEqual('Hello, world!', result)
 
     def test_prints_escaped_chars_correctly(self):
@@ -55,7 +55,7 @@ class PrintTest(TestCase):
         # when
         result = eval_str('(print "newline\\ncreturn\\rtab\\t")', scope)
         # then
-        printer.assert_called_once_with('newline\ncreturn\rtab\t')
+        printer.assert_called_once_with('newline\ncreturn\rtab\t', end=None)
         self.assertEqual('newline\ncreturn\rtab\t', result)
 
     def test_prints_empty_list(self):
@@ -67,8 +67,8 @@ class PrintTest(TestCase):
         # when
         result = eval_str('(print (quote ()))', scope)
         # then
-        printer.assert_called_once_with([])
-        printer.assert_called_once_with(WList())
+        printer.assert_called_once_with([], end=None)
+        printer.assert_called_once_with(WList(), end=None)
         self.assertEqual(result, [])
         self.assertEqual(result, WList())
 
@@ -81,5 +81,21 @@ class PrintTest(TestCase):
         # when
         result = eval_str('(print (quote (1 2 "three")))', scope)
         # then
-        printer.assert_called_once_with([1, 2, "three"])
+        printer.assert_called_once_with([1, 2, "three"], end=None)
         self.assertEqual(result, [1, 2, "three"])
+
+    def test_prints_end_param(self):
+        # given
+        printer = Mock()
+        scope = create_builtins_module()
+
+        def print2(x, _end=None):
+            return w_print(x, end=_end, printer=printer)
+
+        scope['print'] = WMagicFunction(print2, enclosing_scope=scope,
+                                        check_args=False)
+        # when
+        result = eval_str('(print 123 ",")', scope)
+        # then
+        printer.assert_called_once_with(123, end=',')
+        self.assertEqual(123, result)

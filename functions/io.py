@@ -7,16 +7,19 @@ from functions.str import w_str
 import os.path
 
 
-def w_print(x, *, printer=None):
+def w_print(x, end=None, *, printer=None):
     if printer is None:
         printer = print
 
+    if isinstance(end, WString):
+        end = end.value
+
     if isinstance(x, WNumber):
-        printer(x.value)
+        printer(x.value, end=end)
     elif isinstance(x, WString):
-        printer(x.value)
+        printer(x.value, end=end)
     else:
-        printer(x)
+        printer(x, end=end)
     return x
 
 
