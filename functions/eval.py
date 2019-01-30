@@ -184,7 +184,7 @@ def eval_for_magic(control, scope, stack):
         return control
     if not isinstance(control, WObject):
         raise Exception(f'Invalid return from magic function: '
-                        f'{control} ({type(control)}')
+                        f'{control} ({type(control)})')
     if not isinstance(control, WControl):
         return control
     if isinstance(control, WReturnValue):
