@@ -29,7 +29,8 @@ def w_str(arg):
         return WString(str(arg))
     if isinstance(arg, WFunction):
         if isinstance(arg, WMagicFunction):
-            return WString(str(arg.name))
+            from functions.function import w_name_of
+            return w_name_of(arg)
         return w_str(
             WList(
                 wtypes.symbol.WSymbol.get('lambda'),
