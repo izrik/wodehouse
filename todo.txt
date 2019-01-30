@@ -24,4 +24,3 @@ self-hosted
 jit
 execution engine
 import compiled libraries
-multi-line input in repl
