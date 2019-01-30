@@ -141,7 +141,7 @@ def w_eval(expr, scope, stack=None):
                 callee.num_parameters is not None and
                 len(evaled_args) != callee.num_parameters):
             raise Exception(
-                f'Function "{callee.name}" expected {len(callee.parameters)} '
+                f'Function "{callee.name}" expected {callee.num_parameters} '
                 f'args, got {len(evaled_args)} instead.')
 
         fstack = WStackFrame(location=callee, prev=stack)
