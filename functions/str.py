@@ -83,3 +83,27 @@ def w_format(fmt, *args):
     if len(current) > 0:
         parts = parts.append(add(*current))
     return add(*parts)
+
+
+def w_starts_with(s, prefix):
+    if not isinstance(s, WString):
+        raise Exception(f'Argument "s" to starts_with should be a '
+                        f'string. Got "{s}" ({type(s)}) instead.')
+    if not isinstance(prefix, WString):
+        raise Exception(f'Argument "prefix" to starts_with should be a '
+                        f'string. Got "{prefix}" ({type(prefix)}) instead.')
+    if s.value.startswith(prefix.value):
+        return WBoolean.true
+    return WBoolean.false
+
+
+def w_ends_with(s, prefix):
+    if not isinstance(s, WString):
+        raise Exception(f'Argument "s" to ends_with should be a '
+                        f'string. Got "{s}" ({type(s)}) instead.')
+    if not isinstance(prefix, WString):
+        raise Exception(f'Argument "prefix" to ends_with should be a '
+                        f'string. Got "{prefix}" ({type(prefix)}) instead.')
+    if s.value.endswith(prefix.value):
+        return WBoolean.true
+    return WBoolean.false

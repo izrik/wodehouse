@@ -1,3 +1,4 @@
+from functions.str import w_starts_with, w_ends_with
 from wtypes.module import WModule
 
 
@@ -104,5 +105,8 @@ def create_builtins_module(import_=None):
         'is_dir': WMagicFunction(w_is_dir, module, name='is_dir'),
         'list_dir': WMagicFunction(w_list_dir, module, name='list_dir'),
         'nth': WMagicFunction(nth, module),
+        'starts_with': WMagicFunction(w_starts_with, module,
+                                      name='starts_with'),
+        'ends_with': WMagicFunction(w_ends_with, module, name='ends_with'),
     })
     return module
