@@ -5,8 +5,8 @@ from wtypes.module import WModule
 from wtypes.stream import WStream
 
 
-def w_exec_src(src, builtins_module, filename=None, prevstack=None,
-               scope=None):
+def w_exec_src(src, builtins_module, filename=None, scope=None,
+               prevstack=None):
     from functions.eval import w_eval, is_exception
     if scope is None:
         scope = WModule(builtins_module=builtins_module, name=filename,
