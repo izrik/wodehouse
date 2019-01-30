@@ -9,10 +9,14 @@ class WModule(WScope):
         super().__init__(builtins_module=builtins_module)
         self['__module__'] = self
         if name:
-            self['__name__'] = WString(name)
+            if isinstance(name, str):
+                name = WString(name)
+            self['__name__'] = name
             self.name = name
         if filename:
-            self['__file__'] = WString(filename)
+            if isinstance(filename, str):
+                filename = WString(filename)
+            self['__file__'] = filename
         if builtins_module is not None:
             self['__builtins__'] = builtins_module
 
