@@ -40,6 +40,7 @@ def create_builtins_module(import_=None):
     from functions.io import w_list_dir
     from functions.list import nth
     from functions.exec_src import w_exec_src
+    from functions.function import w_name_of
 
     if import_ is None:
         import_ = Import()
@@ -113,5 +114,6 @@ def create_builtins_module(import_=None):
         'join': WMagicFunction(w_join, module, name='join'),
         'exec_src': WMagicFunction(w_exec_src, module, name='exec_src',
                                    check_args=False),
+        'name_of': WMagicFunction(w_name_of, module, name='name_of'),
     })
     return module
