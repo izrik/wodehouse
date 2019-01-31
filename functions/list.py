@@ -13,10 +13,12 @@ def list_func(*args):
 
 
 def w_len(arg):
-    if not isinstance(arg, WList):
+    from wtypes.string import WString
+    if not isinstance(arg, (WList, WString)):
         return WRaisedException(
             WException(
-                f'Expected a list. Got "{arg}" ({get_type(arg)}) instead.'))
+                f'Expected a list ot string. '
+                f'Got "{arg}" ({get_type(arg)}) instead.'))
     return WNumber(len(arg))
 
 
