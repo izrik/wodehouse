@@ -1,3 +1,5 @@
+from wtypes.control import WRaisedException
+from wtypes.exception import WException
 from wtypes.list import WList
 from wtypes.scope import WScope
 
@@ -49,7 +51,12 @@ def new_scope_within(enclosing_scope, pairs=None):
 
 def get_scope_value(scope, name_or_symbol):
     key = WScope.normalize_key(name_or_symbol)
-    return scope[key]
+    try:
+        value = scope[key]
+    except KeyError as e:
+        return WRaisedException(
+            WException(f"KeyError: {str(key)}"))
+    return value
 
 
 def w_dir(scope=None, *, __current_scope__):
