@@ -1,6 +1,6 @@
 from functions.types import get_type
 from wtypes.boolean import WBoolean
-from wtypes.control import WRaisedException, WEvalRequired, WReturnValue
+from wtypes.control import WRaisedException, WEvalRequired
 from wtypes.exception import WException
 from wtypes.function import WFunction
 from wtypes.list import WList
