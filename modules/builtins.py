@@ -42,6 +42,7 @@ def create_builtins_module(import_=None):
     from functions.exec_src import w_exec_src
     from functions.function import w_name_of
     from functions.list import w_filter
+    from functions.module import w_module
 
     if import_ is None:
         import_ = Import()
@@ -117,5 +118,7 @@ def create_builtins_module(import_=None):
                                    check_args=False),
         'name_of': WMagicFunction(w_name_of, module, name='name_of'),
         'filter': WMagicFunction(w_filter, module, name='filter'),
+        'module': WMagicFunction(w_module, module, name='module',
+                                 check_args=False),
     })
     return module
