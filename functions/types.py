@@ -49,6 +49,9 @@ def w_isinstance(arg, type_or_types):
         if type_or_types == WSymbol.get('Macro') and \
                 argtype == WSymbol.get('MagicMacro'):
             return WBoolean.true
+        if type_or_types == WSymbol.get('Scope') and \
+                argtype == WSymbol.get('Module'):
+            return WBoolean.true
         if argtype == type_or_types:
             return WBoolean.true
         return WBoolean.false
