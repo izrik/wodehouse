@@ -1,11 +1,13 @@
 from modules.argparse import create_argparse_module
 from modules.builtins import create_builtins_module
 from modules.sys import create_sys_module
+from wtypes.object import WObject
 from wtypes.symbol import WSymbol
 
 
-class Runtime:
+class Runtime(WObject):
     def __init__(self, argv):
+        super().__init__()
         from macros.import_ import Import
         self.import_ = Import()
         cache = self.import_.module_cache

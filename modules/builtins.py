@@ -48,6 +48,7 @@ def create_builtins_module(import_=None):
         import_ = Import()
 
     module = WModule(name='builtins')
+    from functions.runtime import w_runtime
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -120,5 +121,6 @@ def create_builtins_module(import_=None):
         'filter': WMagicFunction(w_filter, module, name='filter'),
         'module': WMagicFunction(w_module, module, name='module',
                                  check_args=False),
+        'runtime': WMagicFunction(w_runtime, module, name='runtime'),
     })
     return module
