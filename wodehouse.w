@@ -213,10 +213,23 @@
     (join "" (read_wsc_char s)))))
 
 (def run_file (filename argv)
-    (raise "Not implemented"))
+    (let (src (read_file filename))
+        (run_source src filename argv)))
 
 (def run_source (src filename argv)
-    (raise "Not implemented"))
+    (let (r (runtime argv))
+        (let (rv (exec_src src (get_builtins_module r) filename))
+            (if (isinstance rv 'Exception)
+                (let (stacktrace "TODO: format_stacktrace")
+                    (exec
+                        (print "Stacktrace (most recent call last):")
+                        (print stacktrace)
+                        (print
+                            (format
+                                "Exception: {}"
+                                "TODO: get exception message from rv"))
+                        "TODO: get exception from rv"))
+                rv))))
 
 (def repl ()
     (raise "Not implemented"))

@@ -176,7 +176,8 @@ def format_stacktrace(stack, default_filename=None):
 
 def run_file(filename, argv=None):
     """(def run_file (filename argv)
-        (raise "Not implemented"))"""
+        (let (src (read_file filename))
+            (run_source src filename argv)))"""
     with open(filename) as f:
         src = f.read()
     return run_source(src, filename=filename, argv=argv)
@@ -184,7 +185,19 @@ def run_file(filename, argv=None):
 
 def run_source(src, filename=None, argv=None):
     """(def run_source (src filename argv)
-        (raise "Not implemented"))"""
+        (let (r (runtime argv))
+            (let (rv (exec_src src (get_builtins_module r) filename))
+                (if (isinstance rv 'Exception)
+                    (let (stacktrace "TODO: format_stacktrace")
+                        (exec
+                            (print "Stacktrace (most recent call last):")
+                            (print stacktrace)
+                            (print
+                                (format
+                                    "Exception: {}"
+                                    "TODO: get exception message from rv"))
+                            "TODO: get exception from rv"))
+                    rv))))"""
     runtime = Runtime(argv)
     rv = w_exec_src(src, builtins_module=runtime.builtins_module,
                     filename=filename)
