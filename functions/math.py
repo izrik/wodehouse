@@ -41,7 +41,12 @@ def sub(*operands):
     if not operands:
         return WNumber(0)
     x = 0
+    first = True
     for operand in operands:
+        if first:
+            x = operand.value
+            first = False
+            continue
         x -= operand.value
     return WNumber(x)
 
@@ -56,10 +61,15 @@ def mult(*operands):
 
 
 def div(*operands):
-    if not operands:
+    if not operands or len(operands) < 1:
         return WNumber(1)
     x = 1
+    first = True
     for operand in operands:
+        if first:
+            x = operand.value
+            first = False
+            continue
         try:
             x /= operand.value
         except ZeroDivisionError:
