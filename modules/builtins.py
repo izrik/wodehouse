@@ -48,6 +48,7 @@ def create_builtins_module(import_=None):
     from functions.exception import get_message
     from functions.exception import w_format_stacktrace
     from functions.scope import get_current_scope
+    from functions.eval import w_eval
 
     if import_ is None:
         import_ = Import()
@@ -132,5 +133,6 @@ def create_builtins_module(import_=None):
             w_format_stacktrace, module, name='format_stacktrace',
             check_args=False),
         'get_current_scope': WMagicFunction(get_current_scope, module),
+        'eval': WMagicFunction(w_eval, module, name='eval', check_args=False),
     })
     return module
