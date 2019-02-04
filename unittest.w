@@ -6,10 +6,34 @@
 (def main (argv)
     (let (parsed (parse_args '((start ("-s" "--start-directory") 1 ".")) argv))
         (let (tests (gather_tests_in_folder (get parsed 'start)))
-            (exec
-                (run_tests tests)
-                (if (not print_test_function_names) (print ""))
-                (print (format "Ran {} tests. All tests passed." (len tests)))))))
+            (let (results (run_tests tests))
+                (let (failures (filter is_failure results))
+                    (let (num_failed (len failures))
+                        (exec
+                            (if (not print_test_function_names) (print ""))
+                            (if (> num_failed 0)
+                                (map print_failure failures))
+                            (print "----------------------------------------------------------------------")
+                            (print (format "Ran {} tests." (len tests)))
+                            (print "")
+                            (if (eq 0 num_failed)
+                                (print "OK")
+                                (print (format "FAILED (failures={})" num_failed))))))))))
+
+(def is_failure (x)
+    (not (eq x ".")))
+
+(def print_failure (x)
+    (let (func (car x))
+         (exc (nth x 1))
+        (exec
+            # TODO: print the function's containing module or class
+            (print "======================================================================")
+            (print (format "FAIL: {}" (name_of func)))
+            (print "----------------------------------------------------------------------")
+            (print (format_stacktrace exc))
+            (print (format "Exception: {}" (get_message exc)))
+            (print ""))))
 
 (def gather_tests_in_folder (folder)
     (if (not (is_dir folder))
@@ -60,10 +84,20 @@
 (def run_test_func (func)
     (exec
         (if print_test_function_names
-            (print (format "{}" (name_of func))))
-        (func)
-        (if (not print_test_function_names)
-            (print "." ""))))
+            (print (format "{} " (name_of func)) ""))
+        (let (result
+                (try
+                    (exec
+                        (eval (list func) (get_current_scope))
+                        ".")
+                (except as e
+                    (list func e))))
+            (exec
+                (if print_test_function_names
+                    (print "")
+                    (print (if (eq "." result) "." "F") ""))
+
+                result))))
 
 #####
 
