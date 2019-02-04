@@ -289,7 +289,7 @@ def expand_macros(expr, scope, stack):
 
     args = expr.remaining
     if not isinstance(evaled_head, WMacro):
-        new_expr = WList(evaled_head, *args)
+        new_expr = WList(evaled_head, *args, position=expr.position)
         if scope is not None:
             return WMacroExpansion(new_expr, scope)
         return new_expr
