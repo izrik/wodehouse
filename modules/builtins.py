@@ -43,13 +43,13 @@ def create_builtins_module(import_=None):
     from functions.function import w_name_of
     from functions.list import w_filter
     from functions.module import w_module
+    from functions.runtime import w_runtime
+    from macros.try_ import Try
 
     if import_ is None:
         import_ = Import()
 
     module = WModule(name='builtins')
-    from functions.runtime import w_runtime
-    from macros.try_ import Try
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
