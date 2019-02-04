@@ -470,5 +470,16 @@ class TryTest(TestCase):
         # and
         self.assertEqual(['a', 'd', 'e'], calls)
 
+    def test_var_name_in_except_adds_exception_to_scope(self):
+        # when
+        result = eval_str('''(try
+                                (raise "asdf")
+                             (except as e
+                                e))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WException)
+        self.assertEqual("asdf", result.message)
+
     # TODO: clause syntactic order (check arguments)
     # TODO: check stacktraces

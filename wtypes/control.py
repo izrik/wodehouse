@@ -24,9 +24,11 @@ class WEvalRequired(WControl):
 
 
 class WSetHandlers(WControl):
-    def __init__(self, exception_handler, finally_handler, callback):
+    def __init__(self, exception_handler, exception_var_name, finally_handler,
+                 callback):
         super().__init__()
         self.exception_handler = exception_handler
+        self.exception_var_name = exception_var_name
         self.finally_handler = finally_handler
         self.callback = callback
 
