@@ -1,7 +1,7 @@
 from functions.exec_src import w_exec_src
 from wtypes.callstack import WStackFrame
 from wtypes.control import WControl, WRaisedException, WMacroExpansion, \
-    WReturnValue, WEvalRequired, WExecSrcRequired
+    WReturnValue, WEvalRequired, WExecSrcRequired, WSetHandlers
 from wtypes.exception import WException
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
@@ -87,7 +87,8 @@ def w_eval(expr, scope, stack=None):
 
     rv = expand_macros(expr, scope, stack=stack)
     if is_exception(rv, stack=stack):
-        return rv
+        rv2 = handle_exception(rv, scope, stack)
+        return handle_finally(rv2, scope, stack)
 
     expanded_scope = scope
     if isinstance(rv, WMacroExpansion):
@@ -107,22 +108,25 @@ def w_eval(expr, scope, stack=None):
 
     if isinstance(expanded_expr, WList):
         if len(expanded_expr) == 0:
-            return expanded_expr
+            return handle_finally(expanded_expr, scope, stack)
         head = expanded_expr.head
         if head == WSymbol.get('quote'):
             # TODO: more checks (e.g. make sure second is there)
-            return expanded_expr.second
+            return handle_finally(expanded_expr.second, scope, stack)
 
         cstack = WStackFrame(location=stack.location, prev=stack.prev)
         callee = w_eval(head, expanded_scope, stack=cstack)
         if is_exception(callee, cstack):
-            return callee
+            return handle_finally(callee, scope, stack)
         if not isinstance(callee, WFunction):
             from functions.types import get_type
-            return WRaisedException(exception=WException(
-                f'Callee is not a function. '
-                f'Got "{callee}" ({get_type(callee)}) instead.'),
-                stack=stack)
+            return handle_finally(
+                WRaisedException(exception=WException(
+                    f'Callee is not a function. '
+                    f'Got "{callee}" ({get_type(callee)}) instead.'),
+                    stack=stack),
+                scope,
+                stack)
         stack.callee = callee
 
         args = expanded_expr.remaining
@@ -133,7 +137,8 @@ def w_eval(expr, scope, stack=None):
             astack = WStackFrame(location=stack.location, prev=stack.prev)
             evaled_arg = w_eval(arg, expanded_scope, stack=astack)
             if is_exception(evaled_arg, astack):
-                return evaled_arg
+                rv2 = handle_exception(evaled_arg, scope,stack)
+                return handle_finally(rv2, scope, stack)
             evaled_args.append(evaled_arg)
         stack.evaled_args = evaled_args
 
@@ -149,31 +154,62 @@ def w_eval(expr, scope, stack=None):
         if isinstance(callee, WMagicFunction):
             rv1 = callee.call_magic_function(*evaled_args,
                                              __current_scope__=expanded_scope)
-            return eval_for_magic(rv1, expanded_scope, stack=fstack)
+            return handle_finally(
+                eval_for_magic(rv1, expanded_scope, stack=fstack),
+                scope,
+                stack)
 
         fscope = WScope(enclosing_scope=callee.enclosing_scope)
         for i, argname in enumerate(callee.parameters):
             fscope[argname] = evaled_args[i]
         stack.fscope = fscope
         frv = w_eval(callee.expr, fscope, stack=fstack)
-        is_exception(frv, fstack)  # set the stack attribute
-        return frv
+        if is_exception(frv, fstack):
+            frv2 = handle_exception(frv, scope, stack)
+            return handle_finally(frv2, scope, stack)
+        return handle_finally(frv, scope, stack)
     if isinstance(expanded_expr, WSymbol):
         scope2 = expanded_scope
         if expanded_expr not in scope2:
             scope2 = scope2.get_builtins_module()
         if scope2 is None or expanded_expr not in scope2:
-            return WRaisedException(
-                exception=WException(
-                    f'No object found by the name of "{expanded_expr.name}"'),
-                stack=stack)
+            return handle_finally(
+                WRaisedException(
+                    exception=WException(
+                        f'No object found by the name of '
+                        f'"{expanded_expr.name}"'),
+                    stack=stack),
+                scope,
+                stack)
         value = scope2[expanded_expr]
-        return value
+        return handle_finally(value, scope, stack)
     if isinstance(expanded_expr, (WNumber, WString, WBoolean, WFunction,
                                   WMacro, WScope)):
-        return expanded_expr
+        return handle_finally(expanded_expr, scope, stack)
     raise Exception(f'Unknown object type: '
                     f'"{expanded_expr}" ({type(expanded_expr)})')
+
+
+def handle_exception(rv, scope, stack):
+    if stack.exception_handler:
+        ehstack = WStackFrame(stack.location, stack)
+        ehscope = scope
+        ehscope = WScope(enclosing_scope=ehscope)
+        rv2 = w_eval(stack.exception_handler, ehscope, ehstack)
+        is_exception(rv2, stack)
+        return rv2
+    return rv
+
+
+def handle_finally(rv, scope, stack):
+    if stack.finally_handler:
+        fhstack = WStackFrame(stack.location, stack)
+        fhscope = scope
+        fhscope = WScope(enclosing_scope=fhscope)
+        rv2 = w_eval(stack.finally_handler, fhscope, fhstack)
+        if is_exception(rv2, stack):
+            return rv2
+    return rv
 
 
 _eval_source = w_eval.__doc__
@@ -191,6 +227,11 @@ def eval_for_magic(control, scope, stack):
         return control
     if isinstance(control, WMacroExpansion):
         return control
+    if isinstance(control, WSetHandlers):
+        pstack = stack.prev
+        pstack.exception_handler = control.exception_handler
+        pstack.finally_handler = control.finally_handler
+        return eval_for_magic(control.callback(), scope, stack)
     if not isinstance(control, (WEvalRequired, WExecSrcRequired)):
         raise Exception(f'Invalid return from magic function: '
                         f'{control} ({type(control)}')

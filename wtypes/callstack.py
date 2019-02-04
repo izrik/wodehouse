@@ -12,6 +12,8 @@ class WStackFrame(WObject):
     args = None
     evaled_args = None
     fscope = None
+    exception_handler = None
+    finally_handler = None
 
     def __str__(self):
         return f'location={self.location}, expr={self.expr}, ' \

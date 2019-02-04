@@ -49,6 +49,7 @@ def create_builtins_module(import_=None):
 
     module = WModule(name='builtins')
     from functions.runtime import w_runtime
+    from macros.try_ import Try
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -122,5 +123,6 @@ def create_builtins_module(import_=None):
         'module': WMagicFunction(w_module, module, name='module',
                                  check_args=False),
         'runtime': WMagicFunction(w_runtime, module, name='runtime'),
+        'try': Try(),
     })
     return module

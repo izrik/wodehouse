@@ -23,6 +23,14 @@ class WEvalRequired(WControl):
         self.hide_callee_stack_frame = hide_callee_stack_frame
 
 
+class WSetHandlers(WControl):
+    def __init__(self, exception_handler, finally_handler, callback):
+        super().__init__()
+        self.exception_handler = exception_handler
+        self.finally_handler = finally_handler
+        self.callback = callback
+
+
 class WExecSrcRequired(WControl):
     def __init__(self, src, builtins_module, filename, callback):
         super().__init__()
