@@ -57,7 +57,6 @@ class Try(WMagicMacro):
         if len(exprs) < 2:
             raise Exception(f"try requires at least two clauses. "
                             f"Got {len(exprs)} instead.")
-        n = len(exprs)
         for expr in exprs[1:]:
             if not isinstance(expr, WList) or len(expr) != 2 or \
                     not isinstance(expr[0], WSymbol) or \

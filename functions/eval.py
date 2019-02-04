@@ -137,7 +137,7 @@ def w_eval(expr, scope, stack=None):
             astack = WStackFrame(location=stack.location, prev=stack.prev)
             evaled_arg = w_eval(arg, expanded_scope, stack=astack)
             if is_exception(evaled_arg, astack):
-                rv2 = handle_exception(evaled_arg, scope,stack)
+                rv2 = handle_exception(evaled_arg, scope, stack)
                 return handle_finally(rv2, scope, stack)
             evaled_args.append(evaled_arg)
         stack.evaled_args = evaled_args

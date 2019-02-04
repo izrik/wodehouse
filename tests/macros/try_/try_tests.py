@@ -300,7 +300,7 @@ class TryTest(TestCase):
         calls = []
         s = create_builtins_module()
         x = eval_str(
-            """(def x () 
+            """(def x ()
                     (try
                         (exec
                             (c)
@@ -326,6 +326,9 @@ class TryTest(TestCase):
         mkfunc('g', calls, s)
         mkfunc('h', calls, s)
         mkfunc('i', calls, s)
+        # precondition
+        self.assertIsNotNone(x)
+        self.assertIsNotNone(y)
         # when
         result = eval_str(
             """(try
@@ -412,11 +415,11 @@ class TryTest(TestCase):
         result = eval_str("""(try
                                 (if (exec
                                         (a)
-                                        (/ 1 0)) 
+                                        (/ 1 0))
                                     (exec
                                         (b)
                                         "true")
-                                     (exec 
+                                     (exec
                                         (c)
                                         "false"))
                              (except
