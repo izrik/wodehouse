@@ -114,10 +114,7 @@ def w_eval(expr, scope, stack=None):
             # TODO: more checks (e.g. make sure second is there)
             return handle_finally(expanded_expr.second, scope, stack)
 
-        cstack = WStackFrame(location=stack.location, prev=stack.prev)
-        callee = w_eval(head, expanded_scope, stack=cstack)
-        if is_exception(callee, cstack):
-            return handle_finally(callee, scope, stack)
+        callee = head
         if not isinstance(callee, WFunction):
             from functions.types import get_type
             return handle_finally(

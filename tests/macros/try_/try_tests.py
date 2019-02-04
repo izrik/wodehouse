@@ -436,4 +436,38 @@ class TryTest(TestCase):
         # and
         self.assertEqual(['a', 'd', 'e'], calls)
 
+    def test_exception_in_callee_triggers_handler(self):
+        # given
+        s = create_builtins_module()
+        calls = []
+        mkfunc('a', calls, s)
+        mkfunc('b', calls, s)
+        mkfunc('c', calls, s)
+        mkfunc('d', calls, s)
+        mkfunc('e', calls, s)
+        x = eval_str('(def x () (raise "asdf"))', s)
+        y = eval_str('(def y () ((x) (b) 2 3 4))', s)
+        # precondition
+        self.assertIsNotNone(x)
+        self.assertIsNotNone(y)
+        # when
+        result = eval_str("""(try
+                                (exec
+                                    (a)
+                                    (y)
+                                    (c))
+                             (except
+                                (exec
+                                    (d)
+                                    "exc"))
+                             (finally
+                                (exec
+                                    (e)
+                                    "fin")))""", s)
+        # then
+        self.assertIsInstance(result, WString)
+        self.assertEqual("exc", result)
+        # and
+        self.assertEqual(['a', 'd', 'e'], calls)
+
     # TODO: clause syntactic order (check arguments)
