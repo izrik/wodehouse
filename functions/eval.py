@@ -232,7 +232,6 @@ def process_controls(control, scope, stack):
     if not isinstance(control, (WEvalRequired, WExecSrcRequired)):
         raise Exception(f'Invalid return from magic function: '
                         f'{control} ({type(control)}')
-
     if isinstance(control, WExecSrcRequired):
         ms = w_exec_src(src=control.src,
                         builtins_module=control.builtins_module,
@@ -240,8 +239,7 @@ def process_controls(control, scope, stack):
         if is_exception(ms, stack):
             return ms
         return process_controls(control.callback(ms), scope, stack)
-
-    if control.callback:
+    if isinstance(control, WEvalRequired):
         if control.expr is None:
             raise Exception(f'No value given for the '
                             f'callback: {control.callback}')
@@ -256,10 +254,7 @@ def process_controls(control, scope, stack):
             return control2
         return process_controls(control.callback(control2),
                                 scope, stack=stack2)
-    if control.expr is None:
-        raise Exception(f'Not sure what to do with the control: '
-                        f'{control}')
-    return control
+    raise Exception(f'Unknown control type: "{control}" ({type(control)}).')
 
 
 def expand_macros(expr, scope, stack):
