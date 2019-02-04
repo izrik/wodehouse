@@ -45,6 +45,7 @@ def create_builtins_module(import_=None):
     from functions.module import w_module
     from functions.runtime import w_runtime
     from macros.try_ import Try
+    from functions.exception import get_message
 
     if import_ is None:
         import_ = Import()
@@ -124,5 +125,6 @@ def create_builtins_module(import_=None):
                                  check_args=False),
         'runtime': WMagicFunction(w_runtime, module, name='runtime'),
         'try': Try(),
+        'get_message': WMagicFunction(get_message, module),
     })
     return module
