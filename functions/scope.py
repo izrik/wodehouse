@@ -63,3 +63,7 @@ def w_dir(scope=None, *, __current_scope__):
     if scope is None:
         scope = __current_scope__
     return WList(*(key for key in scope.keys()))
+
+
+def get_current_scope(*, __current_scope__):
+    return __current_scope__
