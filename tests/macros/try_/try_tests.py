@@ -471,3 +471,4 @@ class TryTest(TestCase):
         self.assertEqual(['a', 'd', 'e'], calls)
 
     # TODO: clause syntactic order (check arguments)
+    # TODO: check stacktraces
