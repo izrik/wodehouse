@@ -152,7 +152,7 @@ def w_eval(expr, scope, stack=None):
             rv1 = callee.call_magic_function(*evaled_args,
                                              __current_scope__=expanded_scope)
             return handle_finally(
-                eval_for_magic(rv1, expanded_scope, stack=fstack),
+                process_controls(rv1, expanded_scope, stack=fstack),
                 scope,
                 stack)
 
@@ -212,7 +212,7 @@ def handle_finally(rv, scope, stack):
 _eval_source = w_eval.__doc__
 
 
-def eval_for_magic(control, scope, stack):
+def process_controls(control, scope, stack):
     if is_exception(control, stack):
         return control
     if not isinstance(control, WObject):
@@ -228,7 +228,7 @@ def eval_for_magic(control, scope, stack):
         pstack = stack.prev
         pstack.exception_handler = control.exception_handler
         pstack.finally_handler = control.finally_handler
-        return eval_for_magic(control.callback(), scope, stack)
+        return process_controls(control.callback(), scope, stack)
     if not isinstance(control, (WEvalRequired, WExecSrcRequired)):
         raise Exception(f'Invalid return from magic function: '
                         f'{control} ({type(control)}')
@@ -239,7 +239,7 @@ def eval_for_magic(control, scope, stack):
                         filename=control.filename, prevstack=stack)
         if is_exception(ms, stack):
             return ms
-        return eval_for_magic(control.callback(ms), scope, stack)
+        return process_controls(control.callback(ms), scope, stack)
 
     if control.callback:
         if control.expr is None:
@@ -254,7 +254,8 @@ def eval_for_magic(control, scope, stack):
         control2 = w_eval(control.expr, scope2, stack=stack2)
         if is_exception(control2, stack2):
             return control2
-        return eval_for_magic(control.callback(control2), scope, stack=stack2)
+        return process_controls(control.callback(control2),
+                                scope, stack=stack2)
     if control.expr is None:
         raise Exception(f'Not sure what to do with the control: '
                         f'{control}')
@@ -298,7 +299,7 @@ def expand_macros(expr, scope, stack):
     rv = evaled_head.call_macro(args, scope=scope)
     if is_exception(rv, stack=mstack):
         return rv
-    rv2 = eval_for_magic(rv, scope, stack=mstack)
+    rv2 = process_controls(rv, scope, stack=mstack)
     if is_exception(rv2, stack=mstack):
         return rv2
 
