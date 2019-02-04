@@ -37,6 +37,7 @@ import sys
 import traceback
 
 from functions.eval import eval_str, is_exception
+from functions.exception import format_stacktrace
 from functions.exec_src import w_exec_src
 from runtime import Runtime
 from wtypes.list import WList
@@ -141,37 +142,6 @@ def repl(argv=None, primary_prompt=None, secondary_prompt=None):
             tb = traceback.format_exception(type(ex), ex, ex.__traceback__)
             for line in tb:
                 print('  ' + line, end='')
-
-
-def format_stacktrace(stack, default_filename=None):
-    if default_filename is None:
-        default_filename = '<unknown>'
-    frames = []
-    while stack is not None:
-        expr = stack.expanded_expr
-        if not expr:
-            expr = stack.expr
-        if not expr:
-            stack = stack.prev
-            continue
-
-        filename = default_filename
-        line = '<unknown>'
-        expansion = '<unknown>'
-        pos = expr.position
-        if pos:
-            filename = pos.filename or default_filename
-            line = pos.line or '<unknown>'
-            expansion = pos.get_source_line().strip()
-        if len(expansion) > 64:
-            expansion = expansion[0:60] + ' ...'
-        frames.append(
-            f'  File "{filename}", line {line}, in '
-            f'{stack.get_location()}\n'
-            f'    {expansion}')
-        stack = stack.prev
-    frames.reverse()
-    return '\n'.join(frames)
 
 
 def run_file(filename, argv=None):

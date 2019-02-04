@@ -46,6 +46,7 @@ def create_builtins_module(import_=None):
     from functions.runtime import w_runtime
     from macros.try_ import Try
     from functions.exception import get_message
+    from functions.exception import w_format_stacktrace
 
     if import_ is None:
         import_ = Import()
@@ -126,5 +127,8 @@ def create_builtins_module(import_=None):
         'runtime': WMagicFunction(w_runtime, module, name='runtime'),
         'try': Try(),
         'get_message': WMagicFunction(get_message, module),
+        'format_stacktrace': WMagicFunction(
+            w_format_stacktrace, module, name='format_stacktrace',
+            check_args=False)
     })
     return module

@@ -8,3 +8,4 @@ class WException(WObject):
         if isinstance(message, str):
             message = WString(message)
         self.message = message
+        self.stack = None

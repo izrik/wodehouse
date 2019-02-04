@@ -10,7 +10,18 @@ class WRaisedException(WControl):
     def __init__(self, exception, stack=None):
         super().__init__()
         self.exception = exception
-        self.stack = stack
+        self._stack = stack
+
+    @property
+    def stack(self):
+        return self._stack
+
+    @stack.setter
+    def stack(self, value):
+        self._stack = value
+        if self.exception:
+            if not self.exception.stack:
+                self.exception.stack = value
 
 
 class WEvalRequired(WControl):
