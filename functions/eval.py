@@ -294,7 +294,7 @@ def expand_macros(expr, scope, stack):
     if not isinstance(evaled_head, WMacro):
         new_expr = WList(evaled_head, *args)
         if scope is not None:
-            return WMacroExpansion(expr, scope)
+            return WMacroExpansion(new_expr, scope)
         return new_expr
 
     mstack = WStackFrame(location=evaled_head, prev=stack)
