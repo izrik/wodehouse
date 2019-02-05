@@ -43,6 +43,7 @@
          (exc (nth x 1))
         (exec
             # TODO: print the function's containing module or class
+            #   TODO: either a module_of function or attribute access
             (print "======================================================================")
             (print (format "FAIL: {}" (name_of func)))
             (print "----------------------------------------------------------------------")
