@@ -5,6 +5,8 @@ user-defined types
 user-defined macros
 packages/submodules
     attribute access syntax
+subscript access syntax
+slices syntax?
 wlint
 floating-point w/ literals
 """triple-quote multi-line strings"""
