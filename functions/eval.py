@@ -82,6 +82,9 @@ def w_eval(expr, scope, stack=None):
     if stack is None:
         stack = WStackFrame(location=None, prev=None)
 
+    if emit_listeners:
+        emit(expr)
+
     stack.expr = expr
     stack.scope = scope
 
@@ -328,3 +331,18 @@ def is_exception(rv, stack=None):
             rv.stack = stack
         return True
     return False
+
+
+emit_listeners = []
+
+
+def add_emit_listener(listener):
+    emit_listeners.append(listener)
+
+
+def emit(expr):
+    for listener in emit_listeners:
+        try:
+            listener(expr)
+        except:
+            pass
