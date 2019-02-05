@@ -1,28 +1,39 @@
 (import argparse parse_args)
 (import sys exit)
+(import time time)
 
 (define print_test_function_names false)
 
 (def main (argv)
     (let (parsed (parse_args '((start ("-s" "--start-directory") 1 ".")) argv))
         (let (tests (gather_tests_in_folder (get parsed 'start)))
-            (let (results (run_tests tests))
-                (let (failures (filter is_failure results))
-                    (let (num_failed (len failures))
-                        (exec
-                            (if (not print_test_function_names) (print ""))
-                            (if (> num_failed 0)
-                                (map print_failure failures))
-                            (print "----------------------------------------------------------------------")
-                            (print (format "Ran {} tests." (len tests)))
-                            (print "")
-                            (if (eq 0 num_failed)
-                                (exec
-                                    (print "OK")
-                                    0)
-                                (exec
-                                    (print (format "FAILED (failures={})" num_failed))
-                                    1)))))))))
+            (let (start_time (time))
+                (let (results (run_tests tests))
+                    (let (failures (filter is_failure results))
+                        (let (num_failed (len failures))
+                            (exec
+                                (if (not print_test_function_names) (print ""))
+                                (if (> num_failed 0)
+                                    (map print_failure failures))
+                                (print "----------------------------------------------------------------------")
+                                (print
+                                    (format "Ran {} test{} in {}s."
+                                        (len tests)
+                                        (if (eq (len tests) 1)
+                                            ""
+                                            "s")
+                                        # TODO: format this nicely
+                                        #   TODO: formatting options
+                                        #   TODO: distinct number type, like int and float
+                                        (- (time) start_time)))
+                                (print "")
+                                (if (eq 0 num_failed)
+                                    (exec
+                                        (print "OK")
+                                        0)
+                                    (exec
+                                        (print (format "FAILED (failures={})" num_failed))
+                                        1))))))))))
 
 (def is_failure (x)
     (not (eq x ".")))
