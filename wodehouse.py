@@ -205,7 +205,6 @@ def main():
         parser = argparse.ArgumentParser()
         parser.add_argument('-c', '--command',
                             help='program passed in as string')
-        parser.add_argument('--run-files', nargs='+')
         parser.add_argument('-v', '--verbose', action='store_true')
         args, remaining = parser.parse_known_args(argv)
         command = args.command
@@ -213,33 +212,6 @@ def main():
 
     if command:
         return run_source(command, filename='<string>', argv=argv)
-
-    if args and args.run_files:
-        rv = None
-        files_to_run = []
-        for filename in args.run_files:
-            from pathlib import Path
-            path = Path(filename)
-            if not path.exists():
-                raise FileNotFoundError(f'Could not find file "{filename}".')
-
-            def add_file_or_dir(_path):
-                f = str(_path)
-                if _path.is_file() and f.endswith('.w'):
-                    files_to_run.append(f)
-                elif _path.is_dir():
-                    for f in _path.glob('*'):
-                        add_file_or_dir(f)
-
-            add_file_or_dir(path)
-
-        for file_to_run in files_to_run:
-            if args.verbose:
-                print(f'Running file {file_to_run} ... ', end='')
-            rv = run_file(file_to_run, argv=argv)
-            if args.verbose:
-                print('done.')
-        return rv
 
     filename = None
     if len(argv) > 0:
