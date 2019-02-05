@@ -181,6 +181,22 @@ def run_source(src, filename=None, argv=None):
     return rv
 
 
+def run_module(module, argv):
+    import os.path
+    module_file = f'{module}.w'
+    if os.path.exists(module_file):
+        return run_file(module_file, argv)
+
+    from wtypes.symbol import WSymbol
+    module_symbol = WSymbol.get(str(module))
+    runtime = Runtime(argv)
+    if module_symbol in runtime.import_.module_cache:
+        mod = runtime.import_.module_cache[module_symbol]
+        raise Exception(f'now what? do we re-run the module\'s source? {mod}')
+
+    raise Exception(f'No module named {module}')
+
+
 def main():
     """(def main ()
     (let (parsed (parse_args
@@ -202,17 +218,23 @@ def main():
 
     args = None
     command = None
+    module = None
     if len(argv) > 0 and argv[0] and argv[0].startswith('-'):
         parser = argparse.ArgumentParser()
-        parser.add_argument('-c', '--command',
+        parser.add_argument('-c', metavar='cmd', dest='command',
                             help='program passed in as string')
+        parser.add_argument('-m', metavar='mod', dest='module',
+                            help='run library module as a script')
         parser.add_argument('-v', '--verbose', action='store_true')
         args, remaining = parser.parse_known_args(argv)
         command = args.command
+        module = args.module
         argv = remaining
 
     if command:
         return run_source(command, filename='<string>', argv=argv)
+    elif module:
+        return run_module(module, argv=argv)
 
     filename = None
     if len(argv) > 0:
