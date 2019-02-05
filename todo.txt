@@ -5,6 +5,8 @@ user-defined types
 user-defined macros
 packages/submodules
     attribute access syntax
+unit tests for unittest.w
+coverage tool
 subscript access syntax
 slices syntax?
 wlint
