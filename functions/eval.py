@@ -1,7 +1,7 @@
 from functions.exec_src import w_exec_src
 from wtypes.callstack import WStackFrame
 from wtypes.control import WControl, WRaisedException, WMacroExpansion, \
-    WReturnValue, WEvalRequired, WExecSrcRequired
+    WReturnValue, WEvalRequired, WExecSrcRequired, WMultipleEvalsRequired
 from wtypes.exception import WException
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
@@ -191,7 +191,8 @@ def eval_for_magic(control, scope, stack):
         return control
     if isinstance(control, WMacroExpansion):
         return control
-    if not isinstance(control, (WEvalRequired, WExecSrcRequired)):
+    if not isinstance(control, (WEvalRequired, WExecSrcRequired,
+                                WMultipleEvalsRequired)):
         raise Exception(f'Invalid return from magic function: '
                         f'{control} ({type(control)}')
 
@@ -202,6 +203,20 @@ def eval_for_magic(control, scope, stack):
         if is_exception(ms, stack):
             return ms
         return eval_for_magic(control.callback(ms), scope, stack)
+
+    if isinstance(control, WMultipleEvalsRequired):
+        scope2 = scope
+        if control.scope is not None:
+            scope2 = control.scope
+        stack2 = stack
+        if control.hide_callee_stack_frame:
+            stack2 = stack2.prev
+            controls = []
+        for expr in control.exprs:
+            control2 = w_eval(expr, scope2, stack=stack2)
+            if is_exception(control2, stack2):
+                return control2
+            controls =
 
     if control.callback:
         if control.expr is None:

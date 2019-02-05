@@ -23,6 +23,16 @@ class WEvalRequired(WControl):
         self.hide_callee_stack_frame = hide_callee_stack_frame
 
 
+class WMultipleEvalsRequired(WControl):
+    def __init__(self, exprs, callback, scope=None,
+                 hide_callee_stack_frame=False):
+        super().__init__()
+        self.exprs = exprs
+        self.callback = callback
+        self.scope = scope
+        self.hide_callee_stack_frame = hide_callee_stack_frame
+
+
 class WExecSrcRequired(WControl):
     def __init__(self, src, builtins_module, filename, callback):
         super().__init__()
