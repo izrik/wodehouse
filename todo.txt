@@ -1,0 +1,25 @@
+homo-iconic?
+    - no, not exactly
+user-defined types
+    types and subtypes
+user-defined macros
+packages/submodules
+    attribute access syntax
+unit tests for unittest.w
+coverage tool
+subscript access syntax
+slices syntax?
+wlint
+floating-point w/ literals
+"""triple-quote multi-line strings"""
+__doc__
+dicts
+sets
+list/dict/set comprehensions?
+function arg default values
+function *args
+function **kwargs
+self-hosted
+jit
+execution engine
+import compiled libraries

@@ -185,3 +185,16 @@ FakesAssemblies/
 # MonoDevelop
 *.userprefs
 
+# JetBrains
+.idea/
+*.iml
+
+# virtualenv
+.venv/
+
+# Python
+__pycache__/
+.coverage
+htmlcov/
+_scratch*
+instance/

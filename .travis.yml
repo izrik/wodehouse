@@ -1,0 +1,10 @@
+language: python
+python:
+    - "3.6"
+sudo: false
+install:
+    - pip install -r dev-requirements-lock.txt
+script:
+    - ./run_tests.sh
+after_success:
+    - coveralls
