@@ -3,13 +3,8 @@ homo-iconic?
 user-defined types
     types and subtypes
 user-defined macros
-unittest
-    file i/o
-    argparse
-    discover
-        packages/submodules
-            attribute access syntax
-    exception handling
+packages/submodules
+    attribute access syntax
 wlint
 floating-point w/ literals
 """triple-quote multi-line strings"""
