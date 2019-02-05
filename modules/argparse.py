@@ -15,6 +15,6 @@ def create_argparse_module(builtins_module):
         __src__ = __f.read()
     from functions.exec_src import w_exec_src
     mod = WModule(builtins_module=builtins_module)
-    w_exec_src(__src__, builtins_module=builtins_module,
+    w_exec_src(__src__, builtins_module=builtins_module, name='argparse',
                filename=__src_file__, scope=mod)
     return mod

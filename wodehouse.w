@@ -201,7 +201,7 @@
 
 (def run_source (src filename argv)
     (let (r (runtime argv))
-        (let (rv (exec_src src (get_builtins_module r) filename))
+        (let (rv (exec_src src (get_builtins_module r) "__main__" filename))
             (if (isinstance rv 'Exception)
                 (let (stacktrace "TODO: format_stacktrace")
                     (exec

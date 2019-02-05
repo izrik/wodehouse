@@ -64,5 +64,7 @@ class Import(WMagicMacro):
                 self.module_cache[module_name] = imported_ms
                 return complete_module(imported_ms)
 
-            return WExecSrcRequired(src, builtins_module=bm, filename=filename,
-                                    callback=callback)
+            from functions.str import w_str
+            return WExecSrcRequired(src, builtins_module=bm,
+                                    name=w_str(module_name),
+                                    filename=filename, callback=callback)

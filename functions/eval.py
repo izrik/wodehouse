@@ -238,6 +238,7 @@ def process_controls(control, scope, stack):
     if isinstance(control, WExecSrcRequired):
         ms = w_exec_src(src=control.src,
                         builtins_module=control.builtins_module,
+                        name=control.name,
                         filename=control.filename, prevstack=stack)
         if is_exception(ms, stack):
             return ms

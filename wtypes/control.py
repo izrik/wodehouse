@@ -45,10 +45,11 @@ class WSetHandlers(WControl):
 
 
 class WExecSrcRequired(WControl):
-    def __init__(self, src, builtins_module, filename, callback):
+    def __init__(self, src, name, builtins_module, filename, callback):
         super().__init__()
         self.src = src
         self.builtins_module = builtins_module
+        self.name = name
         self.filename = filename
         self.callback = callback
 

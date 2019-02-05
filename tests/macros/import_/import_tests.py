@@ -28,7 +28,7 @@ class ImportTest(TestCase):
             'define': Define(),
         })
         # when
-        result = w_exec_src("(import file x)", filename="<test>",
+        result = w_exec_src("(import file x)", name='test', filename="<test>",
                             builtins_module=bm)
         # then
         self.assertIsInstance(result, WScope)

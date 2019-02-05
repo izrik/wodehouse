@@ -156,7 +156,8 @@ def run_file(filename, argv=None):
 def run_source(src, filename=None, argv=None):
     """(def run_source (src filename argv)
         (let (r (runtime argv))
-            (let (rv (exec_src src (get_builtins_module r) filename))
+            (let (rv (exec_src src (get_builtins_module r) "__main__"
+                                filename))
                 (if (isinstance rv 'Exception)
                     (let (stacktrace "TODO: format_stacktrace")
                         (exec
@@ -170,7 +171,7 @@ def run_source(src, filename=None, argv=None):
                     rv))))"""
     runtime = Runtime(argv)
     rv = w_exec_src(src, builtins_module=runtime.builtins_module,
-                    filename=filename)
+                    filename=filename, name='__main__')
     if is_exception(rv):
         stacktrace = format_stacktrace(rv.stack)
         print('Stacktrace (most recent call last):')

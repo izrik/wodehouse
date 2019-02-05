@@ -5,11 +5,11 @@ from wtypes.module import WModule
 from wtypes.stream import WStream
 
 
-def w_exec_src(src, builtins_module, filename=None, scope=None,
+def w_exec_src(src, builtins_module, name=None, filename=None, scope=None,
                prevstack=None):
     from functions.eval import w_eval, is_exception
     if scope is None:
-        scope = WModule(builtins_module=builtins_module, name=filename,
+        scope = WModule(builtins_module=builtins_module, name=name,
                         filename=filename)
     stream = WStream(src, filename=filename)
     read_whitespace_and_comments(stream)

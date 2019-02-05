@@ -68,7 +68,7 @@
         (starts_with item ".")))
 
 (def gather_tests_in_file (file)
-    (let (s (exec_src (read_file file) __builtins__ file
+    (let (s (exec_src (read_file file) __builtins__ "name" file
                         (module __builtins__ file file)))
         (filter is_valid_test_function
                 (map (lambda (key) (get s key)) (dir s)))))

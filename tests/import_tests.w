@@ -8,7 +8,7 @@
         (assert (not (in 'example (dir s))))
 
         # when
-        (exec_src "(import example)" __builtins__ "<unit_test>" s)
+        (exec_src "(import example)" __builtins__ "unit_test" "<unit_test>" s)
 
         # then
 
@@ -43,7 +43,7 @@
         # precondition
         (assert (not (in 'something (dir s))))
         # when
-        (exec_src "(import example something)" __builtins__ "<unit_test>" s)
+        (exec_src "(import example something)" __builtins__ "unit_test" "<unit_test>" s)
         # then
         (assert (in 'something (dir s)))
         (assert (eq (get s 'something) "abc"))))
@@ -53,7 +53,7 @@
     (exec
         # given
         (define s (new_scope_within __module__))
-        (exec_src "(import example)" __builtins__ "<unit_test>" s)
+        (exec_src "(import example)" __builtins__ "unit_test" "<unit_test>" s)
         (define example_one (get s 'example))
         (define s2 (new_scope_within __module__))
 
@@ -61,7 +61,7 @@
         (assert (not (in 'example (dir s2))))
 
         # when
-        (exec_src "(import example)" __builtins__ "<unit_test>" s2)
+        (exec_src "(import example)" __builtins__ "unit_test" "<unit_test>" s2)
 
         # then the module is in the second scope
         (assert (in 'example (dir s2)))
