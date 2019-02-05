@@ -54,6 +54,7 @@ def create_builtins_module(import_=None):
         import_ = Import()
 
     module = WModule(name='builtins')
+    from functions.object import w_position_of
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -134,5 +135,7 @@ def create_builtins_module(import_=None):
             check_args=False),
         'get_current_scope': WMagicFunction(get_current_scope, module),
         'eval': WMagicFunction(w_eval, module, name='eval', check_args=False),
+        'position_of': WMagicFunction(w_position_of, module,
+                                      name='position_of'),
     })
     return module
