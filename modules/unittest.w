@@ -101,4 +101,5 @@
 
 #####
 
-(main (cdr (get sys 'argv)))
+(if (eq __name__ "__main__")
+    (main (get sys 'argv)))

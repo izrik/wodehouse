@@ -17,7 +17,9 @@ class Import(WMagicMacro):
     class DefaultLoader:
         def get_filename_from_module_name(self, module_name):
             filename = f'{str(module_name)}.w'
-            return filename
+            import os.path
+            fullpath = os.path.join(os.getcwd(), filename)
+            return fullpath
 
         def load(self, module_name):
             filename = self.get_filename_from_module_name(module_name)

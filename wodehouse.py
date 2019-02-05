@@ -148,6 +148,8 @@ def run_file(filename, argv=None):
     """(def run_file (filename argv)
         (let (src (read_file filename))
             (run_source src filename argv)))"""
+    if isinstance(filename, WString):
+        filename = filename.value
     with open(filename) as f:
         src = f.read()
     return run_source(src, filename=filename, argv=argv)
@@ -188,11 +190,18 @@ def run_module(module, argv):
         return run_file(module_file, argv)
 
     from wtypes.symbol import WSymbol
+    from macros.import_ import Import
     module_symbol = WSymbol.get(str(module))
+    loader = Import.DefaultLoader()
+    filename = loader.get_filename_from_module_name(module_symbol)
+    if os.path.exists(filename):
+        return run_file(filename, argv)
+
     runtime = Runtime(argv)
     if module_symbol in runtime.import_.module_cache:
         mod = runtime.import_.module_cache[module_symbol]
-        raise Exception(f'now what? do we re-run the module\'s source? {mod}')
+        if "__file__" in mod:
+            return run_file(mod["__file__"], argv)
 
     raise Exception(f'No module named {module}')
 
