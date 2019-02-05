@@ -1,5 +1,5 @@
 (import argparse parse_args)
-(import sys)
+(import sys exit)
 
 (define print_test_function_names false)
 
@@ -17,8 +17,12 @@
                             (print (format "Ran {} tests." (len tests)))
                             (print "")
                             (if (eq 0 num_failed)
-                                (print "OK")
-                                (print (format "FAILED (failures={})" num_failed))))))))))
+                                (exec
+                                    (print "OK")
+                                    0)
+                                (exec
+                                    (print (format "FAILED (failures={})" num_failed))
+                                    1)))))))))
 
 (def is_failure (x)
     (not (eq x ".")))
@@ -102,4 +106,5 @@
 #####
 
 (if (eq __name__ "__main__")
-    (main (get sys 'argv)))
+    (exit
+        (main (get sys 'argv))))
