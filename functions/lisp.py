@@ -1,9 +1,7 @@
 from wtypes.list import WList
 
 
-def car(first, *args):
-    if args:
-        raise Exception('Too many arguments given to car')
+def car(first):
     if not isinstance(first, WList):
         raise TypeError('{} is not a list'.format(str(first)))
     if len(first) < 1:
@@ -11,9 +9,7 @@ def car(first, *args):
     return first.head
 
 
-def cdr(first, *args):
-    if args:
-        raise Exception('Too many arguments given to cdr')
+def cdr(first):
     if not isinstance(first, WList):
         raise TypeError('{} is not a list'.format(str(first)))
     return first.remaining
