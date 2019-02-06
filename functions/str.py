@@ -1,7 +1,6 @@
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
 from wtypes.boolean import WBoolean
-import wtypes.list
 from wtypes.number import WNumber
 from wtypes.object import WObject
 from wtypes.stream import WStream

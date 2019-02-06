@@ -1,4 +1,3 @@
-from functions.str import w_str
 from wtypes.object import WObject
 from wtypes.string import WString
 from wtypes.symbol import WSymbolAt, WSymbol
@@ -18,6 +17,7 @@ class WScope(WObject):
 
     @staticmethod
     def normalize_key(key):
+        from functions.str import w_str
         if isinstance(key, WSymbolAt):
             return key.src
         if isinstance(key, WSymbol):
