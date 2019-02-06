@@ -20,7 +20,7 @@ def create_builtins_module(import_=None):
         stream_get_next_char, stream_get_position, stream_peek
     from functions.symbol import symbol_at
     from functions.types import get_type, w_isinstance
-    from macros.apply import Apply
+    from functions.apply import w_apply
     from macros.assert_ import WAssert
     from macros.cond import Cond
     from macros.define import Define
@@ -62,7 +62,7 @@ def create_builtins_module(import_=None):
         '*': WMagicFunction(mult, module, name='*'),
         '/': WMagicFunction(div, module, name='/'),
         'let': Let(),
-        'apply': Apply(),
+        'apply': WMagicFunction(w_apply, module, name='apply'),
         'list': WMagicFunction(list_func, module, name='list'),
         'len': WMagicFunction(w_len, module, name='len'),
         'car': WMagicFunction(car, module),
