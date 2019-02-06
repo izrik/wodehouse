@@ -1,18 +1,18 @@
 from wtypes.list import WList
 
 
-def car(first):
-    if not isinstance(first, WList):
-        raise TypeError('{} is not a list'.format(str(first)))
-    if len(first) < 1:
+def car(arg):
+    if not isinstance(arg, WList):
+        raise TypeError('{} is not a list'.format(str(arg)))
+    if len(arg) < 1:
         return WList()
-    return first.head
+    return arg.head
 
 
-def cdr(first):
-    if not isinstance(first, WList):
-        raise TypeError('{} is not a list'.format(str(first)))
-    return first.remaining
+def cdr(arg):
+    if not isinstance(arg, WList):
+        raise TypeError('{} is not a list'.format(str(arg)))
+    return arg.remaining
 
 
 def cons(a, b):
