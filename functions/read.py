@@ -24,8 +24,13 @@ def parse(s):
                 s
                 (stream s)))) )
     """
+    from wtypes.object import WObject
+    if not isinstance(s, WObject):
+        from modules.sys import w_from_py
+        s = w_from_py(s)
     if not isinstance(s, WStream):
-        s = WStream(str(s))
+        from functions.str import w_str
+        s = WStream(w_str(s))
     return read_expr(s)
 
 
