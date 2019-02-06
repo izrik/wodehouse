@@ -11,6 +11,9 @@ def w_print(x, end=None, *, printer=None):
     if printer is None:
         printer = print
 
+    from wtypes.object import WObject
+    if end is not None and isinstance(end, WObject):
+        end = w_str(end)
     if isinstance(end, WString):
         end = end.value
 
