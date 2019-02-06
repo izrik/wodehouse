@@ -1,7 +1,11 @@
 from wtypes.list import WList
+from wtypes.object import WObject
 
 
 def car(arg):
+    if not isinstance(arg, WObject):
+        raise TypeError(f'First argument to car must be a WObject. '
+                        f'Got "{arg}" ({type(arg)}) instead.')
     if not isinstance(arg, WList):
         raise TypeError('{} is not a list'.format(str(arg)))
     if len(arg) < 1:
@@ -10,6 +14,9 @@ def car(arg):
 
 
 def cdr(arg):
+    if not isinstance(arg, WObject):
+        raise TypeError(f'First argument to car must be a WObject. '
+                        f'Got "{arg}" ({type(arg)}) instead.')
     if not isinstance(arg, WList):
         raise TypeError('{} is not a list'.format(str(arg)))
     return arg.remaining
