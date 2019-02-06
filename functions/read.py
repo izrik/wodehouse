@@ -75,9 +75,7 @@ def read_whitespace_and_comments(s):
                 s.get_next_char()
                 ch = s.peek()
             if not s.has_chars():
-                raise RanOutOfCharactersException(
-                    "Ran out of characters before reading expression.",
-                    s, s.get_position())
+                break
         s.get_next_char()
         ch = s.peek()
 
