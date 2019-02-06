@@ -30,10 +30,16 @@ def cdr(arg):
 
 
 def cons(a, b):
+    if not isinstance(a, WObject):
+        raise TypeError(f'First argument to cons must be a WObject. '
+                        f'Got "{a}" ({type(a)}) instead.')
+    if not isinstance(b, WObject):
+        raise TypeError(f'Second argument to cons must be a WObject. '
+                        f'Got "{b}" ({type(b)}) instead.')
     if not isinstance(b, WList):
-        raise Exception(
-            "Expected b to be a list. "
-            "Got \"{}\" ({}) instead.".format(b, type(b)))
+        return WRaisedException(
+            WException(f'Second argument to cons must be a list. '
+                       f'Got "{b}" ({get_type(b)}) instead.'))
     return WList(a, *b)
 
 
