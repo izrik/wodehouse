@@ -1,13 +1,18 @@
+from functions.types import get_type
+from wtypes.control import WRaisedException
+from wtypes.exception import WException
 from wtypes.list import WList
 from wtypes.object import WObject
 
 
 def car(arg):
     if not isinstance(arg, WObject):
-        raise TypeError(f'First argument to car must be a WObject. '
+        raise TypeError(f'Argument to car must be a WObject. '
                         f'Got "{arg}" ({type(arg)}) instead.')
     if not isinstance(arg, WList):
-        raise TypeError('{} is not a list'.format(str(arg)))
+        return WRaisedException(
+            WException(f'Argument to car must be a list. '
+                       f'Got "{arg}" ({get_type(arg)}) instead.'))
     if len(arg) < 1:
         return WList()
     return arg.head
@@ -15,10 +20,12 @@ def car(arg):
 
 def cdr(arg):
     if not isinstance(arg, WObject):
-        raise TypeError(f'First argument to car must be a WObject. '
+        raise TypeError(f'Argument to cdr must be a WObject. '
                         f'Got "{arg}" ({type(arg)}) instead.')
     if not isinstance(arg, WList):
-        raise TypeError('{} is not a list'.format(str(arg)))
+        return WRaisedException(
+            WException(f'Argument to cdr must be a list. '
+                       f'Got "{arg}" ({get_type(arg)}) instead.'))
     return arg.remaining
 
 
