@@ -1,10 +1,10 @@
 
 # Parse command-line arguments
 # `params` takes the form
-#   (('name1 '(flag1a flag1b flag1c) nargs{0,1} default_value{optional})
-#    ('name2 '(flag2a flag2b flag2c) nargs{0,1} default_value{optional})
+#   (('name1 '(flag1a flag1b flag1c ...) nargs{0,1} default_value{optional})
+#    ('name2 '(flag2a flag2b flag2c ...) nargs{0,1} default_value{optional})
 #    ...
-#    ('nameN '(flagNa flagNb flagNc) nargs{0,1} default_value{optional}))
+#    ('nameN '(flagNa flagNb flagNc ...) nargs{0,1} default_value{optional}))
 
 (def parse_args (params args)
     # TODO: if args not specified, use sys.argv
