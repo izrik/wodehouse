@@ -1,4 +1,3 @@
-from functions.str import w_starts_with, w_ends_with, w_join
 from wtypes.module import WModule
 
 
@@ -49,14 +48,15 @@ def create_builtins_module(import_=None):
     from functions.exception import w_format_stacktrace
     from functions.scope import get_current_scope
     from functions.eval import w_eval
+    from functions.object import w_position_of
+    from functions.read import parse
+    from functions.collections import w_unique
+    from functions.str import w_starts_with, w_ends_with, w_join, w_split
 
     if import_ is None:
         import_ = Import()
 
     module = WModule(name='builtins')
-    from functions.object import w_position_of
-    from functions.read import parse
-    from functions.collections import w_unique
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -125,6 +125,7 @@ def create_builtins_module(import_=None):
                                       name='starts_with'),
         'ends_with': WMagicFunction(w_ends_with, module, name='ends_with'),
         'join': WMagicFunction(w_join, module, name='join'),
+        'split': WMagicFunction(w_split, module, name='split'),
         'exec_src': WMagicFunction(w_exec_src, module, name='exec_src',
                                    check_args=False),
         'name_of': WMagicFunction(w_name_of, module, name='name_of'),

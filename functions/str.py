@@ -110,6 +110,7 @@ def w_ends_with(s, prefix):
 
 
 def w_join(delim, parts):
+    import wtypes.list
     if not isinstance(delim, WString):
         raise Exception(f'Argument "delim" to join should be a '
                         f'string. Got "{delim}" ({type(delim)}) instead.')
@@ -118,3 +119,18 @@ def w_join(delim, parts):
         raise Exception(f'Argument "parts" to join should be a list of '
                         f'strings. Got "{parts}" ({type(parts)}) instead.')
     return WString(delim.value.join(p.value for p in parts))
+
+
+def w_split(s, sep):
+    if not isinstance(s, WObject):
+        raise TypeError(f'First argument to split should be a WObject.'
+                        f'Got "{s}" ({type(s)}) instead.')
+    if not isinstance(sep, WObject):
+        raise TypeError(f'First argument to split should be a WObject.'
+                        f'Got "{sep}" ({type(sep)}) instead.')
+
+    s = w_str(s)
+    sep = w_str(sep)
+
+    from wtypes.list import WList
+    return WList(*(WString(_) for _ in s.value.split(sep.value)))
