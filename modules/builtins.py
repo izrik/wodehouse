@@ -56,6 +56,7 @@ def create_builtins_module(import_=None):
     module = WModule(name='builtins')
     from functions.object import w_position_of
     from functions.read import parse
+    from functions.collections import w_unique
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -139,5 +140,6 @@ def create_builtins_module(import_=None):
         'position_of': WMagicFunction(w_position_of, module,
                                       name='position_of'),
         'parse': WMagicFunction(parse, module),
+        'unique': WMagicFunction(w_unique, module, name='unique'),
     })
     return module
