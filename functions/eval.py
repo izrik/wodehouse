@@ -340,6 +340,10 @@ def add_emit_listener(listener):
     emit_listeners.append(listener)
 
 
+def remove_emit_listener(listener):
+    emit_listeners.remove(listener)
+
+
 def emit(expr):
     for listener in emit_listeners:
         try:
