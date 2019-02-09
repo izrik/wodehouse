@@ -1,6 +1,7 @@
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
 from wtypes.number import WNumber
+from wtypes.object import WObject
 from wtypes.string import WString
 from pathlib import Path
 from functions.str import w_str
@@ -31,6 +32,25 @@ def read_file(path):
         path = path.value
     with open(path) as f:
         return WString(f.read())
+
+
+def write_file(path, content):
+    if isinstance(path, WObject):
+        path = w_str(path).value
+    if isinstance(content, WObject):
+        content = w_str(path).value
+    with open(path, 'w') as f:
+        f.write(content)
+        return WNumber(f.write(content))
+
+
+def append_file(path, content):
+    if isinstance(path, WObject):
+        path = w_str(path).value
+    if isinstance(content, WObject):
+        content = w_str(path).value
+    with open(path, 'a') as f:
+        return WNumber(f.write(content))
 
 
 def w_is_file(path):

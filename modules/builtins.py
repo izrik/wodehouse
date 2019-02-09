@@ -7,7 +7,7 @@ def create_builtins_module(import_=None):
     from functions.convert import int_from_str
     from functions.exception import exception
     from functions.exec_src import w_exec
-    from functions.io import w_print, read_file
+    from functions.io import w_print, read_file, write_file, append_file
     from functions.lisp import car, cdr, cons, atom
     from functions.list import list_func
     from functions.logical import w_not, w_or, w_and, less_than, \
@@ -97,6 +97,8 @@ def create_builtins_module(import_=None):
         'in': WMagicFunction(w_in, module, name='in'),
         'map': WMagicFunction(w_map, module, name='map', check_args=False),
         'read_file': WMagicFunction(read_file, module),
+        'write_file': WMagicFunction(write_file, module),
+        'append_file': WMagicFunction(append_file, module),
         'assert': WAssert(),
         'raise': WMagicFunction(w_raise, module, name='raise'),
         'stream': WMagicFunction(stream, module),
