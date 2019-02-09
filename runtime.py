@@ -16,6 +16,9 @@ class Runtime(WObject):
         cache = self.import_.module_cache
         self.builtins_module = create_builtins_module(import_=self.import_)
 
+        # TODO: don't execute the modules' w-lang code until they're imported.
+        # Otherwise "-m" won't work
+
         self.sys_module = create_sys_module(self.builtins_module, argv=argv)
         cache[WSymbol.get('sys')] = self.sys_module
 

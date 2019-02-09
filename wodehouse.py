@@ -149,6 +149,7 @@ def repl(argv=None, primary_prompt=None, secondary_prompt=None):
 
 
 def run_file(filename, argv=None):
+    # TODO: look into the runpy module
     """(def run_file (filename argv)
         (let (src (read_file filename))
             (run_source src filename argv)))"""
@@ -160,6 +161,7 @@ def run_file(filename, argv=None):
 
 
 def run_source(src, filename=None, argv=None):
+    # TODO: look into the runpy module
     """(def run_source (src filename argv)
         (let (r (runtime argv))
             (let (rv (exec_src src (get_builtins_module r) "__main__"
@@ -188,6 +190,7 @@ def run_source(src, filename=None, argv=None):
 
 
 def run_module(module, argv):
+    # TODO: look into the runpy module
     import os.path
     module_file = f'{module}.w'
     if os.path.exists(module_file):
@@ -233,6 +236,7 @@ def main():
     command = None
     module = None
     if len(argv) > 0 and argv[0] and argv[0].startswith('-'):
+        # TODO: manually parse argv without argparse
         parser = argparse.ArgumentParser()
         parser.add_argument('-c', metavar='cmd', dest='command',
                             help='program passed in as string')
