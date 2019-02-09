@@ -4,6 +4,7 @@ from itertools import takewhile
 from wtypes.list import WList
 from wtypes.magic_function import WMagicFunction
 from wtypes.module import WModule
+from version import __version__, __version_info__
 
 
 def create_sys_module(builtins_module, argv=None):
@@ -17,18 +18,23 @@ def create_sys_module(builtins_module, argv=None):
     mod = WModule(builtins_module=builtins_module, name='sys')
     mod['argv'] = argv
     mod['exit'] = WMagicFunction(w_exit, mod, name='exit', check_args=False)
+    mod['version'] = w_from_py(__version__)
+    mod['version_info'] = WList(*(w_from_py(_) for _ in __version_info__))
     return mod
 
 
 def w_from_py(p):
     from wtypes.object import WObject
     from wtypes.string import WString
+    from wtypes.number import WNumber
     if isinstance(p, WObject):
         return p
     if isinstance(p, list):
         return WList(*list(w_from_py(_) for _ in p))
     if isinstance(p, str):
         return WString(p)
+    if isinstance(p, int):
+        return WNumber(p)
     raise Exception(f'Unknown object type: {p} ({type(p)})')
 
 
