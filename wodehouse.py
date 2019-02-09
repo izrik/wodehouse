@@ -44,6 +44,7 @@ from wtypes.list import WList
 from wtypes.module import WModule
 from wtypes.number import WNumber
 from wtypes.string import WString
+from version import __version__
 
 
 def repl_print(x):
@@ -75,6 +76,9 @@ def iter_by_two(i):
 def repl(argv=None, primary_prompt=None, secondary_prompt=None):
     """(def repl ()
         (raise "Not implemented"))"""
+    print(f'Wodehouse {__version__}')
+    print('Copyright © 2014-2019 izrik')
+    print(f'Type "quit" or "exit" to quit.')
     if primary_prompt is None:
         primary_prompt = '>>> '
     if secondary_prompt is None:
