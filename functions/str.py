@@ -3,6 +3,7 @@ from wtypes.magic_function import WMagicFunction
 from wtypes.boolean import WBoolean
 from wtypes.number import WNumber
 from wtypes.object import WObject
+from wtypes.position import Position
 from wtypes.stream import WStream
 from wtypes.string import WString
 import wtypes.symbol
@@ -39,6 +40,8 @@ def w_str(arg):
         return WString(str(arg))
     from wtypes.scope import WScope
     if isinstance(arg, WScope):
+        return WString(str(arg))
+    if isinstance(arg, Position):
         return WString(str(arg))
     raise Exception(f'Unknown object type: "{arg}" ({type(arg)})')
 
