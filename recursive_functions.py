@@ -228,7 +228,7 @@ class Macro(WObject):
     def __call__(self, *args, **kwargs):
         if self.func:
             return self.func(*args, **kwargs)
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class Let(Macro):
