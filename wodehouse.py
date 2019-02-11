@@ -213,6 +213,25 @@ def run_module(module, argv):
     raise Exception(f'No module named {module}')
 
 
+def print_usage(argv):
+    print(f'usage: {argv[0]} [option] ... '
+          f'[-c cmd | -m mod | file | -] [arg] ...')
+    print('Options and arguments:')
+    print('-c cmd : program passed in as string (terminates option list)')
+    print('-h     : print this help message and exit (also --help)')
+    print('-m mod : run library module as a script (terminates option list)')
+    print('-v     : verbose; can be supplied multiple times to increase')
+    print('         verbosity')
+    print('-V     : print the Wodehouse version number and exit '
+          '(also --version)')
+    print('file   : program read from script in file (terminates option '
+          'list)')
+    # TODO: determine if tty or not
+    print('-      : program read from stdin (default)')\
+          # 'interactive mode if a tty')
+    print('arg ...: arguments passed to the program in sys.argv')
+
+
 def main():
     """(def main ()
     (let (parsed (parse_args
@@ -232,38 +251,55 @@ def main():
     if len(sys.argv) > 1:
         argv = sys.argv[1:]
 
-    args = None
     command = None
     module = None
-    if len(argv) > 0 and argv[0] and argv[0].startswith('-'):
-        # TODO: manually parse argv without argparse
-        parser = argparse.ArgumentParser()
-        parser.add_argument('-c', metavar='cmd', dest='command',
-                            help='program passed in as string')
-        parser.add_argument('-m', metavar='mod', dest='module',
-                            help='run library module as a script')
-        parser.add_argument('-v', '--verbose', action='store_true')
-        args, remaining = parser.parse_known_args(argv)
-        command = args.command
-        module = args.module
-        argv = remaining
+    filename = None
+    verbose = 0
+    i = 0
+    while i < len(argv):
+        # TODO: multiple short options in a single argv element
+        if argv[i] == '-m':
+            # TODO: print an error message if there's no argv[i+1]
+            module = argv[i + 1]
+            argv = argv[i + 1:]
+            i += 1
+            break
+        if argv[i] == '-c':
+            # TODO: print an error message if there's no argv[i+1]
+            command = argv[i + 1]
+            argv = argv[i + 1:]
+            i += 1
+            break
+        if argv[i] == '-V':
+            print(f'Wodehouse {__version__}')
+            return
+        if argv[i] in ['-h', '--help']:
+            print_usage(argv)
+            return
+        if argv[i] == '--':
+            break
+
+        if argv[i] in ['-v', '--verbose']:
+            verbose += 1
+
+        if not argv[i].startswith('-'):
+            filename = argv[i]
+            break
+
+        i += 1
+
+    argv = argv[i:]
 
     if command:
         return run_source(command, filename='<string>', argv=argv)
-    elif module:
-        return run_module(module, argv=argv)
 
-    filename = None
-    if len(argv) > 0:
-        if argv[0] != '-' and argv[0].startswith('-'):
-            print(f'Unknown option: {argv[0]}')
-            return
-        filename = argv[0]
+    if module:
+        return run_module(module, argv=argv)
 
     if filename is not None and filename != '-':
         return run_file(filename, argv=argv)
 
-    repl(argv=argv)
+    return repl(argv=argv)
 
 
 if __name__ == '__main__':
