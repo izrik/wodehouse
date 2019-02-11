@@ -53,7 +53,7 @@ def get_scope_value(scope, name_or_symbol):
     key = WScope.normalize_key(name_or_symbol)
     try:
         value = scope[key]
-    except KeyError as e:
+    except KeyError:
         return WRaisedException(
             WException(f"KeyError: {str(key)}"))
     return value

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SOURCES=wodehouse,wtypes,functions,macros
+SOURCES=wodehouse,wtypes,functions,macros,modules,runtime,version
 
 coverage run --branch --source=$SOURCES -m unittest discover -s tests -p '*.py' -t . && \
     coverage run -a --branch --source=$SOURCES ./wodehouse.py -m unittest -s tests && \

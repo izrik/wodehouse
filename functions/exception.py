@@ -1,6 +1,8 @@
+from functions.types import get_type
 from wtypes.callstack import WStackFrame
 from wtypes.control import WRaisedException
 from wtypes.exception import WException
+from wtypes.object import WObject
 from wtypes.string import WString
 
 
@@ -11,11 +13,14 @@ def exception(message=None):
 
 
 def get_message(exc):
+    if not isinstance(exc, WObject):
+        raise TypeError(f'Argument to get_message must be a WObject. '
+                        f'Got "{exc}" ({type(exc)}) instead.')
     if not isinstance(exc, WException):
         return WRaisedException(
             WException(
                 f'Argument to get_message must be an exception. '
-                f'Got "{exc}" ({type(exc)}) instead.'))
+                f'Got "{exc}" ({get_type(exc)}) instead.'))
     return exc.message
 
 
