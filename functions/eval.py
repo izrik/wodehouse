@@ -348,5 +348,5 @@ def emit(expr):
     for listener in emit_listeners:
         try:
             listener(expr)
-        except Exception as e:
+        except Exception:
             pass
