@@ -1,6 +1,7 @@
 from modules.argparse import create_argparse_module
 from modules.builtins import create_builtins_module
 from modules.coverage import create_coverage_module
+from modules.runw import create_runw_module
 from modules.sys import create_sys_module
 from modules.time import create_time_module
 from modules.unittest import create_unittest_module
@@ -30,6 +31,9 @@ class Runtime(WObject):
 
         self.unittest_module = create_unittest_module(self.builtins_module)
         cache[WSymbol.get('unittest')] = self.unittest_module
+
+        self.runw_module = create_runw_module(self.builtins_module)
+        cache[WSymbol.get('runw')] = self.runw_module
 
         self.coverage_module = create_coverage_module(self.builtins_module)
         cache[WSymbol.get('coverage')] = self.coverage_module
