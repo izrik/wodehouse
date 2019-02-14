@@ -31,7 +31,6 @@ requires
     syntax change: read_expr("'(1)") --> WList(1)
 
 """
-import argparse
 import sys
 
 import traceback
@@ -228,7 +227,7 @@ def print_usage(argv):
           'list)')
     # TODO: determine if tty or not
     print('-      : program read from stdin (default)')\
-          # 'interactive mode if a tty')
+        # 'interactive mode if a tty')
     print('arg ...: arguments passed to the program in sys.argv')
 
 
