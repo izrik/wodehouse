@@ -10,11 +10,11 @@ class Import(WMagicMacro):
     def __init__(self, loader=None):
         super().__init__()
         if loader is None:
-            loader = Import.DefaultLoader()
+            loader = Import.FileLoader()
         self.loader = loader
         self.module_cache = WScope()
 
-    class DefaultLoader:
+    class FileLoader:
         def get_filename_from_module_name(self, module_name):
             filename = f'{str(module_name)}.w'
             import os.path
