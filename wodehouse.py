@@ -198,7 +198,7 @@ def run_module(module, argv):
     from wtypes.symbol import WSymbol
     from macros.import_ import Import
     module_symbol = WSymbol.get(str(module))
-    loader = Import.DefaultLoader()
+    loader = Import.FileLoader()
     filename = loader.get_filename_from_module_name(module_symbol)
     if os.path.exists(filename):
         return run_file(filename, argv)
