@@ -147,7 +147,7 @@ def repl(argv=None, primary_prompt=None, secondary_prompt=None):
                 print('  ' + line, end='')
 
 
-def run_file(filename, argv=None):
+def run_file(filename, argv=None, scope=None):
     # TODO: look into the runpy module
     """(def run_file (filename argv)
         (let (src (read_file filename))
@@ -156,10 +156,10 @@ def run_file(filename, argv=None):
         filename = filename.value
     with open(filename) as f:
         src = f.read()
-    return run_source(src, filename=filename, argv=argv)
+    return run_source(src, filename=filename, argv=argv, scope=scope)
 
 
-def run_source(src, filename=None, argv=None):
+def run_source(src, filename=None, argv=None, scope=None):
     # TODO: look into the runpy module
     """(def run_source (src filename argv)
         (let (r (runtime argv))
@@ -176,8 +176,12 @@ def run_source(src, filename=None, argv=None):
                                     "TODO: get exception message from rv"))
                             "TODO: get exception from rv"))
                     rv))))"""
-    runtime = Runtime(argv)
-    rv = w_exec_src(src, builtins_module=runtime.builtins_module,
+    if scope is None:
+        runtime = Runtime(argv)
+        bm = runtime.builtins_module
+    else:
+        bm = scope.get_builtins_module()
+    rv = w_exec_src(src, builtins_module=bm, scope=scope,
                     filename=filename, name='__main__')
     if is_exception(rv):
         stacktrace = format_stacktrace(rv.stack)
@@ -188,7 +192,7 @@ def run_source(src, filename=None, argv=None):
     return rv
 
 
-def run_module(module, argv):
+def run_module(module, argv=None, runtime=None):
     # TODO: look into the runpy module
     import os.path
     module_file = f'{module}.w'
@@ -203,11 +207,12 @@ def run_module(module, argv):
     if os.path.exists(filename):
         return run_file(filename, argv)
 
-    runtime = Runtime(argv)
+    if runtime is None:
+        runtime = Runtime(argv)
     if module_symbol in runtime.import_.module_cache:
         mod = runtime.import_.module_cache[module_symbol]
         if "__file__" in mod:
-            return run_file(mod["__file__"], argv)
+            return run_file(mod["__file__"], argv=argv, scope=mod)
 
     raise Exception(f'No module named {module}')
 

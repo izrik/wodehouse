@@ -1,0 +1,22 @@
+
+
+(def test_get_all_exprs ()
+    (exec
+        (assert (eq (get_all_exprs 'a)
+                    '(a)))
+        (assert (eq (get_all_exprs '(a))
+                    '((a) a)))
+        (assert (eq (get_all_exprs '(a (b) c))
+                    '((a (b) c) a (b) b c)))
+    ))
+
+
+#    (exec
+#        (let (x (get_all_exprs (parse "(get_value (name_of x))") ""))
+#            (print (format "final result: `{}`" x)))))
+
+#(def test_x ()
+#    (exec
+#        (let (i '(name_of x))
+#             (indent "                ")
+#            (print (get_expr_item (cdr i) (+ "    " indent))))))

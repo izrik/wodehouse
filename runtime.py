@@ -1,6 +1,6 @@
 from modules.argparse import create_argparse_module
 from modules.builtins import create_builtins_module
-from modules.coverage import create_coverage_module
+from modules.coverage import create_coverage_module, create__coverage_module
 from modules.runw import create_runw_module
 from modules.sys import create_sys_module
 from modules.time import create_time_module
@@ -16,6 +16,7 @@ class Runtime(WObject):
         self.import_ = Import()
         cache = self.import_.module_cache
         self.builtins_module = create_builtins_module(import_=self.import_)
+        # self.builtins_module['__runtime__'] = self
 
         # TODO: don't execute the modules' w-lang code until they're imported.
         # Otherwise "-m" won't work
