@@ -204,8 +204,8 @@ def run_module(module, argv):
         return run_file(filename, argv)
 
     runtime = Runtime(argv)
-    if module_symbol in runtime.import_.module_cache:
-        mod = runtime.import_.module_cache[module_symbol]
+    if runtime.import_.loader.can_load_module(module_symbol):
+        mod = runtime.import_.loader.load(module_symbol)
         if "__file__" in mod:
             return run_file(mod["__file__"], argv)
 
