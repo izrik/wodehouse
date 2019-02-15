@@ -5,6 +5,7 @@ user-defined types
 user-defined macros
 packages/submodules
     attribute access syntax
+fix double-quoting in strings
 unit tests for unittest.w
 coverage tool
 subscript access syntax
