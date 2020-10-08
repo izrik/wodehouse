@@ -192,7 +192,9 @@ def run_module(module, argv):
     # TODO: look into the runpy module
     import os.path
     module_file = f'{module}.w'
+    module_file = os.path.abspath(module_file)
     if os.path.exists(module_file):
+        argv = [module_file] + argv
         return run_file(module_file, argv)
 
     from wtypes.symbol import WSymbol
@@ -201,12 +203,14 @@ def run_module(module, argv):
     loader = Import.FileLoader()
     filename = loader.get_filename_from_module_name(module_symbol)
     if os.path.exists(filename):
+        argv = [filename] + argv
         return run_file(filename, argv)
 
     runtime = Runtime(argv)
     if module_symbol in runtime.import_.module_cache:
         mod = runtime.import_.module_cache[module_symbol]
         if "__file__" in mod:
+            argv = [mod["__file__"]] + argv
             return run_file(mod["__file__"], argv)
 
     raise Exception(f'No module named {module}')
