@@ -299,14 +299,16 @@ def main():
 
     argv = argv[i:]
 
-    if command:
-        return run_source(command, filename='<string>', argv=argv)
+    if command or module or (filename is not None and filename != '-'):
+        runtime = Runtime(argv)
+        if command:
+            return runtime.runw_module['run_source'].f(
+                command, filename='<string>', argv=argv)
 
-    if module:
-        return run_module(module, argv=argv)
+        if module:
+            return runtime.runw_module['run_module'].f(module, argv=argv)
 
-    if filename is not None and filename != '-':
-        return run_file(filename, argv=argv)
+        return runtime.runw_module['run_file'].f(filename, argv=argv)
 
     return repl(argv=argv)
 
