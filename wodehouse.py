@@ -78,6 +78,12 @@ def repl(argv=None, primary_prompt=None, secondary_prompt=None):
     print(f'Wodehouse {__version__}')
     print('Copyright © 2014-2019 izrik')
     print(f'Type "quit" or "exit" to quit.')
+
+    try:
+        import readline
+    except ImportError:
+        print('Warning: readline functionality not available')
+
     if primary_prompt is None:
         primary_prompt = '>>> '
     if secondary_prompt is None:
