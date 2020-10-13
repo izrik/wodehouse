@@ -46,6 +46,7 @@ def gather(module, module_name=None):
 gather(functions.read)
 gather(functions.eval)
 gather(wodehouse)
+gather(wodehouse.Runtime, 'runtime')
 
 log('pyfuncs:')
 for k, v in pyfuncs.items():
