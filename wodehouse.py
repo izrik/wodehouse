@@ -80,7 +80,7 @@ def repl(argv=None, primary_prompt=None, secondary_prompt=None):
     print(f'Type "quit" or "exit" to quit.')
 
     try:
-        import readline
+        import readline  # noqa
     except ImportError:
         print('Warning: readline functionality not available')
 
