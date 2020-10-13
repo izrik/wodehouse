@@ -54,9 +54,16 @@
             (max (len (str cmd))
                  (get_max_width_1 rest)))))
 
+(def run_cmd (argv)
+    (exec
+        (print "This is the run cmd")
+        (print argv)
+        0))
+
 (define commands_by_name
     (new_scope (list
-        (list 'help (list help_cmd "Get help on using coverage")))))
+        (list 'help (list help_cmd "Get help on using coverage"))
+        (list 'run (list run_cmd "Run a Wodehouse command and measure code execution."))) ))
 
 #####
 
