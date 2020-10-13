@@ -1,3 +1,4 @@
+from functions.math import w_int
 from wtypes.module import WModule
 
 
@@ -144,5 +145,6 @@ def create_builtins_module(import_=None):
                                       name='position_of'),
         'parse': WMagicFunction(parse, module),
         'unique': WMagicFunction(w_unique, module, name='unique'),
+        'int': WMagicFunction(w_int, module, name='int'),
     })
     return module

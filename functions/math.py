@@ -75,3 +75,18 @@ def div(*operands):
         except ZeroDivisionError:
             return WRaisedException(exception=WException('Division by zero'))
     return WNumber(x)
+
+
+def w_int(operand):
+    from wtypes.object import WObject
+    if operand is None:
+        raise ValueError('Expected a value, got None instead.')
+    if not isinstance(operand, WObject):
+        raise TypeError(f'Argument to w_int should be a WObject. '
+                        f'Got "{operand}" ({type(operand)}) instead.')
+    if not isinstance(operand, WNumber):
+        return WRaisedException(
+            exception=WException(f'Argument to int should be a Number. '
+                                 f'Got "{operand}" ({get_type(operand)}) '
+                                 f'instead.'))
+    return WNumber(int(operand.value))
