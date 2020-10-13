@@ -16,10 +16,12 @@ runtime = wodehouse.Runtime(sys.argv[:1])
 bm = runtime.builtins_module
 
 
-def gather(module):
+def gather(module, module_name=None):
+    if module_name is None:
+        module_name = module.__name__
     for k, v in list(module.__dict__.items()):
         if hasattr(v, '__call__') and hasattr(v, '__doc__') and \
-                v.__doc__ and v.__module__ == module.__name__:
+                v.__doc__ and v.__module__ == module_name:
             src2 = v.__doc__
             # print(f'Reading docstring for {v} ... ', end='')
             _ms = w_exec_src(src2, builtins_module=bm)
