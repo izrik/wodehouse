@@ -28,7 +28,8 @@ def gather(module, module_name=None):
         module_name = module.__name__
     log(f'gathering from {module}, __name__ == {module_name}')
     for k, v in list(module.__dict__.items()):
-        log(f'  considering {k}, __module__ == {v.__module__ if hasattr(v, "__module__") else "<missing>"}')
+        log(f'  considering {k}, __module__ =='
+            f' {v.__module__ if hasattr(v, "__module__") else "<missing>"}')
         if hasattr(v, '__call__') and hasattr(v, '__doc__') and \
                 v.__doc__ and v.__module__ == module_name:
             src2 = v.__doc__
