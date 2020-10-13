@@ -70,8 +70,7 @@ class Runtime(WObject):
                                         "TODO: get exception message from rv"))
                                 "TODO: get exception from rv"))
                         rv))))"""
-        runtime = Runtime(argv)
-        rv = w_exec_src(src, builtins_module=runtime.builtins_module,
+        rv = w_exec_src(src, builtins_module=self.builtins_module,
                         filename=filename, name='__main__')
         if is_exception(rv):
             stacktrace = format_stacktrace(rv.stack)
@@ -99,9 +98,8 @@ class Runtime(WObject):
             argv = [filename] + argv
             return self.run_file(filename, argv)
 
-        runtime = Runtime(argv)
-        if module_symbol in runtime.import_.module_cache:
-            mod = runtime.import_.module_cache[module_symbol]
+        if module_symbol in self.import_.module_cache:
+            mod = self.import_.module_cache[module_symbol]
             if "__file__" in mod:
                 argv = [mod["__file__"]] + argv
                 return self.run_file(mod["__file__"], argv)
