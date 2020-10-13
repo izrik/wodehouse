@@ -32,7 +32,7 @@ class Runtime(WObject):
         self.unittest_module = create_unittest_module(self.builtins_module)
         cache[WSymbol.get('unittest')] = self.unittest_module
 
-        self.runw_module = create_runw_module(self.builtins_module)
+        self.runw_module = create_runw_module(self.builtins_module, self)
         cache[WSymbol.get('runw')] = self.runw_module
 
         self.coverage_module = create_coverage_module(self.builtins_module)
