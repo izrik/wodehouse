@@ -7,11 +7,14 @@
         (exec
             (print "Code coverage for Wodehouse.")
             0)
-        (if (eq (car argv) "help")
-            (help_cmd (cdr argv))
-            (exec
-                (print argv)
-                0))))
+        (let (cmd_name (car argv))
+            (if (not (in cmd_name commands_by_name))
+                (exec
+                    (print (format "Unknown command: '{}'" cmd_name))
+                    (print "Use 'coverage help' for help.")
+                    1)
+                (let (cmd (car (get commands_by_name cmd_name)))
+                    (cmd argv))))))
 
 (def help_cmd (argv)
     (exec
