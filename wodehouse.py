@@ -71,7 +71,7 @@ def iter_by_two(i):
         yield item1, item2
 
 
-def repl(argv=None, primary_prompt=None, secondary_prompt=None):
+def repl(runtime, primary_prompt=None, secondary_prompt=None):
     """(def repl ()
         (raise "Not implemented"))"""
     print(f'Wodehouse {__version__}')
@@ -87,7 +87,6 @@ def repl(argv=None, primary_prompt=None, secondary_prompt=None):
         primary_prompt = '>>> '
     if secondary_prompt is None:
         secondary_prompt = '... '
-    runtime = Runtime(argv)
     bm = runtime.builtins_module
     scope = WModule(builtins_module=bm, name='__main__', filename='__repl__')
     while True:
@@ -228,18 +227,15 @@ def main():
         i += 1
 
     argv = argv[i:]
+    runtime = Runtime(argv)
 
-    if command or module or (filename is not None and filename != '-'):
-        runtime = Runtime(argv)
-        if command:
-            return runtime.run_source(command, filename='<string>', argv=argv)
-
-        if module:
-            return runtime.run_module(module, argv=argv)
-
+    if command:
+        return runtime.run_source(command, filename='<string>', argv=argv)
+    if module:
+        return runtime.run_module(module, argv=argv)
+    if filename is not None and filename != '-':
         return runtime.run_file(filename, argv=argv)
-
-    return repl(argv=argv)
+    return repl(runtime=runtime)
 
 
 if __name__ == '__main__':
