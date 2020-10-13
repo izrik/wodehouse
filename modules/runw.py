@@ -2,7 +2,7 @@ from wtypes.magic_function import WMagicFunction
 from wtypes.module import WModule
 
 
-def create_runw_module(builtins_module):
+def create_runw_module(builtins_module, runtime):
     from wodehouse import run_module
     from wodehouse import run_file
     from wodehouse import run_source
