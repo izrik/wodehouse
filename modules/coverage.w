@@ -8,12 +8,12 @@
             (print "Code coverage for Wodehouse.")
             0)
         (if (eq (car argv) "help")
-            (help (cdr argv))
+            (help_cmd (cdr argv))
             (exec
                 (print argv)
                 0))))
 
-(def help (argv)
+(def help_cmd (argv)
     (exec
         (print "coverage module")
         (print "")
@@ -53,7 +53,7 @@
 
 (define commands_by_name
     (new_scope (list
-        (list 'help (list help "Get help on using coverage")))))
+        (list 'help (list help_cmd "Get help on using coverage")))))
 
 #####
 
