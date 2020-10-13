@@ -3,9 +3,13 @@
 #####
 
 (def main (argv)
-    (exec
-        (print argv)
-        0))
+    (if (eq argv '())
+        (exec
+            (print "Code coverage for Wodehouse.")
+            0)
+        (exec
+            (print argv)
+            0)))
 
 #####
 
