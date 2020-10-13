@@ -1,4 +1,3 @@
-from functions.str import w_str
 from functions.types import get_type
 from wtypes.control import WRaisedException
 from wtypes.exception import WException
@@ -28,6 +27,7 @@ def add(*operands):
             x += operand.value
         return WNumber(x)
     if isinstance(operands[0], WString):
+        from functions.str import w_str
         parts = WList()
         for operand in operands:
             parts = parts.append(w_str(operand).value)
