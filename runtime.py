@@ -98,12 +98,10 @@ class Runtime(WObject):
         module_symbol = WSymbol.get(w_str(module))
         loader = Import.FileLoader()
         filename = loader.get_filename_from_module_name(module_symbol)
-        print(f'filename: {filename}')
         if os.path.exists(filename):
             argv = WList([WString(filename)] + argv.values)
             return self.run_file(WString(filename), argv)
 
-        print(f'import module cache: {self.import_.module_cache}')
         if module_symbol in self.import_.module_cache:
             mod = self.import_.module_cache[module_symbol]
             if "__file__" in mod:
