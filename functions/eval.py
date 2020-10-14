@@ -82,10 +82,18 @@ def w_eval(expr, scope, stack=None):
     if stack is None:
         stack = WStackFrame(location=None, prev=None)
 
+    # Look up the current runtime and emit the expr
+    get_rt = None
     if 'get_current_runtime' in scope and \
             scope['get_current_runtime'] is not None:
-        rt = scope['get_current_runtime'].call_magic_function()
-        rt.emit(expr)
+        get_rt = scope['get_current_runtime']
+    elif scope.get_builtins_module() is not None and \
+            'get_current_runtime' in scope.get_builtins_module() and \
+            scope.get_builtins_module()['get_current_runtime'] is not None:
+        get_rt = scope.get_builtins_module()['get_current_runtime']
+    if get_rt:
+        rt = get_rt.call_magic_function()
+        rt.emit(expr, scope, stack)
 
     stack.expr = expr
     stack.scope = scope

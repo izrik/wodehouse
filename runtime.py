@@ -1,6 +1,7 @@
 from functions.eval import is_exception
 from functions.exception import format_stacktrace
 from functions.exec_src import w_exec_src
+from functions.types import get_type
 from modules.argparse import create_argparse_module
 from modules.builtins import create_builtins_module
 from modules.coverage import create_coverage_module
@@ -8,6 +9,9 @@ from modules.runw import create_runw_module
 from modules.sys import create_sys_module
 from modules.time import create_time_module
 from modules.unittest import create_unittest_module
+from wtypes.control import WRaisedException
+from wtypes.exception import WException
+from wtypes.function import WFunction
 from wtypes.object import WObject
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
@@ -19,6 +23,7 @@ class Runtime(WObject):
         from macros.import_ import Import
         self.import_ = Import()
         cache = self.import_.module_cache
+        self.emit_listeners = []
         self.builtins_module = create_builtins_module(import_=self.import_,
                                                       runtime=self)
 
@@ -42,8 +47,6 @@ class Runtime(WObject):
 
         self.coverage_module = create_coverage_module(self.builtins_module)
         cache[WSymbol.get('coverage')] = self.coverage_module
-
-        self.emit_listeners = []
 
     def run_file(self, filename, argv=None):
         # TODO: look into the runpy module
@@ -116,14 +119,33 @@ class Runtime(WObject):
         return WRaisedException(
             WException(WString(f'No module named {module}')))
 
-    def emit(self, expr):
+    def eval(self, expr, scope=None, stack=None):
+        return self.builtins_module['eval'].call_magic_function(expr, scope,
+                                                                stack)
+
+    def emit(self, expr, scope, stack):
+        from wtypes.magic_function import WMagicFunction
+        from wtypes.list import WList
         for listener in self.emit_listeners:
             try:
-                listener(expr)
+                if isinstance(listener, WMagicFunction):
+                    listener.call_magic_function(expr, scope, stack)
+                else:
+                    self.eval(WList(listener, expr, scope, stack))
             except Exception:
                 pass
 
     def add_emit_listener(self, listener):
+        if not isinstance(listener, WObject):
+            raise TypeError(f'Argument to add_emit_listener must be a '
+                            f'WFunction. Got "{listener}" '
+                            f'({type(listener)}) instead.')
+        if not isinstance(listener, WFunction):
+            return WRaisedException(
+                WException(f'Argument to add_emit_listener must be a '
+                           f'function. Got "{listener}" '
+                           f'({get_type(listener)}) instead.'))
+
         self.emit_listeners.append(listener)
 
     def remove_emit_listener(self, listener):
