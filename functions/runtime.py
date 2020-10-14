@@ -13,3 +13,7 @@ class GetCurrentRuntime(WMagicFunction):
 
     def get_current_runtime(self):
         return self.runtime
+
+
+def add_emit_listener(runtime, listener):
+    runtime.add_emit_listener(listener)
