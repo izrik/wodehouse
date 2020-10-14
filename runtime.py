@@ -19,7 +19,8 @@ class Runtime(WObject):
         from macros.import_ import Import
         self.import_ = Import()
         cache = self.import_.module_cache
-        self.builtins_module = create_builtins_module(import_=self.import_)
+        self.builtins_module = create_builtins_module(import_=self.import_,
+                                                      runtime=self)
 
         # TODO: don't execute the modules' w-lang code until they're imported.
         # Otherwise "-m" won't work
