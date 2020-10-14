@@ -82,18 +82,19 @@ class Runtime(WObject):
         # TODO: look into the runpy module
         import os.path
         from wtypes.list import WList
+        from wtypes.symbol import WSymbol
+        from macros.import_ import Import
+        from functions.str import w_str
 
         if isinstance(module, str):
             module = WString(module)
+        module = w_str(module)
         module_file = module + WString('.w')
         module_file = WString(os.path.abspath(module_file.value))
         if os.path.exists(module_file.value):
             argv = WList([module_file] + argv.values)
             return self.run_file(module_file, argv)
 
-        from wtypes.symbol import WSymbol
-        from macros.import_ import Import
-        from functions.str import w_str
         module_symbol = WSymbol.get(w_str(module))
         loader = Import.FileLoader()
         filename = loader.get_filename_from_module_name(module_symbol)
