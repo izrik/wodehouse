@@ -47,10 +47,8 @@ class Runtime(WObject):
         """(def run_file (filename argv)
             (let (src (read_file filename))
                 (run_source src filename argv)))"""
-        if isinstance(filename, WString):
-            filename = filename.value
-        with open(filename) as f:
-            src = f.read()
+        with open(filename.value) as f:
+            src = WString(f.read())
         return self.run_source(src, filename=filename, argv=argv)
 
     def run_source(self, src, filename=None, argv=None):
@@ -83,25 +81,35 @@ class Runtime(WObject):
     def run_module(self, module, argv):
         # TODO: look into the runpy module
         import os.path
-        module_file = f'{module}.w'
-        module_file = os.path.abspath(module_file)
-        if os.path.exists(module_file):
-            argv = [module_file] + argv
+        from wtypes.list import WList
+
+        if isinstance(module, str):
+            module = WString(module)
+        module_file = module + WString('.w')
+        module_file = WString(os.path.abspath(module_file.value))
+        if os.path.exists(module_file.value):
+            argv = WList([module_file] + argv.values)
             return self.run_file(module_file, argv)
 
         from wtypes.symbol import WSymbol
         from macros.import_ import Import
-        module_symbol = WSymbol.get(str(module))
+        from functions.str import w_str
+        module_symbol = WSymbol.get(w_str(module))
         loader = Import.FileLoader()
         filename = loader.get_filename_from_module_name(module_symbol)
+        print(f'filename: {filename}')
         if os.path.exists(filename):
-            argv = [filename] + argv
-            return self.run_file(filename, argv)
+            argv = WList([WString(filename)] + argv.values)
+            return self.run_file(WString(filename), argv)
 
+        print(f'import module cache: {self.import_.module_cache}')
         if module_symbol in self.import_.module_cache:
             mod = self.import_.module_cache[module_symbol]
             if "__file__" in mod:
-                argv = [mod["__file__"]] + argv
+                argv = WList([mod["__file__"]] + argv.values)
                 return self.run_file(mod["__file__"], argv)
 
-        raise Exception(f'No module named {module}')
+        from wtypes.control import WRaisedException
+        from wtypes.exception import WException
+        return WRaisedException(
+            WException(WString(f'No module named {module}')))
