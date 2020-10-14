@@ -1,4 +1,5 @@
 (import sys exit)
+(import runw run_module_with_rt)
 
 #####
 
@@ -55,10 +56,17 @@
                  (get_max_width_1 rest)))))
 
 (def run_cmd (argv)
-    (exec
-        (print "This is the run cmd")
-        (print argv)
-        0))
+    (let (argv (cdr argv))
+        (cond
+            ((eq (car argv) "-m")
+                (let (module_name (car (cdr argv)))
+                     (rt (runtime (cdr (cdr argv))))
+                    (run_module_with_rt rt module_name (cdr (cdr argv)))))
+            (true
+                (exec
+                    (print "This is the run cmd")
+                    (print argv)
+                    0)))))
 
 (define commands_by_name
     (new_scope (list
