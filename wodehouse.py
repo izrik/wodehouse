@@ -57,20 +57,6 @@ def repl_print(x):
     return x
 
 
-def iter_by_two(i):
-    x = i.__iter__()
-    while True:
-        try:
-            item1 = x.__next__()
-        except StopIteration:
-            break
-        try:
-            item2 = x.__next__()
-        except StopIteration:
-            raise Exception('Items are not in pairs')
-        yield item1, item2
-
-
 def repl(runtime, primary_prompt=None, secondary_prompt=None):
     """(def repl ()
         (raise "Not implemented"))"""
