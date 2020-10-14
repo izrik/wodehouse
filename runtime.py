@@ -43,6 +43,8 @@ class Runtime(WObject):
         self.coverage_module = create_coverage_module(self.builtins_module)
         cache[WSymbol.get('coverage')] = self.coverage_module
 
+        self.emit_listeners = []
+
     def run_file(self, filename, argv=None):
         # TODO: look into the runpy module
         """(def run_file (filename argv)
@@ -113,3 +115,16 @@ class Runtime(WObject):
         from wtypes.exception import WException
         return WRaisedException(
             WException(WString(f'No module named {module}')))
+
+    def emit(self, expr):
+        for listener in self.emit_listeners:
+            try:
+                listener(expr)
+            except Exception:
+                pass
+
+    def add_emit_listener(self, listener):
+        self.emit_listeners.append(listener)
+
+    def remove_emit_listener(self, listener):
+        self.emit_listeners.remove(listener)
