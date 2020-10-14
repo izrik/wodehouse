@@ -2,7 +2,7 @@ from functions.math import w_int
 from wtypes.module import WModule
 
 
-def create_builtins_module(import_=None):
+def create_builtins_module(import_=None, runtime=None):
     from functions.collections import w_map, w_in
     from functions.convert import int_from_str
     from functions.exception import exception
@@ -53,6 +53,7 @@ def create_builtins_module(import_=None):
     from functions.read import parse
     from functions.collections import w_unique
     from functions.str import w_starts_with, w_ends_with, w_join, w_split
+    from functions.runtime import GetCurrentRuntime
 
     if import_ is None:
         import_ = Import()
@@ -147,4 +148,8 @@ def create_builtins_module(import_=None):
         'unique': WMagicFunction(w_unique, module, name='unique'),
         'int': WMagicFunction(w_int, module, name='int'),
     })
+    if runtime is not None:
+        module.update({
+            'get_current_runtime': GetCurrentRuntime(runtime, module),
+        })
     return module

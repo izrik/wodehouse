@@ -31,5 +31,6 @@ class WMagicFunction(WFunction):
     def call_magic_function(self, *args, **kwargs):
         kwargs2 = dict(kwargs)
         for name in self.names_to_remove:
-            del kwargs2[name]
+            if name in kwargs:
+                del kwargs2[name]
         return self.f(*args, **kwargs2)
