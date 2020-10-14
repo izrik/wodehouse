@@ -226,14 +226,18 @@ def main():
 
         i += 1
 
-    argv = argv[i:]
+    argv = WList(*[WString(arg) for arg in argv[i:]])
     runtime = Runtime(argv)
 
     if command:
-        return runtime.run_source(command, filename='<string>', argv=argv)
+        command = WString(command)
+        return runtime.run_source(command, filename=WString('<string>'),
+                                  argv=argv)
     if module:
+        module = WString(module)
         return runtime.run_module(module, argv=argv)
     if filename is not None and filename != '-':
+        filename = WString(filename)
         return runtime.run_file(filename, argv=argv)
     return repl(runtime=runtime)
 
