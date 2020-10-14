@@ -31,6 +31,19 @@ class WString(WObject):
     def __getitem__(self, item):
         return self.value[item]
 
+    def __add__(self, other):
+        if not isinstance(other, WObject):
+            raise TypeError(f'Operand must be a WObject. '
+                            f'Got {other} ({type(other)}) instead.')
+        if not isinstance(other, WString):
+            from wtypes.control import WRaisedException
+            from wtypes.exception import WException
+            from functions.types import get_type
+            return WRaisedException(
+                WException(f'Unsupported operand type(s) for +: '
+                           f'"{get_type(self)}" and "{get_type(other)}"'))
+        return WString(self.value + other.value)
+
     def escaped(self):
         def escape_char(_ch):
             if _ch == '\n':
