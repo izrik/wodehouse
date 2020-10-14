@@ -156,7 +156,7 @@ def print_usage(argv):
     print('arg ...: arguments passed to the program in sys.argv')
 
 
-def main():
+def main(argv=None):
     """(def main ()
     (let (parsed (parse_args
                     '(
@@ -171,9 +171,10 @@ def main():
                 (if (or (>= 0 (len argv)) (eq (car argv) "-"))
                     (print 'repl)
                     (run_file (car argv) (cdr argv)))))))"""
-    argv = []
-    if len(sys.argv) > 1:
-        argv = sys.argv[1:]
+    if argv is None:
+        argv = []
+        if len(sys.argv) > 1:
+            argv = sys.argv[1:]
 
     command = None
     module = None
