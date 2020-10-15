@@ -4,6 +4,7 @@ from wtypes.function import WFunction
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
 from wtypes.scope import WScope
+from wtypes.set import WSet
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
@@ -81,3 +82,26 @@ def w_unique(arg):
                        f'Got "{arg}" ({get_type(arg)}) instead.'))
 
     return WList(*set(arg))
+
+
+def w_add(s, value):
+    from wtypes.object import WObject
+    from functions.types import get_type
+    if not isinstance(s, WObject):
+        raise TypeError(f'Arguments to add must be WObject. '
+                        f'Got "{s}" ({type(s)}) instead.')
+    if not isinstance(s, WSet):
+        return WRaisedException(
+            WException(f'Argument "s" must be a set. '
+                       f'Got "{s}" ({get_type(s)}) instead.'))
+    if not isinstance(value, WObject):
+        raise TypeError(f'Arguments to add must be WObject. '
+                        f'Got "{value}" ({type(value)}) instead.')
+    try:
+        rv = s.add(value)
+    except TypeError as e:
+        if 'unhashable type' in str(e):
+            return WRaisedException(
+                WException(f'Unhashable type: "{get_type(value)}"'))
+        raise
+    return rv
