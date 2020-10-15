@@ -51,7 +51,7 @@ def create_builtins_module(import_=None, runtime=None):
     from functions.eval import w_eval
     from functions.object import w_position_of
     from functions.read import parse
-    from functions.collections import w_unique
+    from functions.collections import w_unique, w_add
     from functions.str import w_starts_with, w_ends_with, w_join, w_split
     from functions.runtime import GetCurrentRuntime
 
@@ -147,6 +147,7 @@ def create_builtins_module(import_=None, runtime=None):
         'parse': WMagicFunction(parse, module),
         'unique': WMagicFunction(w_unique, module, name='unique'),
         'int': WMagicFunction(w_int, module, name='int'),
+        'add': WMagicFunction(w_add, module, name='add')
     })
     if runtime is not None:
         module.update({

@@ -32,3 +32,4 @@ class WSet(WObject):
 
     def add(self, value):
         self.values.add(value)
+        return self

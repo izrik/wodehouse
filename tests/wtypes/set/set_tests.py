@@ -44,11 +44,13 @@ class SetTests(unittest.TestCase):
         self.assertIn(WNumber(123), s)
         self.assertNotIn(WNumber(456), s)
         # when
-        s.add(WNumber(456))
+        result = s.add(WNumber(456))
         # then
         self.assertEqual(len(s), 2)
         self.assertIn(WNumber(123), s)
         self.assertIn(WNumber(456), s)
+        # and
+        self.assertIs(result, s)
 
     def test_iterate(self):
         # given
