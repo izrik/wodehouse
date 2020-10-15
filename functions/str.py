@@ -17,6 +17,8 @@ def w_str(arg):
     """
     from wtypes.list import WList
     from wtypes.symbol import WSymbol
+    from functions.function import w_name_of
+    from wtypes.scope import WScope
     if not isinstance(arg, WObject):
         raise Exception(f'Unknown object type: "{arg}" ({type(arg)})')
     if isinstance(arg, WString):
@@ -25,24 +27,16 @@ def w_str(arg):
         return WString(str(arg.value))
     if isinstance(arg, WSymbol):
         return w_str(arg.name)
-    if isinstance(arg, WList):
+    if isinstance(arg, (WList, WBoolean, WScope, Position)):
         return WString(str(arg))
     if isinstance(arg, WFunction):
         if isinstance(arg, WMagicFunction):
-            from functions.function import w_name_of
             return w_name_of(arg)
         return w_str(
             WList(
                 WSymbol.get('lambda'),
                 WList(*arg.parameters),
                 WList(*arg.expr)))
-    if isinstance(arg, WBoolean):
-        return WString(str(arg))
-    from wtypes.scope import WScope
-    if isinstance(arg, WScope):
-        return WString(str(arg))
-    if isinstance(arg, Position):
-        return WString(str(arg))
     raise Exception(f'Unknown object type: "{arg}" ({type(arg)})')
 
 
