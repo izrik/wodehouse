@@ -30,3 +30,6 @@ class Position(WObject):
             is_or_equals(self.filename, other.filename) and \
             is_or_equals(self.line, other.line) and \
             is_or_equals(self.char, other.char)
+
+    def __hash__(self):
+        return hash((self.filename, self.line, self.char))
