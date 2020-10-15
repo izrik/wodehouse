@@ -3,7 +3,7 @@ from wtypes.module import WModule
 
 
 def create_runw_module(builtins_module, runtime):
-    from functions.runtime import add_emit_listener
+    from functions.runtime import add_emit_listener, remove_emit_listener
     module = WModule(name='runw', builtins_module=builtins_module)
     module['run_module'] = WMagicFunction(runtime.run_module, module,
                                           check_args=False)
@@ -20,6 +20,8 @@ def create_runw_module(builtins_module, runtime):
                                                   check_args=False)
 
     module['add_emit_listener'] = WMagicFunction(add_emit_listener, module)
+    module['remove_emit_listener'] = WMagicFunction(remove_emit_listener,
+                                                    module)
 
     return module
 
