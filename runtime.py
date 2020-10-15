@@ -147,6 +147,8 @@ class Runtime(WObject):
                            f'({get_type(listener)}) instead.'))
 
         self.emit_listeners.append(listener)
+        return listener
 
     def remove_emit_listener(self, listener):
         self.emit_listeners.remove(listener)
+        return listener
