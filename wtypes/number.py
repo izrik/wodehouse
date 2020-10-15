@@ -22,3 +22,6 @@ class WNumber(WObject):
         if isinstance(other, WNumber):
             return self.value == other.value
         return False
+
+    def __hash__(self):
+        return self.value.__hash__()
