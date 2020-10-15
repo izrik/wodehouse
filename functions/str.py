@@ -19,6 +19,7 @@ def w_str(arg):
     from wtypes.symbol import WSymbol
     from functions.function import w_name_of
     from wtypes.scope import WScope
+    from wtypes.set import WSet
     if not isinstance(arg, WObject):
         raise Exception(f'Unknown object type: "{arg}" ({type(arg)})')
     if isinstance(arg, WString):
@@ -27,7 +28,7 @@ def w_str(arg):
         return WString(str(arg.value))
     if isinstance(arg, WSymbol):
         return w_str(arg.name)
-    if isinstance(arg, (WList, WBoolean, WScope, Position)):
+    if isinstance(arg, (WList, WBoolean, WScope, Position, WSet)):
         return WString(str(arg))
     if isinstance(arg, WFunction):
         if isinstance(arg, WMagicFunction):
