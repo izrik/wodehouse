@@ -76,13 +76,13 @@ class Try(WMagicMacro):
             if expr[0] is s_exc:
                 msg = f'An except clause must be of the form "(except ' \
                       f'[as <varname>] <expr>)", with exactly one ' \
-                      f'expression to be evaluated, and my have an ' \
+                      f'expression to be evaluated, and may have an ' \
                       f'optional "as <varname>" portion. ' \
                       f'Got {expr[1:]} instead.'
                 if len(expr) != 2 and len(expr) != 4:
                     raise Exception(msg)
                 if len(expr) == 4:
-                    if expr[1] != WSymbol.get('at') or \
+                    if expr[1] != WSymbol.get('as') or \
                             not isinstance(expr[2], WSymbol):
                         raise Exception(msg)
             if expr[0] is s_fin:
