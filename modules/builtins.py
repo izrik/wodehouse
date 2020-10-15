@@ -59,6 +59,7 @@ def create_builtins_module(import_=None, runtime=None):
         import_ = Import()
 
     module = WModule(name='builtins')
+    from wtypes.set import WSet
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -147,7 +148,8 @@ def create_builtins_module(import_=None, runtime=None):
         'parse': WMagicFunction(parse, module),
         'unique': WMagicFunction(w_unique, module, name='unique'),
         'int': WMagicFunction(w_int, module, name='int'),
-        'add': WMagicFunction(w_add, module, name='add')
+        'add': WMagicFunction(w_add, module, name='add'),
+        'set': WMagicFunction(WSet, module, name='set'),
     })
     if runtime is not None:
         module.update({
