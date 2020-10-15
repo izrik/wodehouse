@@ -109,3 +109,12 @@ class SetTests(unittest.TestCase):
         # then
         self.assertIsInstance(result, str)
         self.assertEqual(result, "(set 123)")
+
+    def test_w_str(self):
+        # given
+        s = WSet(WNumber(123))
+        # when
+        result = w_str(s)
+        # then
+        self.assertIsInstance(result, WString)
+        self.assertEqual(result, "(set 123)")
