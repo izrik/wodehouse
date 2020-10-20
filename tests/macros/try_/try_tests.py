@@ -571,18 +571,6 @@ class TryTest(TestCase):
         self.assertEqual(w_str(result.exception.message),
                          'Too many expressions in except clause.')
 
-    def test_too_many_except_clauses_raises(self):
-        # when
-        result = eval_str('''(try
-                                 (raise "asdf")
-                             (except as e 1)
-                             (except as e 2))''',
-                          create_builtins_module())
-        # then
-        self.assertIsInstance(result, WRaisedException)
-        self.assertEqual(w_str(result.exception.message),
-                         'Too many except clauses.')
-
     def test_too_many_finally_clauses_raises(self):
         # when
         result = eval_str('''(try
