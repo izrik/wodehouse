@@ -2,6 +2,9 @@ homo-iconic?
     - no, not exactly
 user-defined types
     types and subtypes
+exception type hierarchy
+filter exception handlers by type
+    so run-of-the-mill handlers don't accidentally catch SystemExit
 user-defined macros
 packages/submodules
     attribute access syntax
