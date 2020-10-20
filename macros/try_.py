@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 from wtypes.control import WSetHandlers, WEvalRequired
 from wtypes.list import WList
 from wtypes.magic_macro import WMagicMacro
@@ -104,8 +106,8 @@ class Try(WMagicMacro):
                 raise Exception(f'Invalid clause: {expr[0]}.')
 
         code_clause = exprs[0]
+        ExceptClause = namedtuple('ExceptClause', ['expr', 'var_name'])
         except_clause = None
-        except_var_name = None
         finally_clause = None
         for expr in exprs[1:]:
             head = expr.head
@@ -115,9 +117,11 @@ class Try(WMagicMacro):
                 if finally_clause is not None:
                     raise Exception('An except clause must appear before the '
                                     'finally clause.')
+                except_var_name = None
                 if len(expr) > 2:
                     except_var_name = expr[2]
-                except_clause = expr[-1]
+                except_clause = ExceptClause(expr=expr[-1],
+                                             var_name=except_var_name)
             else:  # head == s_fin:
                 if finally_clause is not None:
                     raise Exception('Too many finally clauses.')
@@ -130,6 +134,5 @@ class Try(WMagicMacro):
             return rv
 
         return WSetHandlers(exception_handler=except_clause,
-                            exception_var_name=except_var_name,
                             finally_handler=finally_clause,
                             callback=run_code_clause)
