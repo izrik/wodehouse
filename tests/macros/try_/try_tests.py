@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from functions.eval import eval_str
+from functions.str import w_str
 from modules.builtins import create_builtins_module
 from wtypes.control import WRaisedException
 from wtypes.exception import WException
@@ -481,164 +482,163 @@ class TryTest(TestCase):
         self.assertIsInstance(result, WException)
         self.assertEqual("asdf", result.message)
 
-    # TODO: clause syntactic order (check arguments)
     # TODO: check stacktraces
 
     def test_too_few_args_raises(self):
-        # TODO: This should result in a w-level exception, instead of py-level
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf"))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf"))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'try requires at least two clauses. Got 1 instead.')
 
     def test_no_finally_expr_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (finally))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (finally))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'No expression in finally clause.')
 
     def test_too_many_finally_exprs_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (finally 1 2))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (finally 1 2))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'Too many expressions in finally clause.')
 
     def test_no_expr_in_except_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (except))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (except))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'No expression in except clause.')
 
     def test_no_expr_in_except_as_e_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (except as e))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (except as e))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'No expression in except clause.')
 
     def test_too_many_exprs_in_except_without_as_e_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (except 1 2))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (except 1 2))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'Too many expressions in except clause.')
 
     def test_too_many_exprs_in_except_without_as_e_raises_2(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (except 1 2 3))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (except 1 2 3))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'Too many expressions in except clause.')
 
     def test_too_many_exprs_in_except_with_as_e_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (except as e 1 2))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (except as e 1 2))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'Too many expressions in except clause.')
 
     def test_too_many_except_clauses_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (except as e 1)
-                        (except as e 2))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (except as e 1)
+                             (except as e 2))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'Too many except clauses.')
 
     def test_too_many_finally_clauses_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (finally 1)
-                        (finally 2))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (finally 1)
+                             (finally 2))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'Too many finally clauses.')
 
     def test_finally_except_clauses_wrong_order_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (finally 1)
-                        (except 2))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (finally 1)
+                             (except 2))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'An except clause must appear before the finally '
                          'clause.')
 
     def test_invalid_clause_head_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (something 1))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception), 'Invalid clause: something.')
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (something 1))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
+                         'Invalid clause: something.')
 
     def test_invalid_clause_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        1)''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             1)''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'Clause must be a list. Got "1" '
-                         '(<class \'wtypes.number.WNumber\'>) instead.')
+                         '(Number) instead.')
 
     def test_non_symbol_clause_head_raises(self):
-        # expect
-        with self.assertRaises(Exception) as exc:
-            eval_str('''(try
-                            (raise "asdf")
-                        (1 2 3))''',
-                     create_builtins_module())
-        # and
-        self.assertEqual(str(exc.exception),
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (1 2 3))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
                          'Clause must start with a symbol. Got "1" '
-                         '(<class \'wtypes.number.WNumber\'>) instead.')
+                         '(Number) instead.')
