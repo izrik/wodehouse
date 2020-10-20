@@ -494,3 +494,28 @@ class TryTest(TestCase):
         # and
         self.assertEqual(str(exc.exception),
                          'try requires at least two clauses. Got 1 instead.')
+
+    def test_no_finally_expr_raises(self):
+        # expect
+        with self.assertRaises(Exception) as exc:
+            eval_str('''(try
+                            (raise "asdf")
+                        (finally))''',
+                     create_builtins_module())
+        # and
+        self.assertEqual(str(exc.exception),
+                         'A finally clause must have exactly one expression '
+                         'to be evaluated.')
+
+
+    def test_too_many_finally_exprs_raises(self):
+        # expect
+        with self.assertRaises(Exception) as exc:
+            eval_str('''(try
+                            (raise "asdf")
+                        (finally 1 2))''',
+                     create_builtins_module())
+        # and
+        self.assertEqual(str(exc.exception),
+                         'A finally clause must have exactly one expression '
+                         'to be evaluated.')

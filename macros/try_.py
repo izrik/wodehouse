@@ -73,7 +73,7 @@ class Try(WMagicMacro):
                 raise Exception(f'Clause should be a list with "except" or '
                                 f'"finally" in the head position. '
                                 f'Got "{expr}" ({type(expr)}) instead.')
-            if expr[0] is s_exc:
+            if expr[0] == s_exc:
                 msg = f'An except clause must be of the form "(except ' \
                       f'[as <varname>] <expr>)", with exactly one ' \
                       f'expression to be evaluated, and may have an ' \
@@ -85,7 +85,7 @@ class Try(WMagicMacro):
                     if expr[1] != WSymbol.get('as') or \
                             not isinstance(expr[2], WSymbol):
                         raise Exception(msg)
-            if expr[0] is s_fin:
+            if expr[0] == s_fin:
                 if len(expr) != 2:
                     raise Exception('A finally clause must have exactly one '
                                     'expression to be evaluated.')
