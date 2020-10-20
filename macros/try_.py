@@ -1,6 +1,8 @@
 from collections import namedtuple
 
-from wtypes.control import WSetHandlers, WEvalRequired
+from functions.types import get_type
+from wtypes.control import WSetHandlers, WEvalRequired, WRaisedException
+from wtypes.exception import WException
 from wtypes.list import WList
 from wtypes.magic_macro import WMagicMacro
 from wtypes.symbol import WSymbol
@@ -66,44 +68,58 @@ class Try(WMagicMacro):
         s_as = WSymbol.get('as')
 
         # check args
+        # TODO: Change these WExceptions to something like WSyntaxError
+        # TODO: Also somehow store the position in the exceptions
         if len(exprs) < 2:
-            raise Exception(f"try requires at least two clauses. "
-                            f"Got {len(exprs)} instead.")
+            return WRaisedException(
+                WException(f"try requires at least two clauses. "
+                           f"Got {len(exprs)} instead."))
         for expr in exprs[1:]:
             if not isinstance(expr, WList):
-                raise Exception(f'Clause must be a list. '
-                                f'Got "{expr}" ({type(expr)}) instead.')
+                return WRaisedException(
+                    WException(f'Clause must be a list. '
+                               f'Got "{expr}" ({get_type(expr)}) instead.'))
             if not isinstance(expr[0], WSymbol):
-                raise Exception(f'Clause must start with a symbol. '
-                                f'Got "{expr[0]}" ({type(expr[0])}) instead.')
+                return WRaisedException(
+                    WException(f'Clause must start with a symbol. '
+                               f'Got "{expr[0]}" ({get_type(expr[0])}) '
+                               f'instead.'))
             if expr[0] == s_exc:
                 if len(expr) < 2:
-                    raise Exception('No expression in except clause.')
+                    return WRaisedException(
+                        WException('No expression in except clause.'))
                 elif len(expr) == 2:
                     pass
                 elif len(expr) == 3:
                     if expr[1] == s_as:
-                        raise Exception('No expression in except clause.')
+                        return WRaisedException(
+                            WException('No expression in except clause.'))
                     else:
-                        raise Exception(
-                            'Too many expressions in except clause.')
+                        return WRaisedException(
+                            WException(
+                                'Too many expressions in except clause.'))
                 elif len(expr) == 4:
                     if expr[1] == s_as:
                         pass
                     else:
-                        raise Exception(
-                            'Too many expressions in except clause.')
+                        return WRaisedException(
+                            WException(
+                                'Too many expressions in except clause.'))
                 else:  # len(expr) > 4
-                    raise Exception('Too many expressions in except clause.')
+                    return WRaisedException(
+                        WException('Too many expressions in except clause.'))
             elif expr[0] == s_fin:
                 if len(expr) < 2:
-                    raise Exception('No expression in finally clause.')
+                    return WRaisedException(
+                        WException('No expression in finally clause.'))
                 elif len(expr) == 2:
                     pass
                 else:  # len(expr) > 2
-                    raise Exception('Too many expressions in finally clause.')
+                    return WRaisedException(
+                        WException('Too many expressions in finally clause.'))
             else:  # invalid clause
-                raise Exception(f'Invalid clause: {expr[0]}.')
+                return WRaisedException(
+                    WException(f'Invalid clause: {expr[0]}.'))
 
         code_clause = exprs[0]
         ExceptClause = namedtuple('ExceptClause', ['expr', 'var_name'])
@@ -113,10 +129,12 @@ class Try(WMagicMacro):
             head = expr.head
             if head == s_exc:
                 if except_clause is not None:
-                    raise Exception(f'Too many except clauses.')
+                    return WRaisedException(
+                        WException(f'Too many except clauses.'))
                 if finally_clause is not None:
-                    raise Exception('An except clause must appear before the '
-                                    'finally clause.')
+                    return WRaisedException(
+                        WException('An except clause must appear before the '
+                                   'finally clause.'))
                 except_var_name = None
                 if len(expr) > 2:
                     except_var_name = expr[2]
@@ -124,7 +142,8 @@ class Try(WMagicMacro):
                                              var_name=except_var_name)
             else:  # head == s_fin:
                 if finally_clause is not None:
-                    raise Exception('Too many finally clauses.')
+                    return WRaisedException(
+                        WException('Too many finally clauses.'))
                 finally_clause = expr[1]
 
         def run_code_clause():
