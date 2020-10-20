@@ -55,8 +55,21 @@ def py_from_w(w):
 
 
 def w_exit(status=None):
-    # TODO: raise a SystemExit exception so finally hnadlers get triggered
-    #   TODO: filter exception handlers by type, so run-of-the-mill handlers
-    #         don't accidentally catch SystemExit
-    #   TODO: type system with sub-types and built-in exception classes
-    sys.exit(py_from_w(status))
+    from wtypes.control import WRaisedException
+    from wtypes.exception import WSystemExit
+    from wtypes.exception import WException
+    from wtypes.object import WObject
+    from wtypes.number import WNumber
+    from functions.types import get_type
+
+    if not isinstance(status, WObject):
+        raise TypeError(f'Code must be a WNumber. '
+                        f'Got "{status}" ({type(status)}) instead.')
+    # TODO: on non-number, print it and use 1 as the status code
+    if not isinstance(status, WNumber):
+        return WRaisedException(
+            WException(f'Code must be a number. '
+                       f'Got "{status}" '
+                       f'({get_type(status)}) instead.'))
+
+    return WRaisedException(WSystemExit(status))
