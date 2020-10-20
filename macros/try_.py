@@ -61,34 +61,47 @@ class Try(WMagicMacro):
 
         s_exc = WSymbol.get('except')
         s_fin = WSymbol.get('finally')
+        s_as = WSymbol.get('as')
 
         # check args
         if len(exprs) < 2:
             raise Exception(f"try requires at least two clauses. "
                             f"Got {len(exprs)} instead.")
         for expr in exprs[1:]:
-            if not isinstance(expr, WList) or \
-                    not isinstance(expr[0], WSymbol) or \
-                    expr[0] not in [s_exc, s_fin]:
-                raise Exception(f'Clause should be a list with "except" or '
-                                f'"finally" in the head position. '
+            if not isinstance(expr, WList):
+                raise Exception(f'Clause must be a list. '
                                 f'Got "{expr}" ({type(expr)}) instead.')
+            if not isinstance(expr[0], WSymbol):
+                raise Exception(f'Clause must start with a symbol. '
+                                f'Got "{expr[0]}" ({type(expr[0])}) instead.')
             if expr[0] == s_exc:
-                msg = f'An except clause must be of the form "(except ' \
-                      f'[as <varname>] <expr>)", with exactly one ' \
-                      f'expression to be evaluated, and may have an ' \
-                      f'optional "as <varname>" portion. ' \
-                      f'Got {expr[1:]} instead.'
-                if len(expr) != 2 and len(expr) != 4:
-                    raise Exception(msg)
-                if len(expr) == 4:
-                    if expr[1] != WSymbol.get('as') or \
-                            not isinstance(expr[2], WSymbol):
-                        raise Exception(msg)
-            if expr[0] == s_fin:
-                if len(expr) != 2:
-                    raise Exception('A finally clause must have exactly one '
-                                    'expression to be evaluated.')
+                if len(expr) < 2:
+                    raise Exception('No expression in except clause.')
+                elif len(expr) == 2:
+                    pass
+                elif len(expr) == 3:
+                    if expr[1] == s_as:
+                        raise Exception('No expression in except clause.')
+                    else:
+                        raise Exception(
+                            'Too many expressions in except clause.')
+                elif len(expr) == 4:
+                    if expr[1] == s_as:
+                        pass
+                    else:
+                        raise Exception(
+                            'Too many expressions in except clause.')
+                else:  # len(expr) > 4
+                    raise Exception('Too many expressions in except clause.')
+            elif expr[0] == s_fin:
+                if len(expr) < 2:
+                    raise Exception('No expression in finally clause.')
+                elif len(expr) == 2:
+                    pass
+                else:  # len(expr) > 2
+                    raise Exception('Too many expressions in finally clause.')
+            else:  # invalid clause
+                raise Exception(f'Invalid clause: {expr[0]}.')
 
         code_clause = exprs[0]
         except_clause = None
@@ -98,19 +111,17 @@ class Try(WMagicMacro):
             head = expr.head
             if head == s_exc:
                 if except_clause is not None:
-                    raise Exception(f'Only one except clause is allowed.')
+                    raise Exception(f'Too many except clauses.')
                 if finally_clause is not None:
                     raise Exception('An except clause must appear before the '
-                                    'finally clause')
+                                    'finally clause.')
                 if len(expr) > 2:
                     except_var_name = expr[2]
                 except_clause = expr[-1]
-            elif head == s_fin:
+            else:  # head == s_fin:
                 if finally_clause is not None:
-                    raise Exception('Only one finally clause is allowed.')
+                    raise Exception('Too many finally clauses.')
                 finally_clause = expr[1]
-            else:
-                raise Exception(f'Invalid clause: {head}')
 
         def run_code_clause():
             return WEvalRequired(code_clause, callback=return_code_retval)
