@@ -483,3 +483,14 @@ class TryTest(TestCase):
 
     # TODO: clause syntactic order (check arguments)
     # TODO: check stacktraces
+
+    def test_too_few_args_raises(self):
+        # TODO: This should result in a w-level exception, instead of py-level
+        # expect
+        with self.assertRaises(Exception) as exc:
+            eval_str('''(try
+                            (raise "asdf"))''',
+                     create_builtins_module())
+        # and
+        self.assertEqual(str(exc.exception),
+                         'try requires at least two clauses. Got 1 instead.')
