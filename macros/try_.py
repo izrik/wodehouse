@@ -120,14 +120,11 @@ class Try(WMagicMacro):
                     WException(f'Invalid clause: {expr[0]}.'))
 
         code_clause = exprs[0]
-        except_clause = None
+        except_clauses = []
         finally_clause = None
         for expr in exprs[1:]:
             head = expr.head
             if head == s_exc:
-                if except_clause is not None:
-                    return WRaisedException(
-                        WException(f'Too many except clauses.'))
                 if finally_clause is not None:
                     return WRaisedException(
                         WException('An except clause must appear before the '
@@ -135,8 +132,8 @@ class Try(WMagicMacro):
                 except_var_name = None
                 if len(expr) > 2:
                     except_var_name = expr[2]
-                except_clause = ExceptClause(expr=expr[-1],
-                                             var_name=except_var_name)
+                except_clauses.append(ExceptClause(expr=expr[-1],
+                                                   var_name=except_var_name))
             else:  # head == s_fin:
                 if finally_clause is not None:
                     return WRaisedException(
@@ -149,7 +146,7 @@ class Try(WMagicMacro):
         def return_code_retval(rv):
             return rv
 
-        return WSetHandlers(exception_handler=except_clause,
+        return WSetHandlers(exception_handlers=except_clauses,
                             finally_handler=finally_clause,
                             callback=run_code_clause)
 

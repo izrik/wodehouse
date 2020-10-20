@@ -201,16 +201,16 @@ def w_eval(expr, scope, stack=None):
 
 
 def handle_exception(rv, scope, stack):
-    if stack.exception_handler:
-        eh = stack.exception_handler
-        ehstack = WStackFrame(stack.location, stack)
-        ehscope = scope
-        ehscope = WScope(enclosing_scope=ehscope)
-        if eh.var_name:
-            ehscope[eh.var_name] = rv.exception
-        rv2 = w_eval(eh.expr, ehscope, ehstack)
-        is_exception(rv2, stack)
-        return rv2
+    if stack.exception_handlers:
+        for eh in stack.exception_handlers:
+            ehstack = WStackFrame(stack.location, stack)
+            ehscope = scope
+            ehscope = WScope(enclosing_scope=ehscope)
+            if eh.var_name:
+                ehscope[eh.var_name] = rv.exception
+            rv2 = w_eval(eh.expr, ehscope, ehstack)
+            is_exception(rv2, stack)
+            return rv2
     return rv
 
 
@@ -242,7 +242,7 @@ def process_controls(control, scope, stack):
         return control
     if isinstance(control, WSetHandlers):
         pstack = stack.prev
-        pstack.exception_handler = control.exception_handler
+        pstack.exception_handlers = control.exception_handlers
         pstack.finally_handler = control.finally_handler
         return process_controls(control.callback(), scope, stack)
     if not isinstance(control, (WEvalRequired, WExecSrcRequired)):
