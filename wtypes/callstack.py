@@ -13,7 +13,6 @@ class WStackFrame(WObject):
     evaled_args = None
     fscope = None
     exception_handler = None
-    exception_var_name = None
     finally_handler = None
 
     def __str__(self):
