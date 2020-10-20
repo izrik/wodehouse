@@ -1,5 +1,3 @@
-from collections import namedtuple
-
 from functions.types import get_type
 from wtypes.control import WSetHandlers, WEvalRequired, WRaisedException
 from wtypes.exception import WException
@@ -122,7 +120,6 @@ class Try(WMagicMacro):
                     WException(f'Invalid clause: {expr[0]}.'))
 
         code_clause = exprs[0]
-        ExceptClause = namedtuple('ExceptClause', ['expr', 'var_name'])
         except_clause = None
         finally_clause = None
         for expr in exprs[1:]:
@@ -155,3 +152,9 @@ class Try(WMagicMacro):
         return WSetHandlers(exception_handler=except_clause,
                             finally_handler=finally_clause,
                             callback=run_code_clause)
+
+
+class ExceptClause:
+    def __init__(self, expr, var_name):
+        self.expr = expr
+        self.var_name = var_name
