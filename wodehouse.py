@@ -117,11 +117,7 @@ def repl(runtime, primary_prompt=None, secondary_prompt=None):
                 continue
             rv = eval_str(input_s, scope)
             if is_exception(rv):
-                stacktrace = format_stacktrace(rv.stack,
-                                               default_filename='<stdin>')
-                print('Stacktrace (most recent call last):')
-                print(stacktrace)
-                print(f'Exception: {rv.exception.message.value}')
+                check_and_print_exception(rv, default_filename='<stdin>')
             else:
                 repl_print(rv)
         except EOFError:
@@ -135,6 +131,20 @@ def repl(runtime, primary_prompt=None, secondary_prompt=None):
             tb = traceback.format_exception(type(ex), ex, ex.__traceback__)
             for line in tb:
                 print('  ' + line, end='')
+
+
+def check_and_print_exception(rv, default_filename=None):
+    if is_exception(rv):
+        from wtypes.exception import WSystemExit
+        if isinstance(rv.exception, WSystemExit):
+            sys.exit(rv.exception.code)
+
+        stacktrace = format_stacktrace(rv.stack,
+                                       default_filename=default_filename)
+        print('Stacktrace (most recent call last):')
+        print(stacktrace)
+        print(f'Exception: {rv.exception.message.value}')
+        return rv.exception
 
 
 def print_usage(argv):
@@ -218,14 +228,20 @@ def main(argv=None):
 
     if command:
         command = WString(command)
-        return runtime.run_source(command, filename=WString('<string>'),
+        rv = runtime.run_source(command, filename=WString('<string>'),
                                   argv=argv)
+        check_and_print_exception(rv)
+        return rv
     if module:
         module = WString(module)
-        return runtime.run_module(module, argv=argv)
+        rv = runtime.run_module(module, argv=argv)
+        check_and_print_exception(rv)
+        return rv
     if filename is not None and filename != '-':
         filename = WString(filename)
-        return runtime.run_file(filename, argv=argv)
+        rv = runtime.run_file(filename, argv=argv)
+        check_and_print_exception(rv)
+        return rv
     return repl(runtime=runtime)
 
 

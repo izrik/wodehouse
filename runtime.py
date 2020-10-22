@@ -76,12 +76,6 @@ class Runtime(WObject):
                         rv))))"""
         rv = w_exec_src(src, builtins_module=self.builtins_module,
                         filename=filename, name='__main__')
-        if is_exception(rv):
-            stacktrace = format_stacktrace(rv.stack)
-            print('Stacktrace (most recent call last):')
-            print(stacktrace)
-            print(f'Exception: {rv.exception.message.value}')
-            return rv.exception
         return rv
 
     def run_module(self, module, argv):
