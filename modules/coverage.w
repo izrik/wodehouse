@@ -1,5 +1,5 @@
 (import sys exit)
-(import runw run_module_with_rt)
+(import runw run_module_with_rt add_emit_listener remove_emit_listener)
 
 #####
 
@@ -55,13 +55,36 @@
             (max (len (str cmd))
                  (get_max_width_1 rest)))))
 
+(def print_positions (positions)
+    (if (< (len positions) 1)
+        0
+        (exec
+            (print (car positions))
+            (print_positions (cdr positions))
+            0)))
+
 (def run_cmd (argv)
     (let (argv (cdr argv))
         (cond
             ((eq (car argv) "-m")
                 (let (module_name (car (cdr argv)))
                      (rt (runtime (cdr (cdr argv))))
-                    (run_module_with_rt rt module_name (cdr (cdr argv)))))
+                     (all_positions (set))
+                     (listener
+                        (lambda (expr scope stack)
+                            (exec
+                                (add all_positions (position_of expr))
+                                0)))
+                    (exec
+                        (print (format "set size before: {}" (len all_positions)))
+                        (add_emit_listener rt listener)
+                        (try
+                            (run_module_with_rt rt module_name (cdr (cdr argv)))
+                        (except SystemExit 0))
+                        (remove_emit_listener rt listener)
+                        (print (format "set size after: {}" (len all_positions)))
+                        (print_positions (to_list all_positions))
+                        0)))
             (true
                 (exec
                     (print "This is the run cmd")
