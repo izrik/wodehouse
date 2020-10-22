@@ -137,7 +137,7 @@ def check_and_print_exception(rv, default_filename=None):
     if is_exception(rv):
         from wtypes.exception import WSystemExit
         if isinstance(rv.exception, WSystemExit):
-            sys.exit(rv.exception.code)
+            sys.exit(rv.exception.code.value)
 
         stacktrace = format_stacktrace(rv.stack,
                                        default_filename=default_filename)
