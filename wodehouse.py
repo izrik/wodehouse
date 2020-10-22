@@ -229,7 +229,7 @@ def main(argv=None):
     if command:
         command = WString(command)
         rv = runtime.run_source(command, filename=WString('<string>'),
-                                  argv=argv)
+                                argv=argv)
         check_and_print_exception(rv)
         return rv
     if module:
