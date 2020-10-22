@@ -105,3 +105,16 @@ def w_add(s, value):
                 WException(f'Unhashable type: "{get_type(value)}"'))
         raise
     return rv
+
+
+def w_to_list(s):
+    from wtypes.object import WObject
+    from functions.types import get_type
+    if not isinstance(s, WObject):
+        raise TypeError(f'Argument "s" to w_to_list must be a WObject. '
+                        f'Got "{s}" ({type(s)}) instead.')
+    if not isinstance(s, (WList, WSet)):
+        return WRaisedException(
+            WException(f'Argument "s" to to_list must be a list or set. '
+                       f'Got "{s}" ({get_type(s)}) instead.'))
+    return WList(*s.values)
