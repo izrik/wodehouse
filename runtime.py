@@ -1,5 +1,3 @@
-from functions.eval import is_exception
-from functions.exception import format_stacktrace
 from functions.exec_src import w_exec_src
 from functions.types import get_type
 from modules.argparse import create_argparse_module
