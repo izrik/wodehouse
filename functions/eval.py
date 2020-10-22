@@ -200,9 +200,20 @@ def w_eval(expr, scope, stack=None):
                     f'"{expanded_expr}" ({type(expanded_expr)})')
 
 
+def matches_exception_type(exc, exc_type):
+    from wtypes.exception import WSystemExit
+    if isinstance(exc, WSystemExit) and exc_type == WSymbol.get('SystemExit'):
+        return True
+    if type(exc) == WException and exc_type == WSymbol.get('Exception'):
+        return True
+    return False
+
+
 def handle_exception(rv, scope, stack):
     if stack.exception_handlers:
         for eh in stack.exception_handlers:
+            if not matches_exception_type(rv.exception, eh.filter_type):
+                continue
             ehstack = WStackFrame(stack.location, stack)
             ehscope = scope
             ehscope = WScope(enclosing_scope=ehscope)

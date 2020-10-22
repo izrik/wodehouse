@@ -60,6 +60,16 @@ class Try(WMagicMacro):
         # other values with the same name in the current scope, and the
         # exception will not be available after the handler has completed.
         #
+        # Additionally, the clause can filter what exception type it catches:
+        #
+        #   (try
+        #       (call_some_function arg1 arg2 arg3)
+        #   (except SystemExit as e
+        #       (print (format "Tried to exit: {}" e))))
+        #
+        # The above will only catch a SystemExit exception (usually a result
+        # of a call to the `exit` function of the `sys` module).
+        #
 
         s_exc = WSymbol.get('except')
         s_fin = WSymbol.get('finally')
@@ -86,24 +96,42 @@ class Try(WMagicMacro):
                 if len(expr) < 2:
                     return WRaisedException(
                         WException('No expression in except clause.'))
-                elif len(expr) == 2:
+                elif len(expr) == 2:  # except expr
                     pass
-                elif len(expr) == 3:
+                elif len(expr) == 3:  # except T expr
                     if expr[1] == s_as:
                         return WRaisedException(
                             WException('No expression in except clause.'))
                     else:
-                        return WRaisedException(
-                            WException(
-                                'Too many expressions in except clause.'))
-                elif len(expr) == 4:
+                        exc_type_expr = expr[1]
+                        if not isinstance(exc_type_expr, WSymbol) or \
+                                (exc_type_expr != WSymbol.get('Exception') and
+                                 exc_type_expr != WSymbol.get('SystemExit')):
+                            return WRaisedException(
+                                WException(
+                                    'Except clause filter must be a '
+                                    'subclass of Exception.'))
+                elif len(expr) == 4:  # except as e expr
                     if expr[1] == s_as:
                         pass
                     else:
                         return WRaisedException(
                             WException(
                                 'Too many expressions in except clause.'))
-                else:  # len(expr) > 4
+                elif len(expr) == 5:  # except T as e expr
+                    exc_type_expr = expr[1]
+                    if not isinstance(exc_type_expr, WSymbol) or \
+                            (exc_type_expr != WSymbol.get('Exception') and
+                             exc_type_expr != WSymbol.get('SystemExit')):
+                        return WRaisedException(
+                            WException(
+                                'Except clause filter must be a '
+                                'subclass of Exception.'))
+                    if expr[2] != s_as:
+                        return WRaisedException(
+                            WException(
+                                'Too many expressions in except clause.'))
+                else:  # len(expr) > 5
                     return WRaisedException(
                         WException('Too many expressions in except clause.'))
             elif expr[0] == s_fin:
@@ -130,10 +158,19 @@ class Try(WMagicMacro):
                         WException('An except clause must appear before the '
                                    'finally clause.'))
                 except_var_name = None
-                if len(expr) > 2:
+                filter_type = WSymbol.get('Exception')
+                if len(expr) == 2:
+                    pass
+                elif len(expr) == 3:
+                    filter_type = expr[1]
+                elif len(expr) == 4:
                     except_var_name = expr[2]
+                else:  # len(expr) == 5
+                    filter_type = expr[1]
+                    except_var_name = expr[3]
                 except_clauses.append(ExceptClause(expr=expr[-1],
-                                                   var_name=except_var_name))
+                                                   var_name=except_var_name,
+                                                   filter_type=filter_type))
             else:  # head == s_fin:
                 if finally_clause is not None:
                     return WRaisedException(
@@ -152,6 +189,7 @@ class Try(WMagicMacro):
 
 
 class ExceptClause:
-    def __init__(self, expr, var_name):
+    def __init__(self, expr, var_name, filter_type):
         self.expr = expr
         self.var_name = var_name
+        self.filter_type = filter_type

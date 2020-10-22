@@ -3,8 +3,9 @@ from unittest import TestCase
 from functions.eval import eval_str
 from functions.str import w_str
 from modules.builtins import create_builtins_module
+from modules.sys import create_sys_module
 from wtypes.control import WRaisedException
-from wtypes.exception import WException
+from wtypes.exception import WException, WSystemExit
 from wtypes.magic_function import WMagicFunction
 from wtypes.magic_macro import WMagicMacro
 from wtypes.number import WNumber
@@ -482,6 +483,20 @@ class TryTest(TestCase):
         self.assertIsInstance(result, WException)
         self.assertEqual("asdf", result.message)
 
+    def test_filter_with_var_name_in_except_is_allowed(self):
+        # TODO: rename once filtering is working
+        # when
+        result = eval_str('''(try
+                                (raise "asdf")
+                             (except Exception as e
+                                e))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WException)
+        # TODO: The following will not be true once filtering is working
+        self.assertNotIsInstance(result, WSystemExit)
+        self.assertEqual("asdf", result.message)
+
     # TODO: check stacktraces
 
     def test_too_few_args_raises(self):
@@ -538,17 +553,6 @@ class TryTest(TestCase):
         self.assertEqual(w_str(result.exception.message),
                          'No expression in except clause.')
 
-    def test_too_many_exprs_in_except_without_as_e_raises(self):
-        # when
-        result = eval_str('''(try
-                                 (raise "asdf")
-                             (except 1 2))''',
-                          create_builtins_module())
-        # then
-        self.assertIsInstance(result, WRaisedException)
-        self.assertEqual(w_str(result.exception.message),
-                         'Too many expressions in except clause.')
-
     def test_too_many_exprs_in_except_without_as_e_raises_2(self):
         # when
         result = eval_str('''(try
@@ -564,7 +568,7 @@ class TryTest(TestCase):
         # when
         result = eval_str('''(try
                                  (raise "asdf")
-                             (except as e 1 2))''',
+                             (except as e 1 2 3))''',
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
@@ -630,3 +634,163 @@ class TryTest(TestCase):
         self.assertEqual(w_str(result.exception.message),
                          'Clause must start with a symbol. Got "1" '
                          '(Number) instead.')
+
+    def test_filter_exception_catches_regular_exception(self):
+        # when
+        result = eval_str('''(try
+                                 (raise "asdf")
+                             (except Exception 2))''',
+                          create_builtins_module())
+        # then
+        self.assertIsInstance(result, WNumber)
+        self.assertEqual(result, 2)
+
+    def test_filter_systemexit_does_not_catch_regular_exception(self):
+        # given
+        bm = create_builtins_module()
+        calls = []
+        mkfunc('a', calls, bm)
+        # when
+        result = eval_str('''(try
+                                (raise "asdf")
+                             (except SystemExit
+                                (a)))''',
+                          bm)
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message), 'asdf')
+
+    def test_filter_exception_does_not_catch_systemexit(self):
+        # given
+        bm = create_builtins_module()
+        sm = create_sys_module(bm, argv=[])
+        # when
+        result = eval_str('''(try
+                                 (exit 1)
+                             (except Exception 2))''',
+                          sm)
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSystemExit)
+        self.assertEqual(result.exception.code, 1)
+
+    def test_filter_systemexit_catches_systemexit(self):
+        # given
+        bm = create_builtins_module()
+        sm = create_sys_module(bm, argv=[])
+        # when
+        result = eval_str('''(try
+                                (exit 1)
+                             (except SystemExit 2))''',
+                          sm)
+        # then
+        self.assertIsInstance(result, WNumber)
+        self.assertEqual(result, 2)
+
+    def test_bad_filter_type_wraises_3(self):
+        # given
+        bm = create_builtins_module()
+        # when
+        result = eval_str('''(try
+                                (raise "asdf")
+                             (except Something 2))''',
+                          bm)
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
+                         'Except clause filter must be a subclass of '
+                         'Exception.')
+
+    def test_bad_filter_type_wraises_5(self):
+        # given
+        bm = create_builtins_module()
+        # when
+        result = eval_str('''(try
+                                (raise "asdf")
+                             (except Something as e 2))''',
+                          bm)
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
+                         'Except clause filter must be a subclass of '
+                         'Exception.')
+
+    def test_many_expressions_after_filter_as_e_wraises(self):
+        # given
+        bm = create_builtins_module()
+        # when
+        result = eval_str('''(try
+                                (raise "asdf")
+                             (except Exception as e 2 3))''',
+                          bm)
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
+                         'Too many expressions in except clause.')
+
+    def test_many_expressions_after_filter_wraises(self):
+        # given
+        bm = create_builtins_module()
+        # when
+        result = eval_str('''(try
+                                (raise "asdf")
+                             (except Exception 2 3 4))''',
+                          bm)
+        # then
+        self.assertIsInstance(result, WRaisedException)
+        self.assertEqual(w_str(result.exception.message),
+                         'Too many expressions in except clause.')
+
+    def test_multiple_clauses_filter_systemexit_catches_systemexit(self):
+        # given
+        bm = create_builtins_module()
+        sm = create_sys_module(bm, argv=[])
+        # when
+        result = eval_str('''(try
+                                (exit 1)
+                             (except SystemExit 2)
+                             (except Exception 3))''',
+                          sm)
+        # then
+        self.assertIsInstance(result, WNumber)
+        self.assertEqual(result, 2)
+
+    def test_multiple_clauses_filter_systemexit_catches_systemexit_2(self):
+        # given
+        bm = create_builtins_module()
+        sm = create_sys_module(bm, argv=[])
+        # when
+        result = eval_str('''(try
+                                (exit 1)
+                             (except Exception 2)
+                             (except SystemExit 3))''',
+                          sm)
+        # then
+        self.assertIsInstance(result, WNumber)
+        self.assertEqual(result, 3)
+
+    def test_multiple_clauses_filter_exception_catches_exception(self):
+        # given
+        bm = create_builtins_module()
+        # when
+        result = eval_str('''(try
+                                (raise "asdf")
+                             (except SystemExit 2)
+                             (except Exception 3))''',
+                          bm)
+        # then
+        self.assertIsInstance(result, WNumber)
+        self.assertEqual(result, 3)
+
+    def test_multiple_clauses_filter_exception_catches_exception_2(self):
+        # given
+        bm = create_builtins_module()
+        # when
+        result = eval_str('''(try
+                                (raise "asdf")
+                             (except Exception 2)
+                             (except SystemExit 3))''',
+                          bm)
+        # then
+        self.assertIsInstance(result, WNumber)
+        self.assertEqual(result, 2)
