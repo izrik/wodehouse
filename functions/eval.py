@@ -196,6 +196,8 @@ def w_eval(expr, scope, stack=None):
     if isinstance(expanded_expr, (WNumber, WString, WBoolean, WFunction,
                                   WMacro, WScope)):
         return handle_finally(expanded_expr, scope, stack)
+    if isinstance(expanded_expr, (WStackFrame,)):
+        return handle_finally(expanded_expr, scope, stack)
     raise Exception(f'Unknown object type: '
                     f'"{expanded_expr}" ({type(expanded_expr)})')
 
