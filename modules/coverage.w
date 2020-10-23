@@ -55,12 +55,17 @@
             (max (len (str cmd))
                  (get_max_width_1 rest)))))
 
-(def print_positions (positions)
+(def write_positions (filename positions)
+    (exec
+        (write_file filename "")
+        (write_positions_1 filename positions)))
+
+(def write_positions_1 (filename positions)
     (if (< (len positions) 1)
         0
         (exec
-            (print (car positions))
-            (print_positions (cdr positions))
+            (append_file filename (+ (str (car positions)) "\n"))
+            (write_positions_1 filename (cdr positions))
             0)))
 
 (def run_cmd (argv)
@@ -76,14 +81,14 @@
                                 (add all_positions (position_of expr))
                                 0)))
                     (exec
-                        (print (format "set size before: {}" (len all_positions)))
+                        #(print (format "set size before: {}" (len all_positions)))
                         (add_emit_listener rt listener)
                         (try
                             (run_module_with_rt rt module_name (cdr (cdr argv)))
                         (except SystemExit 0))
                         (remove_emit_listener rt listener)
-                        (print (format "set size after: {}" (len all_positions)))
-                        (print_positions (to_list all_positions))
+                        #(print (format "set size after: {}" (len all_positions)))
+                        (write_positions "coverage-w.txt" (to_list all_positions))
                         0)))
             (true
                 (exec
