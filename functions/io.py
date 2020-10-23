@@ -38,7 +38,7 @@ def write_file(path, content):
     if isinstance(path, WObject):
         path = w_str(path).value
     if isinstance(content, WObject):
-        content = w_str(path).value
+        content = w_str(content).value
     with open(path, 'w') as f:
         f.write(content)
         return WNumber(f.write(content))
