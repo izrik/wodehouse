@@ -48,7 +48,7 @@ def append_file(path, content):
     if isinstance(path, WObject):
         path = w_str(path).value
     if isinstance(content, WObject):
-        content = w_str(path).value
+        content = w_str(content).value
     with open(path, 'a') as f:
         return WNumber(f.write(content))
 
