@@ -33,3 +33,11 @@ class WSystemExit(WException):
     @staticmethod
     def get_code(exc):
         return exc.code
+
+
+class WrappedWException(Exception):
+    def __init__(self, exc):
+        if not isinstance(exc, WException):
+            raise TypeError(f'Argument "exc" must be of type WException. '
+                            f'Got "{exc}" ({type(exc)}) instead.')
+        self.exc = exc
