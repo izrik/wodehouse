@@ -167,12 +167,28 @@ def read_string(s):
     pos = s.get_position()
     delim = s.get_next_char()
     assert delim == '"'
+    is_triple = False
+    if s.peek() == '"':
+        s.get_next_char()
+        if s.peek() != '"':
+            return WString('', position=pos)
+        s.get_next_char()
+        is_triple = True
     chs = []
+    ch = ' '
     while s.has_chars():
         ch = s.get_next_char()
         if ch == delim:
-            value = ''.join(chs)
-            return WString(value, position=pos)
+            if not is_triple:
+                value = ''.join(chs)
+                return WString(value, position=pos)
+            if s.peek() == '"':
+                s.get_next_char()
+                if s.peek() == '"':
+                    s.get_next_char()
+                    value = ''.join(chs)
+                    return WString(value, position=pos)
+                chs.append('"')
         if ch == '\\':
             ch = s.get_next_char()
             if ch == 'n':
