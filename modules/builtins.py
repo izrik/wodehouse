@@ -54,12 +54,14 @@ def create_builtins_module(import_=None, runtime=None):
     from functions.collections import w_unique, w_add, w_to_list
     from functions.str import w_starts_with, w_ends_with, w_join, w_split
     from functions.runtime import GetCurrentRuntime
+    from wtypes.set import WSet
+    from wtypes.position import Position
+    from functions.position import w_filename_from_position
 
     if import_ is None:
         import_ = Import()
 
     module = WModule(name='builtins')
-    from wtypes.set import WSet
     module.update({
         '+': WMagicFunction(add, module, name='+'),
         '-': WMagicFunction(sub, module, name='-'),
@@ -151,6 +153,10 @@ def create_builtins_module(import_=None, runtime=None):
         'add': WMagicFunction(w_add, module, name='add'),
         'set': WMagicFunction(WSet, module, name='set'),
         'to_list': WMagicFunction(w_to_list, module, name='to_list'),
+        'position_from_str': WMagicFunction(
+            Position.from_wstr, module, name='position_from_str'),
+        'filename_from_position': WMagicFunction(
+            w_filename_from_position, module, name='filename_from_position'),
     })
     if runtime is not None:
         module.update({

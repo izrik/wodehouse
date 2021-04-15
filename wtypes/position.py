@@ -88,3 +88,29 @@ class Position(WObject):
 
     def __hash__(self):
         return hash((self.filename, self.line, self.char))
+
+    @classmethod
+    def from_wstr(cls, s):
+        """Convert a WString (from Position.__str__) back into a Position."""
+        from wtypes.exception import WException
+        from wtypes.exception import WrappedWException
+        from functions.types import get_type
+        from wtypes.string import WString
+        from functions.str import w_split
+
+        if not isinstance(s, WObject):
+            raise TypeError(f'Argument "s" must be WString. '
+                            f'Got "{s}" ({type(s)}) instead.')
+        if not isinstance(s, WString):
+            raise WrappedWException(
+                WException(f'Argument "s" must be String. '
+                           f'Got "{s}" ({get_type(s)}) '
+                           f'instead.'))
+
+        filename, parts = w_split(s, WString(':'))
+        line, ch = w_split(parts, WString(','))
+        assert isinstance(line, WString)
+        line = int(line.value)
+        assert isinstance(ch, WString)
+        ch = int(ch.value)
+        return cls(filename, line, ch, None)
