@@ -155,6 +155,7 @@ def w_eval(expr, scope, stack=None):
         if (callee.check_args and
                 callee.num_parameters is not None and
                 len(evaled_args) != callee.num_parameters):
+            # TODO: w-exception
             raise Exception(
                 f'Function "{callee.name}" expected {callee.num_parameters} '
                 f'args, got {len(evaled_args)} instead.')
