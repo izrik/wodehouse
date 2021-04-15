@@ -19,7 +19,7 @@ def add(*operands):
     if isinstance(operands[0], WList):
         x = []
         for operand in operands:
-            x += operand
+            x = x + operand
         return WList(*x)
     if isinstance(operands[0], WNumber):
         x = 0
@@ -47,7 +47,7 @@ def sub(*operands):
             x = operand.value
             first = False
             continue
-        x -= operand.value
+        x = x - operand.value
     return WNumber(x)
 
 
@@ -56,7 +56,7 @@ def mult(*operands):
         return WNumber(1)
     x = 1
     for operand in operands:
-        x *= operand.value
+        x = x * operand.value
     return WNumber(x)
 
 
@@ -71,7 +71,7 @@ def div(*operands):
             first = False
             continue
         try:
-            x /= operand.value
+            x = x / operand.value
         except ZeroDivisionError:
             return WRaisedException(exception=WException('Division by zero'))
     return WNumber(x)
