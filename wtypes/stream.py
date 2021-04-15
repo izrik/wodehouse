@@ -41,6 +41,9 @@ class WStream(WObject):
         return Position(self.filename, self.line, self.char, self)
 
     def get_line(self, line_num):
+        from wtypes.number import WNumber
+        if isinstance(line_num, WNumber):
+            line_num = line_num.value
         if line_num == self.line:
             return ''.join(self._current_line)
         return self.lines[line_num - 1]
