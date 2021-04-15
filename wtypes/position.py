@@ -44,13 +44,15 @@ class Position(WObject):
                 WException(f'Argument "char" must be Number. '
                            f'Got "{char}" ({get_type(char)}) instead.'))
 
-        if not isinstance(stream, WObject):
-            raise TypeError(f'Argument "stream" must be WStream. '
-                            f'Got "{stream}" ({type(stream)}) instead.')
-        if not isinstance(stream, WStream):
-            raise WrappedWException(
-                WException(f'Argument "stream" must be Stream. '
-                           f'Got "{stream}" ({get_type(stream)}) instead.'))
+        if stream is not None:
+            if not isinstance(stream, WObject):
+                raise TypeError(f'Argument "stream" must be WStream. '
+                                f'Got "{stream}" ({type(stream)}) instead.')
+            if not isinstance(stream, WStream):
+                raise WrappedWException(
+                    WException(f'Argument "stream" must be Stream. '
+                               f'Got "{stream}" ({get_type(stream)}) '
+                               f'instead.'))
 
         self.filename = filename
         self.line = line
@@ -68,6 +70,8 @@ class Position(WObject):
         return f'{filename}:{line},{char}'
 
     def get_source_line(self):
+        if self.stream is None:
+            return '<unavailable>'
         return self.stream.get_line(self.line)
 
     def __eq__(self, other):
