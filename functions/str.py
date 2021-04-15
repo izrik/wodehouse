@@ -132,3 +132,31 @@ def w_split(s, sep):
 
     from wtypes.list import WList
     return WList(*(WString(_) for _ in s.value.split(sep.value)))
+
+
+def w_replace(s, old, new):
+    from wtypes.control import WRaisedException
+    from wtypes.exception import WException
+    from functions.types import get_type
+    if not isinstance(s, WObject):
+        raise TypeError(f'Argument "s" to replace should be a WString. '
+                        f'Got "{s}" ({type(s)}) instead.')
+    if not isinstance(old, WObject):
+        raise TypeError(f'Argument "old" to replace should be a WString. '
+                        f'Got "{old}" ({type(old)}) instead.')
+    if not isinstance(new, WObject):
+        raise TypeError(f'Argument "new" to replace should be a WString. '
+                        f'Got "{new}" ({type(new)}) instead.')
+    if not isinstance(s, WString):
+        return WRaisedException(
+            WException(f'Argument "s" to replace should be a String. '
+                       f'Got "{s}" ({get_type(s)}) instead.'))
+    if not isinstance(old, WString):
+        return WRaisedException(
+            WException(f'Argument "old" to replace should be a String. '
+                       f'Got "{old}" ({get_type(old)}) instead.'))
+    if not isinstance(new, WString):
+        return WRaisedException(
+            WException(f'Argument "new" to replace should be a String. '
+                       f'Got "{new}" ({get_type(new)}) instead.'))
+    return WString(s.value.replace(old.value, new.value))
