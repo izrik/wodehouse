@@ -17,9 +17,21 @@ def add(*operands):
     if len(operands) < 1:
         return WNumber(0)
     if isinstance(operands[0], WList):
+        for operand in operands:
+            from wtypes.object import WObject
+            if not isinstance(operand, WObject):
+                raise TypeError(
+                    f'Operand to add should be a WList, to match other '
+                    f'operands. Got "{operand}" ({type(operand)}) instead.')
+            if not isinstance(operand, WList):
+                return WRaisedException(
+                    WException(
+                        f'Operand to add should be a WList, to match other '
+                        f'operands. Got "{operand}" ({get_type(operand)}) '
+                        f'instead.'))
         x = []
         for operand in operands:
-            x = x + operand
+            x = x + operand.values
         return WList(*x)
     if isinstance(operands[0], WNumber):
         x = 0
