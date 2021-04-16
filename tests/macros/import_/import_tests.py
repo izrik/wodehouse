@@ -9,7 +9,7 @@ from wtypes.scope import WScope
 from wtypes.symbol import WSymbol
 
 
-class StaticLoader(Import.DefaultLoader):
+class StaticLoader(Import.FileLoader):
     def __init__(self, s):
         self.s = s
 

@@ -24,8 +24,13 @@ def parse(s):
                 s
                 (stream s)))) )
     """
+    from wtypes.object import WObject
+    if not isinstance(s, WObject):
+        from modules.sys import w_from_py
+        s = w_from_py(s)
     if not isinstance(s, WStream):
-        s = WStream(str(s))
+        from functions.str import w_str
+        s = WStream(w_str(s))
     return read_expr(s)
 
 
@@ -75,9 +80,7 @@ def read_whitespace_and_comments(s):
                 s.get_next_char()
                 ch = s.peek()
             if not s.has_chars():
-                raise RanOutOfCharactersException(
-                    "Ran out of characters before reading expression.",
-                    s, s.get_position())
+                break
         s.get_next_char()
         ch = s.peek()
 
@@ -164,12 +167,28 @@ def read_string(s):
     pos = s.get_position()
     delim = s.get_next_char()
     assert delim == '"'
+    is_triple = False
+    if s.peek() == '"':
+        s.get_next_char()
+        if s.peek() != '"':
+            return WString('', position=pos)
+        s.get_next_char()
+        is_triple = True
     chs = []
+    ch = ' '
     while s.has_chars():
         ch = s.get_next_char()
         if ch == delim:
-            value = ''.join(chs)
-            return WString(value, position=pos)
+            if not is_triple:
+                value = ''.join(chs)
+                return WString(value, position=pos)
+            if s.peek() == '"':
+                s.get_next_char()
+                if s.peek() == '"':
+                    s.get_next_char()
+                    value = ''.join(chs)
+                    return WString(value, position=pos)
+                chs.append('"')
         if ch == '\\':
             ch = s.get_next_char()
             if ch == 'n':

@@ -1,3 +1,7 @@
 (print "Hello, World!")
 (print "Hello, World, again!")
 (define something "abc")
+(print something)
+(import sys argv)
+(print (format "1 argv: {}" argv))
+(print (format "1 __name__: {}" __name__))
