@@ -40,8 +40,8 @@ def write_file(path, content):
     if isinstance(content, WObject):
         content = w_str(content).value
     with open(path, 'w') as f:
-        f.write(content)
-        return WNumber(f.write(content))
+        count = f.write(content)
+        return WNumber(count)
 
 
 def append_file(path, content):
