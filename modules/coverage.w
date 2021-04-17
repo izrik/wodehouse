@@ -118,10 +118,9 @@
         ".html"))
 
 (def _generate_index_file (modules positions)
-    (write_file "whtmlcov/index.html"
-        (apply +
-            (+
-                '("""<html>
+    (apply +
+        (+
+            '("""<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Coverage report</title>
@@ -163,11 +162,11 @@
         </tfoot>
         <tbody>
 """)
-                (map
-                    (lambda (module)
-                        (let (href (_get_href_from_module_name module))
-                            (format
-                                """        <tr class="file">
+            (map
+                (lambda (module)
+                    (let (href (_get_href_from_module_name module))
+                        (format
+                            """        <tr class="file">
             <td class="name left"><a href="{}">{}</a></td>
             <td>0</td>
             <td>0</td>
@@ -177,10 +176,10 @@
             <td class="right" data-ratio="0 0">100%</td>
         </tr>
 """
-                                href
-                                module)))
-                    modules)
-            '("""        </tbody>
+                            href
+                            module)))
+                modules)
+        '("""        </tbody>
     </table>
     <p id="no_rows" style="display: none;">
         No items found using the specified filter.
@@ -195,25 +194,28 @@
     </div>
 </div>
 </body>
-</html>""")))))
+</html>"""))))
 
-(def _generate_module_files (modules positions)
-    (if (eq modules '())
-        0
-        (exec
-            (let (module (car modules))
-                 (filename (_get_href_from_module_name module))
-                (exec
-                    (print (format "Writing module {} to file {}" module filename))
-                    (write_file
-                        (+ "whtmlcov/" filename)
-                        (format
-                            """
+(def _generate_module_file (module positions)
+    (let (filename (_get_href_from_module_name module))
+        (format
+            """
 This is the file contents: {} {}
 """
-                            module
-                            filename))))
-            (_generate_module_files (cdr modules) positions))))
+            module
+            filename)))
+
+(def _write_module_files (modules positions)
+    (if (eq modules '())
+        0
+        (let (module (car modules))
+             (filename (_get_href_from_module_name module))
+            (exec
+                (print (format "Writing module {} to file {}" module filename))
+                (write_file
+                    (+ "whtmlcov/" filename)
+                    (_generate_module_file module positions))
+                (_write_module_files (cdr modules) positions)))))
 
 (def html_cmd (argv)
     (let (contents (read_file "coverage-w.txt"))
@@ -221,8 +223,9 @@ This is the file contents: {} {}
          (positions (_get_positions_from_lines lines))
          (modules (to_list (apply set (_get_modules_from_positions positions))))
         (exec
-            (_generate_index_file modules positions)
-            (_generate_module_files modules positions))))
+            (write_file "whtmlcov/index.html"
+                (_generate_index_file modules positions))
+            (_write_module_files modules positions))))
 
 (define commands_by_name
     (new_scope (list
