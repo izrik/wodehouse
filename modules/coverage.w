@@ -117,10 +117,11 @@
             "." "_")
         ".html"))
 
-(def _generate_index_file (modules positions)
-    (apply +
-        (+
-            '("""<html>
+#########################
+# HTML Report Templates #
+#########################
+
+(define _index_file_header """<html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Coverage report</title>
@@ -162,11 +163,8 @@
         </tfoot>
         <tbody>
 """)
-            (map
-                (lambda (module)
-                    (let (href (_get_href_from_module_name module))
-                        (format
-                            """        <tr class="file">
+
+(define _index_file_row_template """        <tr class="file">
             <td class="name left"><a href="{}">{}</a></td>
             <td>0</td>
             <td>0</td>
@@ -175,11 +173,9 @@
             <td>0</td>
             <td class="right" data-ratio="0 0">100%</td>
         </tr>
-"""
-                            href
-                            module)))
-                modules)
-        '("""        </tbody>
+""")
+
+(define _index_file_footer """        </tbody>
     </table>
     <p id="no_rows" style="display: none;">
         No items found using the specified filter.
@@ -188,20 +184,38 @@
 <div id="footer">
     <div class="content">
         <p>
-            <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.2</a>,
+            <a class="nav" href="https://github.com/izrik/wodehouse">wodehouse v0.1</a>,
             created at 2020-10-26 09:01
         </p>
     </div>
 </div>
 </body>
-</html>"""))))
+</html>""")
+
+(define _module_file_template """
+This is the file contents: {} {}
+""")
+
+################
+
+(def _generate_index_file (modules positions)
+    (apply +
+        (+
+            (list _index_file_header)
+            (map
+                (lambda (module)
+                    (let (href (_get_href_from_module_name module))
+                        (format
+                            _index_file_row_template
+                            href
+                            module)))
+                modules)
+        (list _index_file_footer))))
 
 (def _generate_module_file (module positions)
     (let (filename (_get_href_from_module_name module))
         (format
-            """
-This is the file contents: {} {}
-"""
+            _module_file_template
             module
             filename)))
 
