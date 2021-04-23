@@ -73,7 +73,7 @@
 (def read_symbol (s)
     (let (ch (peek s))
     (cond
-        ((in ch "abcdefghijklmnopqrstuvwxyz_0123456789")
+        ((in ch "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789")
             (read_name s))
         ((in ch "+-*/")
             (let (_ (get_next_char s))
@@ -96,12 +96,12 @@
     (cond
         ((not (has_chars s))
             '())
-        ((in (peek s) "abcdefghijklmnopqrstuvwxyz_0123456789")
+        ((in (peek s) "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789")
             (cons (get_next_char s) (read_name_char s)))
         (true '())))
 
 (def read_name (s)
-    (if (not (in (peek s) "abcdefghijklmnopqrstuvwxyz_"))
+    (if (not (in (peek s) "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"))
         (raise
             (format
                 "Unexpected character at the beginning of a name: \"{}\""
@@ -132,7 +132,7 @@
                 (raise "Ran out of characters before reading expression."))
             ((eq ch "(") (read_list s))
             ((in ch "0123456789") (read_integer_literal s))
-            ((or (in ch "+-*/<>_") (in ch "abcdefghijklmnopqrstuvwxyz")) (read_symbol s))
+            ((or (in ch "+-*/<>_") (in ch "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")) (read_symbol s))
             ((eq ch "\"") (read_string s))
             ((eq ch "'")
                 (exec
