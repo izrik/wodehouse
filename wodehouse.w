@@ -47,7 +47,7 @@
     (if (not (has_chars s))
         (raise "Ran out of characters before string was finished.")
         (let (ch (get_next_char s))
-        (if (eq ch "\"")
+            (if (eq ch "\"")
                 '()
                 (cons
                     (if (eq ch "\\")
@@ -63,11 +63,43 @@
                         ch)
                     (read_string_char s))))))
 
+(def read_tstring_char (s)
+    (if (not (has_chars s))
+        (raise "Ran out of characters before string was finished.")
+        (let (ch (get_next_char s))
+            (if (eq ch "\"")
+                (if (eq (peek s) "\"")
+                    (let (ch2 (get_next_char s))
+                        (if (eq (peek s) "\"")
+                            (let (ch2 (get_next_char s))
+                                '())
+                            (+ '("\"" "\"") (read_tstring_char s))))
+                    (+ '("\"") (read_tstring_char s)))
+                (cons
+                    (if (eq ch "\\")
+                        (if (not (has_chars s))
+                            (raise (+ "Ran out of characters before escape "
+                                      "sequence was finished."))
+                            (let (ch2 (get_next_char s))
+                            (cond
+                                ((eq ch2 "n") "\n")
+                                ((eq ch2 "r") "\r")
+                                ((eq ch2 "t") "\t")
+                                (true ch2))))
+                        ch)
+                    (read_tstring_char s))))))
+
 (def read_string (s)
     (let (delim (get_next_char s))
     (exec
         (assert (eq "\"" delim))
-        (join "" (read_string_char s)))))
+        (if (eq (peek s) "\"")
+            (let (ch (get_next_char s))
+                (if (eq (peek s) "\"")
+                    (let (ch (get_next_char s))
+                        (join "" (read_tstring_char s)))
+                    ""))
+            (join "" (read_string_char s))))))
 
 
 (def read_symbol (s)

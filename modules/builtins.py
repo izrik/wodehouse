@@ -58,6 +58,7 @@ def create_builtins_module(import_=None, runtime=None):
     from wtypes.position import Position
     from functions.position import w_filename_from_position
     from functions.str import w_replace
+    from functions.stream import get_stream_index
 
     if import_ is None:
         import_ = Import()
@@ -159,6 +160,8 @@ def create_builtins_module(import_=None, runtime=None):
         'filename_from_position': WMagicFunction(
             w_filename_from_position, module, name='filename_from_position'),
         'replace': WMagicFunction(w_replace, module, name='replace'),
+        'intersect': WMagicFunction(WSet.intersect, module, name='intersect'),
+        'get_stream_index': WMagicFunction(get_stream_index, module),
     })
     if runtime is not None:
         module.update({

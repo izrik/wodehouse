@@ -42,3 +42,12 @@ def stream_get_position(s):
             "Argument s should be a stream. "
             "Got \"{}\" ({}) instead.".format(s, type(s)))
     return s.get_position()
+
+
+def get_stream_index(s):
+    from wtypes.number import WNumber
+    if not isinstance(s, WStream):
+        raise TypeError(
+            "Argument s should be a stream. "
+            "Got \"{}\" ({}) instead.".format(s, type(s)))
+    return WNumber(s.i)
