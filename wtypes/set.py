@@ -33,3 +33,31 @@ class WSet(WObject):
     def add(self, value):
         self.values.add(value)
         return self
+
+    @classmethod
+    def intersect(cls, a, b):
+        from wtypes.control import WRaisedException
+        from wtypes.exception import WException
+        from functions.types import get_type
+
+        if not isinstance(a, WObject):
+            raise TypeError(
+                f'Argument "a" to intersect should be a WSet. '
+                f'Got "{a}" ({type(a)}) instead.')
+        if not isinstance(a, WSet):
+            return WRaisedException(
+                WException(
+                    f'Argument "a" to intersect should be a Set. '
+                    f'Got "{a}" ({get_type(a)}) instead.'))
+
+        if not isinstance(b, WObject):
+            raise TypeError(
+                f'Argument "b" to intersect should be a WSet. '
+                f'Got "{b}" ({type(b)}) instead.')
+        if not isinstance(b, WSet):
+            return WRaisedException(
+                WException(
+                    f'Argument "b" to intersect should be a Set. '
+                    f'Got "{b}" ({get_type(b)}) instead.'))
+
+        return WSet(*a.values.intersection(b.values))
