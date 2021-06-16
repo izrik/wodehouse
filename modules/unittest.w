@@ -48,7 +48,11 @@
             (print (format "FAIL: {}" (name_of func)))
             (print "----------------------------------------------------------------------")
             (print (format_stacktrace exc))
-            (print (format "Exception: {}" (get_message exc)))
+            (print
+                (format
+                    "Exception \"{}\" at {}"
+                    (get_message exc)
+                    (get_exception_position exc)))
             (print ""))))
 
 (def gather_tests_in_folder (folder)

@@ -24,6 +24,20 @@ def get_message(exc):
     return exc.message
 
 
+def get_exception_position(exc):
+    if not isinstance(exc, WObject):
+        raise TypeError(f'Argument to get_message must be a WObject. '
+                        f'Got "{exc}" ({type(exc)}) instead.')
+    if not isinstance(exc, WException):
+        return WRaisedException(
+            WException(
+                f'Argument to get_message must be an Exception. '
+                f'Got "{exc}" ({get_type(exc)}) instead.'))
+    if exc.stack is None:
+        return WString('<unknown>')
+    return exc.stack.get_location()
+
+
 def w_format_stacktrace(exc_or_stack, default_filename=None):
     if not isinstance(exc_or_stack, (WRaisedException, WException,
                                      WStackFrame)):
