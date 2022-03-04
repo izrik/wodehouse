@@ -18,21 +18,31 @@
                     (cmd argv))))))
 
 (def help_cmd (argv)
-    (exec
-        (print "coverage module")
-        (print "")
-        (print "usage: wodehouse -m coverage <command> [options] [args]")
-        (print "")
-        (print "Commands:")
-        (let (width (* (int (/ (get_max_width commands_by_name) 4)) 4))
-            (map
-                (lambda command_name
-                    (print_command_help command_name commands_by_name width))
-                (dir commands_by_name)))
-        (print "")
-        (print "Use \"coverage help <command>\" for detailed help on any command.")
-        (print "For full documentation, please wait...")
-        0))
+    (if (eq argv '())
+        (exec
+            (print "coverage module")
+            (print "")
+            (print "usage: wodehouse -m coverage <command> [options] [args]")
+            (print "")
+            (print "Commands:")
+            (let (width (* (int (/ (get_max_width commands_by_name) 4)) 4))
+                (map
+                    (lambda command_name
+                        (print_command_help command_name commands_by_name width))
+                    (dir commands_by_name)))
+            (print "")
+            (print "Use \"coverage help <command>\" for detailed help on any command.")
+            (print "For full documentation, please wait...")
+            0)
+        (exec
+            (print (format "argv: {}" (str argv)))
+            (let (cmd_name (car (cdr argv)))
+                 (cmd_data (get commands_by_name cmd_name))
+                (exec
+                    (print (format "usage: wodehouse -m coverage {} [options] [args]" cmd_name))
+                    (print "")
+                    (print (car (cdr (cdr cmd_data))))
+                    0)))))
 
 (def print_command_help (command_name commands width)
     (let (space (* " " (+ (- width (len (str command_name))) 2)))
@@ -92,6 +102,7 @@
                         0)))
             (true
                 (exec
+                    # TODO: implement
                     (print "This is the run cmd")
                     (print argv)
                     0)))))
@@ -231,21 +242,75 @@ This is the file contents: {} {}
                     (_generate_module_file module positions))
                 (_write_module_files (cdr modules) positions)))))
 
-(def html_cmd (argv)
-    (let (contents (read_file "coverage-w.txt"))
-         (lines (split contents "\n"))
-         (positions (_get_positions_from_lines lines))
-         (modules (to_list (apply set (_get_modules_from_positions positions))))
+(def _get_exprs_from_stream (s)
+    (let (_ (read_whitespace_and_comments s))
+        (if (not (has_chars s))
+            '()
+            (cons
+                (try
+                    (read_expr s)
+                (except as e
+                    (raise
+                        (format "Error reading expressions from \"{}\": {}"
+                            (get_position s)
+                            (get_message e)))))
+                (_get_exprs_from_stream s)))))
+
+(def _get_exprs_from_file (contents)
+    (let (s (stream contents))
+         (exprs (_get_exprs_from_stream s))
+        exprs))
+
+(def _get_positions_from_exprs (exprs)
+    (if (eq exprs '())
+        '()
+        (cons
+            (position_of (car exprs))
+            (_get_positions_from_exprs (cdr exprs)))))
+
+(def _calculate_coverage_by_modules (modules positions_set)
+    (if (eq modules '())
+        '()
         (exec
-            (write_file "whtmlcov/index.html"
-                (_generate_index_file modules positions))
-            (_write_module_files modules positions))))
+            (print (format "Calulating coverage for {}" (car modules)))
+        (cons
+            (if (starts_with (car modules) "<")
+                '(0 0)
+                (let (module (car modules))
+                     (contents (read_file module))
+                     (exprs (_get_exprs_from_file contents))
+                     (expr_positions (apply set (_get_positions_from_exprs exprs)))
+                     (matching_positions (intersect expr_positions positions_set))
+                    (list (len matching_positions) (len expr_positions))))
+            (_calculate_coverage_by_modules (cdr modules) positions_set))))
+        )
+
+(def html_cmd (argv)
+    (exec
+        (print "Starting to produce html report from coverage numbers")
+        (let (contents (read_file "coverage-w.txt"))
+             (lines (split contents "\n"))
+             (positions (_get_positions_from_lines lines))
+             (modules (to_list (apply set (_get_modules_from_positions positions))))
+             (exec
+                (print (format "Found the following modules:\n  {}\n" (join "\n  " modules)))
+                (let (coverage_by_module (_calculate_coverage_by_modules modules (apply set positions)))
+                    (exec
+                        (write_file "whtmlcov/index.html"
+                            (_generate_index_file modules positions coverage_by_module))
+                        (_write_module_files modules positions)))))))
 
 (define commands_by_name
     (new_scope (list
-        (list 'help (list help_cmd "Get help on using coverage"))
-        (list 'run (list run_cmd "Run a Wodehouse command and measure code execution."))
-        (list 'html (list html_cmd "Generate an html report from the execution results."))  )))
+        (list 'help (list help_cmd
+                          "Get help on using coverage"
+                          "Get help on using coverage"))
+        (list 'run  (list run_cmd
+                          "Run a Wodehouse command and measure code execution."
+                          "Run a module and collect coverage info."))
+        (list 'html (list html_cmd
+                          "Generate an html report from the execution results."
+                          "Generate an HTML report from the results of a previous invocation of 'coverage run'."))  )))
 
 #####
 
