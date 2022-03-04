@@ -15,8 +15,8 @@ class GetCurrentRuntime(WMagicFunction):
         return self.runtime
 
 
-def add_emit_listener(runtime, listener):
-    return runtime.add_emit_listener(listener)
+def add_emit_listener(runtime, listener, enclosing_scope):
+    return runtime.add_emit_listener(listener, enclosing_scope)
 
 
 def remove_emit_listener(runtime, listener):

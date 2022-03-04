@@ -22,6 +22,7 @@ class Runtime(WObject):
         self.import_ = Import()
         cache = self.import_.module_cache
         self.emit_listeners = []
+        self.emit_listener_scopes = {}
         self.builtins_module = create_builtins_module(import_=self.import_,
                                                       runtime=self)
 
@@ -123,11 +124,13 @@ class Runtime(WObject):
                 if isinstance(listener, WMagicFunction):
                     listener.call_magic_function(expr, scope, stack)
                 else:
-                    self.eval(WList(listener, expr, scope, stack))
+                    lscope = self.emit_listener_scopes[listener]
+                    self.eval(expr=WList(listener, expr, scope, stack),
+                              scope=lscope, stack=None)
             except Exception:
                 pass
 
-    def add_emit_listener(self, listener):
+    def add_emit_listener(self, listener, enclosing_scope):
         if not isinstance(listener, WObject):
             raise TypeError(f'Argument to add_emit_listener must be a '
                             f'WFunction. Got "{listener}" '
@@ -139,8 +142,10 @@ class Runtime(WObject):
                            f'({get_type(listener)}) instead.'))
 
         self.emit_listeners.append(listener)
+        self.emit_listener_scopes[listener] = enclosing_scope
         return listener
 
     def remove_emit_listener(self, listener):
         self.emit_listeners.remove(listener)
+        del self.emit_listener_scopes[listener]
         return listener

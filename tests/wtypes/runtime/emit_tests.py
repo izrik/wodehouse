@@ -5,6 +5,7 @@ from runtime import Runtime
 from wtypes.list import WList
 from wtypes.magic_function import WMagicFunction
 from wtypes.module import WModule
+from wtypes.scope import WScope
 
 
 class EmitTest(unittest.TestCase):
@@ -15,7 +16,7 @@ class EmitTest(unittest.TestCase):
         scope = WModule(builtins_module=rt.builtins_module, name='__main__')
         f = Mock()
         ff = WMagicFunction(f, None, name='f')
-        rt.add_emit_listener(ff)
+        rt.add_emit_listener(ff, WScope())
         expr = WNumber(123)
         # when
         result = rt.eval(expr, scope)

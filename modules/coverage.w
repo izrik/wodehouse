@@ -82,7 +82,7 @@
                                 0)))
                     (exec
                         #(print (format "set size before: {}" (len all_positions)))
-                        (add_emit_listener rt listener)
+                        (add_emit_listener rt listener (get_current_scope))
                         (try
                             (run_module_with_rt rt module_name (cdr (cdr argv)))
                         (except SystemExit 0))
