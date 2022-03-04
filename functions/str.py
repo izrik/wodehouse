@@ -1,6 +1,8 @@
 from wtypes.function import WFunction
+from wtypes.macro import WMacro
 from wtypes.magic_function import WMagicFunction
 from wtypes.boolean import WBoolean
+from wtypes.magic_macro import WMagicMacro
 from wtypes.number import WNumber
 from wtypes.object import WObject
 from wtypes.position import Position
@@ -30,6 +32,15 @@ def w_str(arg):
         return w_str(arg.name)
     if isinstance(arg, (WList, WBoolean, WScope, Position, WSet)):
         return WString(str(arg))
+    from wtypes.exception import WException
+    if isinstance(arg, WException):
+        message = ''
+        if arg.message:
+            message = w_str(arg.message)
+        pos = '<unknown>'
+        if arg.stack and arg.stack.expr and arg.stack.expr.position:
+            pos = w_str(arg.stack.expr.position)
+        return WString(f'Exception "{message}" at {pos}')
     if isinstance(arg, WFunction):
         if isinstance(arg, WMagicFunction):
             return w_name_of(arg)
@@ -38,6 +49,10 @@ def w_str(arg):
                 WSymbol.get('lambda'),
                 WList(*arg.parameters),
                 WList(*arg.expr)))
+    if isinstance(arg, WMacro):
+        if isinstance(arg, WMagicMacro):
+            return w_name_of(arg)
+        return WString("Unknown user-defined macro")
     raise Exception(f'Unknown object type: "{arg}" ({type(arg)})')
 
 
