@@ -65,10 +65,15 @@ def sub(*operands):
 
 def mult(*operands):
     if not operands:
+        # TODO: raise an exception here
         return WNumber(1)
+    # TODO: thorough operator checking
+    # TODO: i.e. (str * int) and (int * str) are ok, but no (str * str)
     x = 1
     for operand in operands:
         x = x * operand.value
+    if isinstance(x, str):
+        return WString(x)
     return WNumber(x)
 
 
