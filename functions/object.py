@@ -11,4 +11,4 @@ def w_position_of(expr):
                        f'Got "{expr}" ({type(expr)}) instead.'))
     if expr.position is not None:
         return expr.position
-    return Position('<unknown>', '<unknown>', '<unknown>', None)
+    return Position('<unknown>', 0, 0, None)
