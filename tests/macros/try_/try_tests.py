@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest.mock import Mock
 
 from functions.eval import eval_str
 from functions.str import w_str
@@ -6,10 +7,12 @@ from modules.builtins import create_builtins_module
 from modules.sys import create_sys_module
 from wtypes.control import WRaisedException
 from wtypes.exception import WException, WSystemExit
+from wtypes.list import WList
 from wtypes.magic_function import WMagicFunction
 from wtypes.magic_macro import WMagicMacro
 from wtypes.number import WNumber
 from wtypes.string import WString
+from wtypes.symbol import WSymbol
 
 
 def mkfunc(name, calls, s, _f=None):
@@ -794,3 +797,49 @@ class TryTest(TestCase):
         # then
         self.assertIsInstance(result, WNumber)
         self.assertEqual(result, 2)
+
+    def test_body_is_evaluated_only_once_1(self):
+        # given
+        bm = create_builtins_module()
+        mm = Mock(return_value=WList(WSymbol("f")))
+        fname = 'f'
+        mf = WMagicFunction(mm, enclosing_scope=bm, name=fname)
+        bm[fname] = mf
+
+        # `f` returns a call (in the form of a list with a symbol) of itself
+        # without arguments. It should only be called once; the return value
+        # should NOT be evaluated.
+
+        # when
+        result = eval_str("""(try
+                                (f)
+                             (finally 0))""",
+                          bm)
+        # then
+        self.assertIsInstance(result, WList)
+        self.assertEqual(result, [WSymbol("f")])
+        mm.assert_called_once_with()
+
+    def test_body_is_evaluated_only_once_2(self):
+        # given
+        bm = create_builtins_module()
+        # mm = Mock(return_value=WList(WSymbol("f")))
+        mm = Mock()
+        fname = 'f'
+        mf = WMagicFunction(mm, enclosing_scope=bm, name=fname)
+        mm.return_value = WList(mf)
+        bm[fname] = mf
+
+        # `f` returns a call (in the form of a list with a reference to `f`)
+        # of itself without arguments. It should only be called once; the
+        # return value should NOT be evaluated.
+
+        # when
+        result = eval_str("""(try
+                                (f)
+                             (finally 0))""",
+                          bm)
+        # then
+        self.assertIsInstance(result, WList)
+        self.assertEqual(result, [mf])
+        mm.assert_called_once_with()

@@ -1,5 +1,6 @@
 from functions.types import get_type
-from wtypes.control import WSetHandlers, WEvalRequired, WRaisedException
+from wtypes.control import WSetHandlers, WEvalRequired, WRaisedException, \
+    WExpandedAndEvaled
 from wtypes.exception import WException
 from wtypes.list import WList
 from wtypes.magic_macro import WMagicMacro
@@ -181,7 +182,7 @@ class Try(WMagicMacro):
             return WEvalRequired(code_clause, callback=return_code_retval)
 
         def return_code_retval(rv):
-            return rv
+            return WExpandedAndEvaled(rv)
 
         return WSetHandlers(exception_handlers=except_clauses,
                             finally_handler=finally_clause,

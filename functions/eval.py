@@ -1,7 +1,8 @@
 from functions.exec_src import w_exec_src
 from wtypes.callstack import WStackFrame
 from wtypes.control import WControl, WRaisedException, WMacroExpansion, \
-    WReturnValue, WEvalRequired, WExecSrcRequired, WSetHandlers
+    WReturnValue, WEvalRequired, WExecSrcRequired, WSetHandlers, \
+    WExpandedAndEvaled
 from wtypes.exception import WException
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
@@ -104,6 +105,8 @@ def w_eval(expr, scope, stack=None):
         return handle_finally(rv2, scope, stack)
 
     expanded_scope = scope
+    if isinstance(rv, WExpandedAndEvaled):
+        return handle_finally(rv.expr, scope, stack)
     if isinstance(rv, WMacroExpansion):
         expanded_expr = rv.expr
         if rv.scope is not None:
@@ -250,6 +253,8 @@ def process_controls(control, scope, stack):
                         f'{control} ({type(control)})')
     if not isinstance(control, WControl):
         return control
+    if isinstance(control, WExpandedAndEvaled):
+        return control
     if isinstance(control, WReturnValue):
         return control
     if isinstance(control, WMacroExpansion):
@@ -329,6 +334,8 @@ def expand_macros(expr, scope, stack):
     if is_exception(rv2, stack=mstack):
         return rv2
 
+    if isinstance(rv2, (WExpandedAndEvaled)):
+        return rv2
     expr2 = rv2
     if isinstance(rv2, (WReturnValue, WMacroExpansion)):
         expr2 = rv2.expr

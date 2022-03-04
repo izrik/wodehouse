@@ -63,3 +63,9 @@ class WReturnValue(WControl):
     def __init__(self, expr):
         super().__init__()
         self.expr = expr
+
+
+class WExpandedAndEvaled(WControl):
+    def __init__(self, expr):
+        super().__init__()
+        self.expr = expr
