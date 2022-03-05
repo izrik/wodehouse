@@ -256,8 +256,8 @@ This is the file contents: {} {}
                             (get_message e)))))
                 (_get_exprs_from_stream s)))))
 
-(def _get_exprs_from_file (contents)
-    (let (s (stream contents))
+(def _get_exprs_from_file (contents filename)
+    (let (s (stream contents filename))
          (exprs (_get_exprs_from_stream s))
         exprs))
 
@@ -278,7 +278,7 @@ This is the file contents: {} {}
                 '(0 0)
                 (let (module (car modules))
                      (contents (read_file module))
-                     (exprs (_get_exprs_from_file contents))
+                     (exprs (_get_exprs_from_file contents module))
                      (expr_positions (apply set (_get_positions_from_exprs exprs)))
                      (matching_positions (intersect expr_positions positions_set))
                     (list (len matching_positions) (len expr_positions))))

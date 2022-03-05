@@ -4,8 +4,8 @@ from wtypes.stream import WStream
 from wtypes.string import WString
 
 
-def stream(s):
-    return WStream(w_str(s).value)
+def stream(s, filename=None):
+    return WStream(w_str(s).value, filename=filename)
 
 
 def stream_has_chars(s):

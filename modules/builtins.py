@@ -109,7 +109,7 @@ def create_builtins_module(import_=None, runtime=None):
         'append_file': WMagicFunction(append_file, module),
         'assert': WAssert(),
         'raise': WMagicFunction(w_raise, module, name='raise'),
-        'stream': WMagicFunction(stream, module),
+        'stream': WMagicFunction(stream, module, check_args=False),
         'has_chars': WMagicFunction(stream_has_chars, module,
                                     name='has_chars'),
         'get_next_char': WMagicFunction(stream_get_next_char, module,
