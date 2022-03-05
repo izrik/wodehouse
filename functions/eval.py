@@ -83,6 +83,15 @@ def w_eval(expr, scope, stack=None):
     if stack is None:
         stack = WStackFrame(location=None, prev=None)
 
+    # check callstack height
+    if stack.depth >= 400:
+        return handle_finally(
+            WRaisedException(
+                exception=WException(f'Stack overflow'),
+                stack=stack),
+            scope,
+            stack)
+
     # Look up the current runtime and emit the expr
     get_rt = None
     if 'get_current_runtime' in scope and \
