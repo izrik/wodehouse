@@ -41,3 +41,11 @@ class WrappedWException(Exception):
             raise TypeError(f'Argument "exc" must be of type WException. '
                             f'Got "{exc}" ({type(exc)}) instead.')
         self.exc = exc
+
+
+class WSyntaxError(WException):
+    """ Invalid syntax. """
+
+    def __init__(self, message, position):
+        super().__init__(message)
+        self.position = position
