@@ -13,6 +13,7 @@ from wtypes.list import WList
 from wtypes.number import WNumber
 from wtypes.object import WObject
 from wtypes.scope import WScope
+from wtypes.set import WSet
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
@@ -207,7 +208,7 @@ def w_eval(expr, scope, stack=None):
         value = scope2[expanded_expr]
         return handle_finally(value, scope, stack)
     if isinstance(expanded_expr, (WNumber, WString, WBoolean, WFunction,
-                                  WMacro, WScope)):
+                                  WMacro, WScope, WSet)):
         return handle_finally(expanded_expr, scope, stack)
     if isinstance(expanded_expr, (WStackFrame,)):
         return handle_finally(expanded_expr, scope, stack)
