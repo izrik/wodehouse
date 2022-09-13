@@ -118,3 +118,20 @@ def w_to_list(s):
             WException(f'Argument "s" to to_list must be a list or set. '
                        f'Got "{s}" ({get_type(s)}) instead.'))
     return WList(*s.values)
+
+
+def w_append(lst, value):
+    from wtypes.object import WObject
+    from functions.types import get_type
+    if not isinstance(lst, WObject):
+        raise TypeError(f'Arguments to w_append must be WObject. '
+                        f'Got "{lst}" ({type(lst)}) instead.')
+    if not isinstance(lst, WList):
+        return WRaisedException(
+            WException(f'Argument "lst" must be a List. '
+                       f'Got "{lst}" ({get_type(lst)}) instead.'))
+    if not isinstance(value, WObject):
+        raise TypeError(f'Arguments to w_append must be WObject. '
+                        f'Got "{value}" ({type(value)}) instead.')
+    rv = lst.append(value)
+    return rv

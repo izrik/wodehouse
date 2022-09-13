@@ -51,7 +51,7 @@ def create_builtins_module(import_=None, runtime=None):
     from functions.eval import w_eval
     from functions.object import w_position_of
     from functions.read import parse
-    from functions.collections import w_unique, w_add, w_to_list
+    from functions.collections import w_unique, w_add, w_to_list, w_append
     from functions.str import w_starts_with, w_ends_with, w_join, w_split
     from functions.runtime import GetCurrentRuntime
     from wtypes.set import WSet
@@ -156,6 +156,7 @@ def create_builtins_module(import_=None, runtime=None):
         'add': WMagicFunction(w_add, module, name='add'),
         'set': WMagicFunction(WSet, module, name='set'),
         'to_list': WMagicFunction(w_to_list, module, name='to_list'),
+        'append': WMagicFunction(w_append, module, name='append'),
         'position_from_str': WMagicFunction(
             Position.from_wstr, module, name='position_from_str'),
         'filename_from_position': WMagicFunction(
