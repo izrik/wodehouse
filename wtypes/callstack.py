@@ -12,9 +12,10 @@ class WStackFrame(WObject):
     args = None
     evaled_args = None
     fscope = None
-    exception_handler = None
-    exception_var_name = None
+    exception_handlers = None
     finally_handler = None
+    prev = None
+    depth = 0
 
     def __str__(self):
         return f'location={self.location}, expr={self.expr}, ' \
@@ -27,6 +28,8 @@ class WStackFrame(WObject):
         super().__init__()
         self.location = location
         self.prev = prev
+        if prev:
+            self.depth = prev.depth + 1
 
     def get_location(self):
         if self.location is not None:

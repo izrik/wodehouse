@@ -1,7 +1,8 @@
 from functions.exec_src import w_exec_src
 from wtypes.callstack import WStackFrame
 from wtypes.control import WControl, WRaisedException, WMacroExpansion, \
-    WReturnValue, WEvalRequired, WExecSrcRequired, WSetHandlers
+    WReturnValue, WEvalRequired, WExecSrcRequired, WSetHandlers, \
+    WExpandedAndEvaled
 from wtypes.exception import WException
 from wtypes.function import WFunction
 from wtypes.magic_function import WMagicFunction
@@ -12,6 +13,7 @@ from wtypes.list import WList
 from wtypes.number import WNumber
 from wtypes.object import WObject
 from wtypes.scope import WScope
+from wtypes.set import WSet
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
@@ -82,6 +84,28 @@ def w_eval(expr, scope, stack=None):
     if stack is None:
         stack = WStackFrame(location=None, prev=None)
 
+    # check callstack height
+    if stack.depth >= 400:
+        return handle_finally(
+            WRaisedException(
+                exception=WException(f'Stack overflow'),
+                stack=stack),
+            scope,
+            stack)
+
+    # Look up the current runtime and emit the expr
+    get_rt = None
+    if 'get_current_runtime' in scope and \
+            scope['get_current_runtime'] is not None:
+        get_rt = scope['get_current_runtime']
+    elif scope.get_builtins_module() is not None and \
+            'get_current_runtime' in scope.get_builtins_module() and \
+            scope.get_builtins_module()['get_current_runtime'] is not None:
+        get_rt = scope.get_builtins_module()['get_current_runtime']
+    if get_rt:
+        rt = get_rt.call_magic_function()
+        rt.emit(expr, scope, stack)
+
     stack.expr = expr
     stack.scope = scope
 
@@ -91,6 +115,8 @@ def w_eval(expr, scope, stack=None):
         return handle_finally(rv2, scope, stack)
 
     expanded_scope = scope
+    if isinstance(rv, WExpandedAndEvaled):
+        return handle_finally(rv.expr, scope, stack)
     if isinstance(rv, WMacroExpansion):
         expanded_expr = rv.expr
         if rv.scope is not None:
@@ -142,6 +168,7 @@ def w_eval(expr, scope, stack=None):
         if (callee.check_args and
                 callee.num_parameters is not None and
                 len(evaled_args) != callee.num_parameters):
+            # TODO: w-exception
             raise Exception(
                 f'Function "{callee.name}" expected {callee.num_parameters} '
                 f'args, got {len(evaled_args)} instead.')
@@ -181,22 +208,36 @@ def w_eval(expr, scope, stack=None):
         value = scope2[expanded_expr]
         return handle_finally(value, scope, stack)
     if isinstance(expanded_expr, (WNumber, WString, WBoolean, WFunction,
-                                  WMacro, WScope)):
+                                  WMacro, WScope, WSet)):
+        return handle_finally(expanded_expr, scope, stack)
+    if isinstance(expanded_expr, (WStackFrame,)):
         return handle_finally(expanded_expr, scope, stack)
     raise Exception(f'Unknown object type: '
                     f'"{expanded_expr}" ({type(expanded_expr)})')
 
 
+def matches_exception_type(exc, exc_type):
+    from wtypes.exception import WSystemExit
+    if isinstance(exc, WSystemExit) and exc_type == WSymbol.get('SystemExit'):
+        return True
+    if type(exc) == WException and exc_type == WSymbol.get('Exception'):
+        return True
+    return False
+
+
 def handle_exception(rv, scope, stack):
-    if stack.exception_handler:
-        ehstack = WStackFrame(stack.location, stack)
-        ehscope = scope
-        ehscope = WScope(enclosing_scope=ehscope)
-        if stack.exception_var_name:
-            ehscope[stack.exception_var_name] = rv.exception
-        rv2 = w_eval(stack.exception_handler, ehscope, ehstack)
-        is_exception(rv2, stack)
-        return rv2
+    if stack.exception_handlers:
+        for eh in stack.exception_handlers:
+            if not matches_exception_type(rv.exception, eh.filter_type):
+                continue
+            ehstack = WStackFrame(stack.location, stack)
+            ehscope = scope
+            ehscope = WScope(enclosing_scope=ehscope)
+            if eh.var_name:
+                ehscope[eh.var_name] = rv.exception
+            rv2 = w_eval(eh.expr, ehscope, ehstack)
+            is_exception(rv2, stack)
+            return rv2
     return rv
 
 
@@ -222,14 +263,15 @@ def process_controls(control, scope, stack):
                         f'{control} ({type(control)})')
     if not isinstance(control, WControl):
         return control
+    if isinstance(control, WExpandedAndEvaled):
+        return control
     if isinstance(control, WReturnValue):
         return control
     if isinstance(control, WMacroExpansion):
         return control
     if isinstance(control, WSetHandlers):
         pstack = stack.prev
-        pstack.exception_handler = control.exception_handler
-        pstack.exception_var_name = control.exception_var_name
+        pstack.exception_handlers = control.exception_handlers
         pstack.finally_handler = control.finally_handler
         return process_controls(control.callback(), scope, stack)
     if not isinstance(control, (WEvalRequired, WExecSrcRequired)):
@@ -302,6 +344,8 @@ def expand_macros(expr, scope, stack):
     if is_exception(rv2, stack=mstack):
         return rv2
 
+    if isinstance(rv2, (WExpandedAndEvaled)):
+        return rv2
     expr2 = rv2
     if isinstance(rv2, (WReturnValue, WMacroExpansion)):
         expr2 = rv2.expr

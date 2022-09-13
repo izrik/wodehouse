@@ -35,11 +35,9 @@ class WEvalRequired(WControl):
 
 
 class WSetHandlers(WControl):
-    def __init__(self, exception_handler, exception_var_name, finally_handler,
-                 callback):
+    def __init__(self, exception_handlers, finally_handler, callback):
         super().__init__()
-        self.exception_handler = exception_handler
-        self.exception_var_name = exception_var_name
+        self.exception_handlers = exception_handlers
         self.finally_handler = finally_handler
         self.callback = callback
 
@@ -62,6 +60,12 @@ class WMacroExpansion(WControl):
 
 
 class WReturnValue(WControl):
+    def __init__(self, expr):
+        super().__init__()
+        self.expr = expr
+
+
+class WExpandedAndEvaled(WControl):
     def __init__(self, expr):
         super().__init__()
         self.expr = expr

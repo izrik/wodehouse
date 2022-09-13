@@ -1,13 +1,13 @@
-from functions.str import w_starts_with, w_ends_with, w_join
+from functions.math import w_int
 from wtypes.module import WModule
 
 
-def create_builtins_module(import_=None):
+def create_builtins_module(import_=None, runtime=None):
     from functions.collections import w_map, w_in
     from functions.convert import int_from_str
     from functions.exception import exception
     from functions.exec_src import w_exec
-    from functions.io import w_print, read_file
+    from functions.io import w_print, read_file, write_file, append_file
     from functions.lisp import car, cdr, cons, atom
     from functions.list import list_func
     from functions.logical import w_not, w_or, w_and, less_than, \
@@ -20,7 +20,7 @@ def create_builtins_module(import_=None):
         stream_get_next_char, stream_get_position, stream_peek
     from functions.symbol import symbol_at
     from functions.types import get_type, w_isinstance
-    from macros.apply import Apply
+    from functions.apply import w_apply
     from macros.assert_ import WAssert
     from macros.cond import Cond
     from macros.define import Define
@@ -49,6 +49,17 @@ def create_builtins_module(import_=None):
     from functions.exception import w_format_stacktrace
     from functions.scope import get_current_scope
     from functions.eval import w_eval
+    from functions.object import w_position_of
+    from functions.read import parse
+    from functions.collections import w_unique, w_add, w_to_list, w_append
+    from functions.str import w_starts_with, w_ends_with, w_join, w_split
+    from functions.runtime import GetCurrentRuntime
+    from wtypes.set import WSet
+    from wtypes.position import Position
+    from functions.position import w_filename_from_position
+    from functions.str import w_replace
+    from functions.exception import get_exception_position
+    from functions.stream import get_stream_index
 
     if import_ is None:
         import_ = Import()
@@ -60,7 +71,7 @@ def create_builtins_module(import_=None):
         '*': WMagicFunction(mult, module, name='*'),
         '/': WMagicFunction(div, module, name='/'),
         'let': Let(),
-        'apply': Apply(),
+        'apply': WMagicFunction(w_apply, module, name='apply'),
         'list': WMagicFunction(list_func, module, name='list'),
         'len': WMagicFunction(w_len, module, name='len'),
         'car': WMagicFunction(car, module),
@@ -94,9 +105,11 @@ def create_builtins_module(import_=None):
         'in': WMagicFunction(w_in, module, name='in'),
         'map': WMagicFunction(w_map, module, name='map', check_args=False),
         'read_file': WMagicFunction(read_file, module),
+        'write_file': WMagicFunction(write_file, module),
+        'append_file': WMagicFunction(append_file, module),
         'assert': WAssert(),
         'raise': WMagicFunction(w_raise, module, name='raise'),
-        'stream': WMagicFunction(stream, module),
+        'stream': WMagicFunction(stream, module, check_args=False),
         'has_chars': WMagicFunction(stream_has_chars, module,
                                     name='has_chars'),
         'get_next_char': WMagicFunction(stream_get_next_char, module,
@@ -120,6 +133,7 @@ def create_builtins_module(import_=None):
                                       name='starts_with'),
         'ends_with': WMagicFunction(w_ends_with, module, name='ends_with'),
         'join': WMagicFunction(w_join, module, name='join'),
+        'split': WMagicFunction(w_split, module, name='split'),
         'exec_src': WMagicFunction(w_exec_src, module, name='exec_src',
                                    check_args=False),
         'name_of': WMagicFunction(w_name_of, module, name='name_of'),
@@ -134,5 +148,27 @@ def create_builtins_module(import_=None):
             check_args=False),
         'get_current_scope': WMagicFunction(get_current_scope, module),
         'eval': WMagicFunction(w_eval, module, name='eval', check_args=False),
+        'position_of': WMagicFunction(w_position_of, module,
+                                      name='position_of'),
+        'parse': WMagicFunction(parse, module),
+        'unique': WMagicFunction(w_unique, module, name='unique'),
+        'int': WMagicFunction(w_int, module, name='int'),
+        'add': WMagicFunction(w_add, module, name='add'),
+        'set': WMagicFunction(WSet, module, name='set'),
+        'to_list': WMagicFunction(w_to_list, module, name='to_list'),
+        'append': WMagicFunction(w_append, module, name='append'),
+        'position_from_str': WMagicFunction(
+            Position.from_wstr, module, name='position_from_str'),
+        'filename_from_position': WMagicFunction(
+            w_filename_from_position, module, name='filename_from_position'),
+        'replace': WMagicFunction(w_replace, module, name='replace'),
+        'intersect': WMagicFunction(WSet.intersect, module, name='intersect'),
+        'get_exception_position': WMagicFunction(get_exception_position,
+                                                 module),
+        'get_stream_index': WMagicFunction(get_stream_index, module),
     })
+    if runtime is not None:
+        module.update({
+            'get_current_runtime': GetCurrentRuntime(runtime, module),
+        })
     return module

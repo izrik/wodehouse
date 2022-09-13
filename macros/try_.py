@@ -1,4 +1,7 @@
-from wtypes.control import WSetHandlers, WEvalRequired
+from functions.types import get_type
+from wtypes.control import WSetHandlers, WEvalRequired, WRaisedException, \
+    WExpandedAndEvaled
+from wtypes.exception import WException
 from wtypes.list import WList
 from wtypes.magic_macro import WMagicMacro
 from wtypes.symbol import WSymbol
@@ -58,67 +61,136 @@ class Try(WMagicMacro):
         # other values with the same name in the current scope, and the
         # exception will not be available after the handler has completed.
         #
+        # Additionally, the clause can filter what exception type it catches:
+        #
+        #   (try
+        #       (call_some_function arg1 arg2 arg3)
+        #   (except SystemExit as e
+        #       (print (format "Tried to exit: {}" e))))
+        #
+        # The above will only catch a SystemExit exception (usually a result
+        # of a call to the `exit` function of the `sys` module).
+        #
 
         s_exc = WSymbol.get('except')
         s_fin = WSymbol.get('finally')
+        s_as = WSymbol.get('as')
 
         # check args
+        # TODO: Change these WExceptions to something like WSyntaxError
+        # TODO: Also somehow store the position in the exceptions
         if len(exprs) < 2:
-            raise Exception(f"try requires at least two clauses. "
-                            f"Got {len(exprs)} instead.")
+            return WRaisedException(
+                WException(f"try requires at least two clauses. "
+                           f"Got {len(exprs)} instead."))
         for expr in exprs[1:]:
-            if not isinstance(expr, WList) or \
-                    not isinstance(expr[0], WSymbol) or \
-                    expr[0] not in [s_exc, s_fin]:
-                raise Exception(f'Clause should be a list with "except" or '
-                                f'"finally" in the head position. '
-                                f'Got "{expr}" ({type(expr)}) instead.')
-            if expr[0] is s_exc:
-                msg = f'An except clause must be of the form "(except ' \
-                      f'[as <varname>] <expr>)", with exactly one ' \
-                      f'expression to be evaluated, and my have an ' \
-                      f'optional "as <varname>" portion. ' \
-                      f'Got {expr[1:]} instead.'
-                if len(expr) != 2 and len(expr) != 4:
-                    raise Exception(msg)
-                if len(expr) == 4:
-                    if expr[1] != WSymbol.get('at') or \
-                            not isinstance(expr[2], WSymbol):
-                        raise Exception(msg)
-            if expr[0] is s_fin:
-                if len(expr) != 2:
-                    raise Exception('A finally clause must have exactly one '
-                                    'expression to be evaluated.')
+            if not isinstance(expr, WList):
+                return WRaisedException(
+                    WException(f'Clause must be a list. '
+                               f'Got "{expr}" ({get_type(expr)}) instead.'))
+            if not isinstance(expr[0], WSymbol):
+                return WRaisedException(
+                    WException(f'Clause must start with a symbol. '
+                               f'Got "{expr[0]}" ({get_type(expr[0])}) '
+                               f'instead.'))
+            if expr[0] == s_exc:
+                if len(expr) < 2:
+                    return WRaisedException(
+                        WException('No expression in except clause.'))
+                elif len(expr) == 2:  # except expr
+                    pass
+                elif len(expr) == 3:  # except T expr
+                    if expr[1] == s_as:
+                        return WRaisedException(
+                            WException('No expression in except clause.'))
+                    else:
+                        exc_type_expr = expr[1]
+                        if not isinstance(exc_type_expr, WSymbol) or \
+                                (exc_type_expr != WSymbol.get('Exception') and
+                                 exc_type_expr != WSymbol.get('SystemExit')):
+                            return WRaisedException(
+                                WException(
+                                    'Except clause filter must be a '
+                                    'subclass of Exception.'))
+                elif len(expr) == 4:  # except as e expr
+                    if expr[1] == s_as:
+                        pass
+                    else:
+                        return WRaisedException(
+                            WException(
+                                'Too many expressions in except clause.'))
+                elif len(expr) == 5:  # except T as e expr
+                    exc_type_expr = expr[1]
+                    if not isinstance(exc_type_expr, WSymbol) or \
+                            (exc_type_expr != WSymbol.get('Exception') and
+                             exc_type_expr != WSymbol.get('SystemExit')):
+                        return WRaisedException(
+                            WException(
+                                'Except clause filter must be a '
+                                'subclass of Exception.'))
+                    if expr[2] != s_as:
+                        return WRaisedException(
+                            WException(
+                                'Too many expressions in except clause.'))
+                else:  # len(expr) > 5
+                    return WRaisedException(
+                        WException('Too many expressions in except clause.'))
+            elif expr[0] == s_fin:
+                if len(expr) < 2:
+                    return WRaisedException(
+                        WException('No expression in finally clause.'))
+                elif len(expr) == 2:
+                    pass
+                else:  # len(expr) > 2
+                    return WRaisedException(
+                        WException('Too many expressions in finally clause.'))
+            else:  # invalid clause
+                return WRaisedException(
+                    WException(f'Invalid clause: {expr[0]}.'))
 
         code_clause = exprs[0]
-        except_clause = None
-        except_var_name = None
+        except_clauses = []
         finally_clause = None
         for expr in exprs[1:]:
             head = expr.head
             if head == s_exc:
-                if except_clause is not None:
-                    raise Exception(f'Only one except clause is allowed.')
                 if finally_clause is not None:
-                    raise Exception('An except clause must appear before the '
-                                    'finally clause')
-                if len(expr) > 2:
+                    return WRaisedException(
+                        WException('An except clause must appear before the '
+                                   'finally clause.'))
+                except_var_name = None
+                filter_type = WSymbol.get('Exception')
+                if len(expr) == 2:
+                    pass
+                elif len(expr) == 3:
+                    filter_type = expr[1]
+                elif len(expr) == 4:
                     except_var_name = expr[2]
-                except_clause = expr[-1]
-            elif head == s_fin:
+                else:  # len(expr) == 5
+                    filter_type = expr[1]
+                    except_var_name = expr[3]
+                except_clauses.append(ExceptClause(expr=expr[-1],
+                                                   var_name=except_var_name,
+                                                   filter_type=filter_type))
+            else:  # head == s_fin:
                 if finally_clause is not None:
-                    raise Exception('Only one finally clause is allowed.')
+                    return WRaisedException(
+                        WException('Too many finally clauses.'))
                 finally_clause = expr[1]
-            else:
-                raise Exception(f'Invalid clause: {head}')
 
         def run_code_clause():
             return WEvalRequired(code_clause, callback=return_code_retval)
 
         def return_code_retval(rv):
-            return rv
+            return WExpandedAndEvaled(rv)
 
-        return WSetHandlers(exception_handler=except_clause,
-                            exception_var_name=except_var_name,
+        return WSetHandlers(exception_handlers=except_clauses,
                             finally_handler=finally_clause,
                             callback=run_code_clause)
+
+
+class ExceptClause:
+    def __init__(self, expr, var_name, filter_type):
+        self.expr = expr
+        self.var_name = var_name
+        self.filter_type = filter_type

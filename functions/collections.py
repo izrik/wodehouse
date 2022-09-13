@@ -4,6 +4,7 @@ from wtypes.function import WFunction
 from wtypes.boolean import WBoolean
 from wtypes.list import WList
 from wtypes.scope import WScope
+from wtypes.set import WSet
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
@@ -67,3 +68,70 @@ def w_in(expr, container):
         if item is expr or item == expr:
             return WBoolean.true
     return WBoolean.false
+
+
+def w_unique(arg):
+    from wtypes.object import WObject
+    from functions.types import get_type
+    if not isinstance(arg, WObject):
+        raise TypeError(f'Argument to unique must be a WObject. '
+                        f'Got "{arg}" ({type(arg)}) instead.')
+    if not isinstance(arg, WList):
+        return WRaisedException(
+            WException(f'Argument to unique must be a list. '
+                       f'Got "{arg}" ({get_type(arg)}) instead.'))
+
+    return WList(*set(arg))
+
+
+def w_add(s, value):
+    from wtypes.object import WObject
+    from functions.types import get_type
+    if not isinstance(s, WObject):
+        raise TypeError(f'Arguments to add must be WObject. '
+                        f'Got "{s}" ({type(s)}) instead.')
+    if not isinstance(s, WSet):
+        return WRaisedException(
+            WException(f'Argument "s" must be a set. '
+                       f'Got "{s}" ({get_type(s)}) instead.'))
+    if not isinstance(value, WObject):
+        raise TypeError(f'Arguments to add must be WObject. '
+                        f'Got "{value}" ({type(value)}) instead.')
+    try:
+        rv = s.add(value)
+    except TypeError as e:
+        if 'unhashable type' in str(e):
+            return WRaisedException(
+                WException(f'Unhashable type: "{get_type(value)}"'))
+        raise
+    return rv
+
+
+def w_to_list(s):
+    from wtypes.object import WObject
+    from functions.types import get_type
+    if not isinstance(s, WObject):
+        raise TypeError(f'Argument "s" to w_to_list must be a WObject. '
+                        f'Got "{s}" ({type(s)}) instead.')
+    if not isinstance(s, (WList, WSet)):
+        return WRaisedException(
+            WException(f'Argument "s" to to_list must be a list or set. '
+                       f'Got "{s}" ({get_type(s)}) instead.'))
+    return WList(*s.values)
+
+
+def w_append(lst, value):
+    from wtypes.object import WObject
+    from functions.types import get_type
+    if not isinstance(lst, WObject):
+        raise TypeError(f'Arguments to w_append must be WObject. '
+                        f'Got "{lst}" ({type(lst)}) instead.')
+    if not isinstance(lst, WList):
+        return WRaisedException(
+            WException(f'Argument "lst" must be a List. '
+                       f'Got "{lst}" ({get_type(lst)}) instead.'))
+    if not isinstance(value, WObject):
+        raise TypeError(f'Arguments to w_append must be WObject. '
+                        f'Got "{value}" ({type(value)}) instead.')
+    rv = lst.append(value)
+    return rv

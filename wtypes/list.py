@@ -55,9 +55,8 @@ class WList(WObject):
         return WList(*self.values[1:])
 
     def append(self, value):
-        new_list = list(self.values)
-        new_list.append(value)
-        return WList(*new_list)
+        self.values.append(value)
+        return self  # does not create new object
 
     def extend(self, *values):
         new_list = list(self.values)

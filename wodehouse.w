@@ -47,7 +47,7 @@
     (if (not (has_chars s))
         (raise "Ran out of characters before string was finished.")
         (let (ch (get_next_char s))
-        (if (eq ch "\"")
+            (if (eq ch "\"")
                 '()
                 (cons
                     (if (eq ch "\\")
@@ -63,17 +63,49 @@
                         ch)
                     (read_string_char s))))))
 
+(def read_tstring_char (s)
+    (if (not (has_chars s))
+        (raise "Ran out of characters before string was finished.")
+        (let (ch (get_next_char s))
+            (if (eq ch "\"")
+                (if (eq (peek s) "\"")
+                    (let (ch2 (get_next_char s))
+                        (if (eq (peek s) "\"")
+                            (let (ch2 (get_next_char s))
+                                '())
+                            (+ '("\"" "\"") (read_tstring_char s))))
+                    (+ '("\"") (read_tstring_char s)))
+                (cons
+                    (if (eq ch "\\")
+                        (if (not (has_chars s))
+                            (raise (+ "Ran out of characters before escape "
+                                      "sequence was finished."))
+                            (let (ch2 (get_next_char s))
+                            (cond
+                                ((eq ch2 "n") "\n")
+                                ((eq ch2 "r") "\r")
+                                ((eq ch2 "t") "\t")
+                                (true ch2))))
+                        ch)
+                    (read_tstring_char s))))))
+
 (def read_string (s)
     (let (delim (get_next_char s))
     (exec
         (assert (eq "\"" delim))
-        (join "" (read_string_char s)))))
+        (if (eq (peek s) "\"")
+            (let (ch (get_next_char s))
+                (if (eq (peek s) "\"")
+                    (let (ch (get_next_char s))
+                        (join "" (read_tstring_char s)))
+                    ""))
+            (join "" (read_string_char s))))))
 
 
 (def read_symbol (s)
     (let (ch (peek s))
     (cond
-        ((in ch "abcdefghijklmnopqrstuvwxyz_0123456789")
+        ((in ch "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789")
             (read_name s))
         ((in ch "+-*/")
             (let (_ (get_next_char s))
@@ -96,12 +128,12 @@
     (cond
         ((not (has_chars s))
             '())
-        ((in (peek s) "abcdefghijklmnopqrstuvwxyz_0123456789")
+        ((in (peek s) "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789")
             (cons (get_next_char s) (read_name_char s)))
         (true '())))
 
 (def read_name (s)
-    (if (not (in (peek s) "abcdefghijklmnopqrstuvwxyz_"))
+    (if (not (in (peek s) "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"))
         (raise
             (format
                 "Unexpected character at the beginning of a name: \"{}\""
@@ -132,7 +164,7 @@
                 (raise "Ran out of characters before reading expression."))
             ((eq ch "(") (read_list s))
             ((in ch "0123456789") (read_integer_literal s))
-            ((or (in ch "+-*/<>_") (in ch "abcdefghijklmnopqrstuvwxyz")) (read_symbol s))
+            ((or (in ch "+-*/<>_") (in ch "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")) (read_symbol s))
             ((eq ch "\"") (read_string s))
             ((eq ch "'")
                 (exec
@@ -205,7 +237,7 @@
             (if (isinstance rv 'Exception)
                 (let (stacktrace "TODO: format_stacktrace")
                     (exec
-                        (print "Stacktrace (most recent call last):")
+                        (print "Stacktrace (most recent call last [w]):")
                         (print stacktrace)
                         (print
                             (format

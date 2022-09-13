@@ -1,4 +1,3 @@
-from functions.str import w_str
 from wtypes.object import WObject
 from wtypes.string import WString
 
@@ -9,6 +8,7 @@ class WSymbol(WObject):
         if isinstance(name, str):
             name = WString(name)
         if not isinstance(name, WString):
+            from functions.str import w_str
             name = w_str(name)
         self.name = name
 

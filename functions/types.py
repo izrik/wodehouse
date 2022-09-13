@@ -8,6 +8,7 @@ from wtypes.list import WList
 from wtypes.module import WModule
 from wtypes.number import WNumber
 from wtypes.scope import WScope
+from wtypes.set import WSet
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
@@ -37,6 +38,8 @@ def get_type(arg):
         return WSymbol.get('Scope')
     if isinstance(arg, WException):
         return WSymbol.get('Exception')
+    if isinstance(arg, WSet):
+        return WSymbol.get('Set')
     raise Exception('Unknown object type: "{}" ({})'.format(arg, type(arg)))
 
 

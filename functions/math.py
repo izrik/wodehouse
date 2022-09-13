@@ -1,4 +1,3 @@
-from functions.str import w_str
 from functions.types import get_type
 from wtypes.control import WRaisedException
 from wtypes.exception import WException
@@ -18,9 +17,21 @@ def add(*operands):
     if len(operands) < 1:
         return WNumber(0)
     if isinstance(operands[0], WList):
+        for operand in operands:
+            from wtypes.object import WObject
+            if not isinstance(operand, WObject):
+                raise TypeError(
+                    f'Operand to add should be a WList, to match other '
+                    f'operands. Got "{operand}" ({type(operand)}) instead.')
+            if not isinstance(operand, WList):
+                return WRaisedException(
+                    WException(
+                        f'Operand to add should be a WList, to match other '
+                        f'operands. Got "{operand}" ({get_type(operand)}) '
+                        f'instead.'))
         x = []
         for operand in operands:
-            x += operand
+            x = x + operand.values
         return WList(*x)
     if isinstance(operands[0], WNumber):
         x = 0
@@ -28,6 +39,7 @@ def add(*operands):
             x += operand.value
         return WNumber(x)
     if isinstance(operands[0], WString):
+        from functions.str import w_str
         parts = WList()
         for operand in operands:
             parts = parts.append(w_str(operand).value)
@@ -47,16 +59,21 @@ def sub(*operands):
             x = operand.value
             first = False
             continue
-        x -= operand.value
+        x = x - operand.value
     return WNumber(x)
 
 
 def mult(*operands):
     if not operands:
+        # TODO: raise an exception here
         return WNumber(1)
+    # TODO: thorough operator checking
+    # TODO: i.e. (str * int) and (int * str) are ok, but no (str * str)
     x = 1
     for operand in operands:
-        x *= operand.value
+        x = x * operand.value
+    if isinstance(x, str):
+        return WString(x)
     return WNumber(x)
 
 
@@ -71,7 +88,22 @@ def div(*operands):
             first = False
             continue
         try:
-            x /= operand.value
+            x = x / operand.value
         except ZeroDivisionError:
             return WRaisedException(exception=WException('Division by zero'))
     return WNumber(x)
+
+
+def w_int(operand):
+    from wtypes.object import WObject
+    if operand is None:
+        raise ValueError('Expected a value, got None instead.')
+    if not isinstance(operand, WObject):
+        raise TypeError(f'Argument to w_int should be a WObject. '
+                        f'Got "{operand}" ({type(operand)}) instead.')
+    if not isinstance(operand, WNumber):
+        return WRaisedException(
+            exception=WException(f'Argument to int should be a Number. '
+                                 f'Got "{operand}" ({get_type(operand)}) '
+                                 f'instead.'))
+    return WNumber(int(operand.value))

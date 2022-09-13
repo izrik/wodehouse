@@ -24,8 +24,13 @@ def parse(s):
                 s
                 (stream s)))) )
     """
+    from wtypes.object import WObject
+    if not isinstance(s, WObject):
+        from modules.sys import w_from_py
+        s = w_from_py(s)
     if not isinstance(s, WStream):
-        s = WStream(str(s))
+        from functions.str import w_str
+        s = WStream(w_str(s))
     return read_expr(s)
 
 
@@ -75,9 +80,7 @@ def read_whitespace_and_comments(s):
                 s.get_next_char()
                 ch = s.peek()
             if not s.has_chars():
-                raise RanOutOfCharactersException(
-                    "Ran out of characters before reading expression.",
-                    s, s.get_position())
+                break
         s.get_next_char()
         ch = s.peek()
 
@@ -93,7 +96,8 @@ def read_expr(s):
             (raise "Ran out of characters before reading expression."))
         ((eq ch "(") (read_list s))
         ((in ch "0123456789") (read_integer_literal s))
-        ((or (in ch "+-*/<>_") (in ch "abcdefghijklmnopqrstuvwxyz"))
+        ((or (in ch "+-*/<>_")
+             (in ch "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"))
             (read_symbol s))
         ((eq ch "\"") (read_string s))
         ((eq ch "'")
@@ -154,22 +158,69 @@ def read_string(s):
                     ch)
                 (read_string_char s)))))))
 
+    (def read_tstring_char (s)
+        (if (not (has_chars s))
+            (raise "Ran out of characters before string was finished.")
+            (let (ch (get_next_char s))
+                (if (eq ch "\"")
+                    (if (eq (peek s) "\"")
+                        (let (ch2 (get_next_char s))
+                            (if (eq (peek s) "\"")
+                                '()
+                                (+ ("\"" "\"") (read_tstring_char s))))
+                        (+ ("\"") (read_tstring_char s)))
+                    (cons
+                        (if (eq ch "\\")
+                            (if (not (has_chars s))
+                                (raise
+                                    (+ "Ran out of characters before escape "
+                                       "sequence was finished."))
+                                (let (ch2 (get_next_char s))
+                                (cond
+                                    ((eq ch2 "n") "\n")
+                                    ((eq ch2 "r") "\r")
+                                    ((eq ch2 "t") "\t")
+                                    (true ch2))))
+                            ch)
+                        (read_tstring_char s))))))
+
     (define read_string
     (lambda (s)
     (let (delim (get_next_char s))
     (exec
         (assert (eq "\"" delim))
-        (join "" (read_string_char s))))))
+        (if (eq (peek s) "\"")
+            (let (ch (get_next_char s))
+                (if (eq (peek s) "\"")
+                    (join "" (read_tstring_char s))
+                    ""))
+            (join "" (read_string_char s)))))))
     """
     pos = s.get_position()
     delim = s.get_next_char()
     assert delim == '"'
+    is_triple = False
+    if s.peek() == '"':
+        s.get_next_char()
+        if s.peek() != '"':
+            return WString('', position=pos)
+        s.get_next_char()
+        is_triple = True
     chs = []
+    ch = ' '
     while s.has_chars():
         ch = s.get_next_char()
         if ch == delim:
-            value = ''.join(chs)
-            return WString(value, position=pos)
+            if not is_triple:
+                value = ''.join(chs)
+                return WString(value, position=pos)
+            if s.peek() == '"':
+                s.get_next_char()
+                if s.peek() == '"':
+                    s.get_next_char()
+                    value = ''.join(chs)
+                    return WString(value, position=pos)
+                chs.append('"')
         if ch == '\\':
             ch = s.get_next_char()
             if ch == 'n':
@@ -190,7 +241,7 @@ def read_symbol(s):
 (lambda (s)
 (let (ch (peek s))
 (cond
-    ((in ch "abcdefghijklmnopqrstuvwxyz_0123456789")
+    ((in ch "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789")
         (read_name s))
     ((in ch "+-*/")
         (let (_ (get_next_char s))
@@ -234,13 +285,14 @@ def read_name(s):
 (cond
     ((not (has_chars s))
         '())
-    ((in (peek s) "abcdefghijklmnopqrstuvwxyz_0123456789")
+    ((in (peek s)
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789")
         (cons (get_next_char s) (read_name_char s)))
     (true '()))))
 
 (define read_name
 (lambda (s)
-(if (not (in (peek s) "abcdefghijklmnopqrstuvwxyz_"))
+(if (not (in (peek s) "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"))
     (raise
         (format
             "Unexpected character at the beginning of a name: \"{}\""

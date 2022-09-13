@@ -22,6 +22,9 @@ class WBoolean(WObject):
             return self.value == other.value
         return False
 
+    def __hash__(self):
+        return hash(self.value)
+
     @staticmethod
     def from_value(value):
         if isinstance(value, WBoolean):
