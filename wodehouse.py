@@ -141,7 +141,7 @@ def check_and_print_exception(rv, default_filename=None):
 
         stacktrace = format_stacktrace(rv.stack,
                                        default_filename=default_filename)
-        print('Stacktrace (most recent call last):')
+        print('Stacktrace (most recent call last [py]):')
         print(stacktrace)
         print(f'Exception: {rv.exception.message.value}')
         return rv.exception

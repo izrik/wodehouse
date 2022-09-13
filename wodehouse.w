@@ -237,7 +237,7 @@
             (if (isinstance rv 'Exception)
                 (let (stacktrace "TODO: format_stacktrace")
                     (exec
-                        (print "Stacktrace (most recent call last):")
+                        (print "Stacktrace (most recent call last [w]):")
                         (print stacktrace)
                         (print
                             (format
