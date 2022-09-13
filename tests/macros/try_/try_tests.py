@@ -6,11 +6,12 @@ from functions.str import w_str
 from modules.builtins import create_builtins_module
 from modules.sys import create_sys_module
 from wtypes.control import WRaisedException
-from wtypes.exception import WException, WSystemExit
+from wtypes.exception import WException, WSystemExit, WSyntaxError
 from wtypes.list import WList
 from wtypes.magic_function import WMagicFunction
 from wtypes.magic_macro import WMagicMacro
 from wtypes.number import WNumber
+from wtypes.position import Position
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
@@ -509,8 +510,11 @@ class TryTest(TestCase):
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'try requires at least two clauses. Got 1 instead.')
+        self.assertEqual(result.exception.position.line, 2)
+        self.assertEqual(result.exception.position.char, 34)
 
     def test_no_finally_expr_raises(self):
         # when
@@ -520,8 +524,11 @@ class TryTest(TestCase):
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'No expression in finally clause.')
+        self.assertEqual(result.exception.position.line, 3)
+        self.assertEqual(result.exception.position.char, 30)
 
     def test_too_many_finally_exprs_raises(self):
         # when
@@ -542,8 +549,11 @@ class TryTest(TestCase):
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'No expression in except clause.')
+        self.assertEqual(result.exception.position.line, 3)
+        self.assertEqual(result.exception.position.char, 30)
 
     def test_no_expr_in_except_as_e_raises(self):
         # when
@@ -553,8 +563,11 @@ class TryTest(TestCase):
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'No expression in except clause.')
+        self.assertEqual(result.exception.position.line, 3)
+        self.assertEqual(result.exception.position.char, 30)
 
     def test_too_many_exprs_in_except_without_as_e_raises_2(self):
         # when
@@ -564,8 +577,11 @@ class TryTest(TestCase):
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'Too many expressions in except clause.')
+        self.assertEqual(result.exception.position.line, 3)
+        self.assertEqual(result.exception.position.char, 30)
 
     def test_too_many_exprs_in_except_with_as_e_raises(self):
         # when
@@ -599,9 +615,13 @@ class TryTest(TestCase):
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
-        self.assertEqual(w_str(result.exception.message),
+        wexc = result.exception
+        self.assertIsInstance(wexc, WSyntaxError)
+        self.assertEqual(w_str(wexc.message),
                          'An except clause must appear before the finally '
                          'clause.')
+        self.assertEqual(wexc.position.line, 4)
+        self.assertEqual(wexc.position.char, 30)
 
     def test_invalid_clause_head_raises(self):
         # when
@@ -611,8 +631,11 @@ class TryTest(TestCase):
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'Invalid clause: something.')
+        self.assertEqual(result.exception.position.line, 3)
+        self.assertEqual(result.exception.position.char, 31)
 
     def test_invalid_clause_raises(self):
         # when
@@ -622,9 +645,12 @@ class TryTest(TestCase):
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'Clause must be a list. Got "1" '
                          '(Number) instead.')
+        self.assertEqual(result.exception.position.line, 3)
+        self.assertEqual(result.exception.position.char, 30)
 
     def test_non_symbol_clause_head_raises(self):
         # when
@@ -634,9 +660,12 @@ class TryTest(TestCase):
                           create_builtins_module())
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'Clause must start with a symbol. Got "1" '
                          '(Number) instead.')
+        self.assertEqual(result.exception.position.line, 3)
+        self.assertEqual(result.exception.position.char, 31)
 
     def test_filter_exception_catches_regular_exception(self):
         # when
@@ -728,8 +757,11 @@ class TryTest(TestCase):
                           bm)
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'Too many expressions in except clause.')
+        self.assertEqual(result.exception.position.line, 3)
+        self.assertEqual(result.exception.position.char, 30)
 
     def test_many_expressions_after_filter_wraises(self):
         # given
@@ -741,8 +773,11 @@ class TryTest(TestCase):
                           bm)
         # then
         self.assertIsInstance(result, WRaisedException)
+        self.assertIsInstance(result.exception, WSyntaxError)
         self.assertEqual(w_str(result.exception.message),
                          'Too many expressions in except clause.')
+        self.assertEqual(result.exception.position.line, 3)
+        self.assertEqual(result.exception.position.char, 30)
 
     def test_multiple_clauses_filter_systemexit_catches_systemexit(self):
         # given
