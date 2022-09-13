@@ -1,5 +1,7 @@
 (import sys exit)
 (import runw run_module_with_rt add_emit_listener remove_emit_listener)
+(import wodehouse read_expr read_whitespace_and_comments)
+(import time time)
 
 #####
 
@@ -144,49 +146,34 @@
         <thead>
         <tr class="tablehead" title="Click to sort">
             <th class="name left headerSortDown shortkey_n header">Module</th>
-            <th class="shortkey_s header">statements</th>
-            <th class="shortkey_m header">missing</th>
-            <th class="shortkey_x header">excluded</th>
-            <th class="shortkey_b header">branches</th>
-            <th class="shortkey_p header">partial</th>
-            <th class="right shortkey_c header">coverage</th>
+            <th class="header">Expressions</th>
+            <th class="header">Evaluated</th>
+            <th class="header">Missed</th>
+            <th class="right header">Coverage %</th>
         </tr>
         </thead>
-        <tfoot>
-        <tr class="total">
-            <td class="name left">Total</td>
-            <td>2355</td>
-            <td>324</td>
-            <td>0</td>
-            <td>1033</td>
-            <td>181</td>
-            <td class="right" data-ratio="2805 3388">83%</td>
-        </tr>
-        <tr class="total_dynamic hidden">
-            <td class="name left">Total</td>
-            <td>2355</td>
-            <td>324</td>
-            <td>0</td>
-            <td>1033</td>
-            <td>181</td>
-            <td class="right" data-ratio="2805 3388">83%</td>
-        </tr>
-        </tfoot>
         <tbody>
 """)
 
 (define _index_file_row_template """        <tr class="file">
             <td class="name left"><a href="{}">{}</a></td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
-            <td class="right" data-ratio="0 0">100%</td>
+            <td>{}</td>
+            <td>{}</td>
+            <td>{}</td>
+            <td class="right">{}</td>
         </tr>
 """)
 
 (define _index_file_footer """        </tbody>
+        <tfoot>
+        <tr class="total">
+            <td class="name left">Total</td>
+            <td>{}</td>
+            <td>{}</td>
+            <td>{}</td>
+            <td class="right">{}</td>
+        </tr>
+        </tfoot>
     </table>
     <p id="no_rows" style="display: none;">
         No items found using the specified filter.
@@ -196,7 +183,7 @@
     <div class="content">
         <p>
             <a class="nav" href="https://github.com/izrik/wodehouse">wodehouse v0.1</a>,
-            created at 2020-10-26 09:01
+            created at {}
         </p>
     </div>
 </div>
@@ -209,19 +196,63 @@ This is the file contents: {} {}
 
 ################
 
-(def _generate_index_file (modules positions)
-    (apply +
-        (+
-            (list _index_file_header)
-            (map
-                (lambda (module)
-                    (let (href (_get_href_from_module_name module))
+(def _generate_index_rows (modules positions coverage_by_module)
+    (if (eq modules '())
+        '()
+        (cons
+            (let (module (car modules))
+                 (mod_coverage (car coverage_by_module))
+                 (evaluated (car mod_coverage))
+                 (total (car (cdr mod_coverage)))
+                 (missed (- total evaluated))
+                 (coverage (if (eq total 0)
+                            0
+                            (* 100 (/ evaluated total))))
+                 (href (_get_href_from_module_name module))
+                (format
+                    _index_file_row_template
+                    href
+                    module
+                    total
+                    evaluated
+                    missed
+                    coverage))
+            (_generate_index_rows
+                (cdr modules)
+                positions
+                (cdr coverage_by_module)))))
+
+(def _calculate_coverage_totals (coverage_by_module)
+    (if (eq coverage_by_module '())
+        '(0 0)
+        (let (prev (_calculate_coverage_totals (cdr coverage_by_module)))
+             (total (car prev))
+             (evaluated (car (cdr prev)))
+             (mod_coverage (car coverage_by_module))
+            (list
+                (+ total (car mod_coverage))
+                (+ evaluated (car (cdr mod_coverage)))))))
+
+(def _generate_index_file (modules positions coverage_by_module)
+    (let (totals (_calculate_coverage_totals coverage_by_module))
+        (apply +
+            (+
+                (list _index_file_header)
+                (_generate_index_rows modules positions coverage_by_module)
+                (list
+                    (let (total (car totals))
+                         (evaluated (car (cdr totals)))
+                         (missed (- total evaluated))
+                         (coverage (if (eq total 0)
+                                    100
+                                    (* 100 (/ evaluated total))))
                         (format
-                            _index_file_row_template
-                            href
-                            module)))
-                modules)
-        (list _index_file_footer))))
+                            _index_file_footer
+                            total
+                            evaluated
+                            missed
+                            coverage
+                            (time))))))))
 
 (def _generate_module_file (module positions)
     (let (filename (_get_href_from_module_name module))
@@ -242,7 +273,7 @@ This is the file contents: {} {}
                     (_generate_module_file module positions))
                 (_write_module_files (cdr modules) positions)))))
 
-(def _get_exprs_from_stream (s)
+(def _get_exprs_from_stream1 (s)
     (let (_ (read_whitespace_and_comments s))
         (if (not (has_chars s))
             '()
@@ -254,7 +285,16 @@ This is the file contents: {} {}
                         (format "Error reading expressions from \"{}\": {}"
                             (get_position s)
                             (get_message e)))))
-                (_get_exprs_from_stream s)))))
+                (_get_exprs_from_stream1 s)))))
+
+(def _get_exprs_from_stream2 (s)
+    (let (exprs (list))
+        (exec
+            (while (has_chars s)
+                (append exprs (read_expr s)))
+            exprs)))
+(def _get_exprs_from_stream (s)
+    (_get_exprs_from_stream2 s))
 
 (def _get_exprs_from_file (contents filename)
     (let (s (stream contents filename))
