@@ -37,6 +37,7 @@ def get_type(arg):
             return WSymbol.get('Module')
         return WSymbol.get('Scope')
     if isinstance(arg, WException):
+        # TODO: other exception types
         return WSymbol.get('Exception')
     if isinstance(arg, WSet):
         return WSymbol.get('Set')
