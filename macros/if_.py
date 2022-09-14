@@ -10,9 +10,10 @@ class If(WMagicMacro):
         if scope is None:
             scope = WScope()
         if len(exprs) not in [2, 3]:
-            return WRaisedException(WSyntaxError(
-                "Expected 2 or 3 arguments to if, got {} instead.".format(
-                    len(exprs))))
+            return WRaisedException(
+                WSyntaxError(
+                    f"Expected 2 or 3 arguments to if, "
+                    f"got {len(exprs)} instead."))
         condition = exprs[0]
         true_retval = exprs[1]
         if len(exprs) > 2:
