@@ -10,7 +10,8 @@ echo "Running python unit tests in tests/ with coverage..." && \
     echo "" && echo "Converting py-coverage to html..." && \
     coverage html && \
     echo "" && echo "Running flake8..." && \
-    flake8 *.py functions macros wtypes modules tests && \
+    flake8 ./*.py functions macros wtypes modules tests && \
+    shellcheck ./*.sh && /
     # TODO: wlint
     echo "" && echo "Comparing python and w-lang sources..." && \
     ./compare_sources.py
