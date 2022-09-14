@@ -1,5 +1,5 @@
 from wtypes.control import WEvalRequired, WReturnValue, WRaisedException
-from wtypes.exception import WException
+from wtypes.exception import WException, WSyntaxError
 from wtypes.magic_macro import WMagicMacro
 from wtypes.boolean import WBoolean
 from wtypes.scope import WScope
@@ -10,7 +10,7 @@ class If(WMagicMacro):
         if scope is None:
             scope = WScope()
         if len(exprs) not in [2, 3]:
-            return WRaisedException(WException(
+            return WRaisedException(WSyntaxError(
                 "Expected 2 or 3 arguments to if, got {} instead.".format(
                     len(exprs))))
         condition = exprs[0]
