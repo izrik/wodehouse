@@ -13,7 +13,9 @@ class If(WMagicMacro):
             return WRaisedException(
                 WSyntaxError(
                     f"Expected 2 or 3 arguments to if, "
-                    f"got {len(exprs)} instead."))
+                    f"got {len(exprs)} instead.",
+                    # TODO: get the position of the containing expression
+                    exprs[0].position))
         condition = exprs[0]
         true_retval = exprs[1]
         if len(exprs) > 2:
