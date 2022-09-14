@@ -11,7 +11,6 @@ from wtypes.list import WList
 from wtypes.magic_function import WMagicFunction
 from wtypes.magic_macro import WMagicMacro
 from wtypes.number import WNumber
-from wtypes.position import Position
 from wtypes.string import WString
 from wtypes.symbol import WSymbol
 
