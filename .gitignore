@@ -195,6 +195,7 @@ FakesAssemblies/
 # Python
 __pycache__/
 .coverage
+.coverage.json
 htmlcov/
 _scratch*
 instance/

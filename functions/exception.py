@@ -26,12 +26,12 @@ def get_message(exc):
 
 def get_exception_position(exc):
     if not isinstance(exc, WObject):
-        raise TypeError(f'Argument to get_message must be a WObject. '
-                        f'Got "{exc}" ({type(exc)}) instead.')
+        raise TypeError(f'Argument to get_exception_position must be a '
+                        f'WObject. Got "{exc}" ({type(exc)}) instead.')
     if not isinstance(exc, WException):
         return WRaisedException(
             WException(
-                f'Argument to get_message must be an Exception. '
+                f'Argument to get_exception_position must be an Exception. '
                 f'Got "{exc}" ({get_type(exc)}) instead.'))
     if exc.stack is None:
         return WString('<unknown>')

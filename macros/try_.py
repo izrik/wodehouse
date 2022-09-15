@@ -1,7 +1,7 @@
 from functions.types import get_type
 from wtypes.control import WSetHandlers, WEvalRequired, WRaisedException, \
     WExpandedAndEvaled
-from wtypes.exception import WException
+from wtypes.exception import WException, WSyntaxError
 from wtypes.list import WList
 from wtypes.magic_macro import WMagicMacro
 from wtypes.symbol import WSymbol
@@ -77,38 +77,43 @@ class Try(WMagicMacro):
         s_as = WSymbol.get('as')
 
         # check args
-        # TODO: Change these WExceptions to something like WSyntaxError
-        # TODO: Also somehow store the position in the exceptions
         if len(exprs) < 2:
             return WRaisedException(
-                WException(f"try requires at least two clauses. "
-                           f"Got {len(exprs)} instead."))
+                # TODO: get the position of the enclosing macro call
+                WSyntaxError(f"try requires at least two clauses. "
+                             f"Got {len(exprs)} instead.",
+                             exprs[0].position))
         for expr in exprs[1:]:
             if not isinstance(expr, WList):
                 return WRaisedException(
-                    WException(f'Clause must be a list. '
-                               f'Got "{expr}" ({get_type(expr)}) instead.'))
+                    WSyntaxError(f'Clause must be a list. '
+                                 f'Got "{expr}" ({get_type(expr)}) instead.',
+                                 expr.position))
             if not isinstance(expr[0], WSymbol):
                 return WRaisedException(
-                    WException(f'Clause must start with a symbol. '
-                               f'Got "{expr[0]}" ({get_type(expr[0])}) '
-                               f'instead.'))
+                    WSyntaxError(f'Clause must start with a symbol. '
+                                 f'Got "{expr[0]}" ({get_type(expr[0])}) '
+                                 f'instead.',
+                                 expr[0].position))
             if expr[0] == s_exc:
                 if len(expr) < 2:
                     return WRaisedException(
-                        WException('No expression in except clause.'))
+                        WSyntaxError('No expression in except clause.',
+                                     expr.position))
                 elif len(expr) == 2:  # except expr
                     pass
                 elif len(expr) == 3:  # except T expr
                     if expr[1] == s_as:
                         return WRaisedException(
-                            WException('No expression in except clause.'))
+                            WSyntaxError('No expression in except clause.',
+                                         expr.position))
                     else:
                         exc_type_expr = expr[1]
                         if not isinstance(exc_type_expr, WSymbol) or \
                                 (exc_type_expr != WSymbol.get('Exception') and
                                  exc_type_expr != WSymbol.get('SystemExit')):
                             return WRaisedException(
+                                # TODO: TypeError
                                 WException(
                                     'Except clause filter must be a '
                                     'subclass of Exception.'))
@@ -117,36 +122,44 @@ class Try(WMagicMacro):
                         pass
                     else:
                         return WRaisedException(
-                            WException(
-                                'Too many expressions in except clause.'))
+                            WSyntaxError(
+                                'Too many expressions in except clause.',
+                                expr.position))
                 elif len(expr) == 5:  # except T as e expr
                     exc_type_expr = expr[1]
                     if not isinstance(exc_type_expr, WSymbol) or \
                             (exc_type_expr != WSymbol.get('Exception') and
                              exc_type_expr != WSymbol.get('SystemExit')):
                         return WRaisedException(
+                            # TODO: TypeError
                             WException(
                                 'Except clause filter must be a '
                                 'subclass of Exception.'))
                     if expr[2] != s_as:
                         return WRaisedException(
-                            WException(
-                                'Too many expressions in except clause.'))
+                            WSyntaxError(
+                                'Too many expressions in except clause.',
+                                expr.position))
                 else:  # len(expr) > 5
                     return WRaisedException(
-                        WException('Too many expressions in except clause.'))
+                        WSyntaxError('Too many expressions in except clause.',
+                                     expr.position))
             elif expr[0] == s_fin:
                 if len(expr) < 2:
                     return WRaisedException(
-                        WException('No expression in finally clause.'))
+                        WSyntaxError('No expression in finally clause.',
+                                     expr.position))
                 elif len(expr) == 2:
                     pass
                 else:  # len(expr) > 2
                     return WRaisedException(
-                        WException('Too many expressions in finally clause.'))
+                        WSyntaxError(
+                            'Too many expressions in finally clause.',
+                            expr.position))
             else:  # invalid clause
                 return WRaisedException(
-                    WException(f'Invalid clause: {expr[0]}.'))
+                    WSyntaxError(f'Invalid clause: {expr[0]}.',
+                                 expr[0].position))
 
         code_clause = exprs[0]
         except_clauses = []
@@ -156,8 +169,10 @@ class Try(WMagicMacro):
             if head == s_exc:
                 if finally_clause is not None:
                     return WRaisedException(
-                        WException('An except clause must appear before the '
-                                   'finally clause.'))
+                        WSyntaxError(
+                            'An except clause must appear before the '
+                            'finally clause.',
+                            expr.position))
                 except_var_name = None
                 filter_type = WSymbol.get('Exception')
                 if len(expr) == 2:
@@ -175,7 +190,8 @@ class Try(WMagicMacro):
             else:  # head == s_fin:
                 if finally_clause is not None:
                     return WRaisedException(
-                        WException('Too many finally clauses.'))
+                        WSyntaxError('Too many finally clauses.',
+                                     expr.position))
                 finally_clause = expr[1]
 
         def run_code_clause():

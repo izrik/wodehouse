@@ -41,3 +41,37 @@ class WrappedWException(Exception):
             raise TypeError(f'Argument "exc" must be of type WException. '
                             f'Got "{exc}" ({type(exc)}) instead.')
         self.exc = exc
+
+
+class WSyntaxError(WException):
+    """ Invalid syntax. """
+
+    def __init__(self, message, position):
+        super().__init__(message)
+        self.position = position
+
+# TODO: BaseException
+# TODO:   eventually, GeneratorExit
+# TODO:   KeyboardInterrupt
+
+# TODO: ArithmeticError
+# TODO:   FloatingPointError
+# TODO:   OverflowError
+# TODO:   ZeroDivisionError
+# TODO: AssertionError
+# TODO: eventually, AttributeError
+# TODO: ImportError
+# TODO:   ModuleNotFoundError
+# TODO: LookupError
+# TODO:   KeyError
+# TODO:   IndexError
+# TODO: NameError
+# TODO:   UnboundLocalError
+# TODO: OSError
+# TODO: RuntimeError
+# TODO:   NotImplementedError
+# TODO:   RecursionError
+# TODO: StopIteration
+# TODO: TypeError
+# TODO: ValueError
+# TODO:   UnicodeError, et al
