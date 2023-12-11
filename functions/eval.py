@@ -94,16 +94,10 @@ def w_eval(expr, scope, stack=None):
             stack)
 
     # Look up the current runtime and emit the expr
-    get_rt = None
-    if 'get_current_runtime' in scope and \
-            scope['get_current_runtime'] is not None:
-        get_rt = scope['get_current_runtime']
-    elif scope.get_builtins_module() is not None and \
-            'get_current_runtime' in scope.get_builtins_module() and \
-            scope.get_builtins_module()['get_current_runtime'] is not None:
-        get_rt = scope.get_builtins_module()['get_current_runtime']
-    if get_rt:
-        rt = get_rt.call_magic_function()
+    if scope.get_builtins_module() is not None and \
+            '__current_runtime__' in scope.get_builtins_module() and \
+            scope.get_builtins_module()['__current_runtime__'] is not None:
+        rt = scope.get_builtins_module()['__current_runtime__']
         rt.emit(expr, scope, stack)
 
     stack.expr = expr
