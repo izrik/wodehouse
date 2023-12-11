@@ -29,6 +29,11 @@ class Runtime(WObject):
         # TODO: don't execute the modules' w-lang code until they're imported.
         # Otherwise "-m" won't work
 
+        from wtypes.list import WList
+        if not argv:
+            argv = WList([])
+        if not isinstance(argv, WList):
+            argv = WList(argv)
         self.sys_module = create_sys_module(self.builtins_module, argv=argv)
         cache[WSymbol.get('sys')] = self.sys_module
 
