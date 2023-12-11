@@ -22,7 +22,8 @@ class Runtime(WObject):
         self.import_ = Import()
         cache = self.import_.module_cache
         if not evaluator:
-            evaluator = None
+            from wtypes.evaluator import WEvaluator
+            evaluator = WEvaluator()
         self.evaluator = evaluator
         self.emit_listeners = []
         self.emit_listener_scopes = {}
