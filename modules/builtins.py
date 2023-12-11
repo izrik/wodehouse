@@ -171,4 +171,5 @@ def create_builtins_module(import_=None, runtime=None):
         module.update({
             'get_current_runtime': GetCurrentRuntime(runtime, module),
         })
+        module.update({'__current_runtime__': runtime})
     return module
