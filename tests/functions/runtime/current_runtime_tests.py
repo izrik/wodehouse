@@ -5,22 +5,13 @@ from runtime import Runtime
 from wtypes.list import WList
 
 
-class GetCurrentRuntimeTest(unittest.TestCase):
-    def test_gets_current_runtime(self):
-        # given
-        rt = Runtime(WList())
-        gcr = GetCurrentRuntime(rt, None)
-        # when
-        result = gcr.call_magic_function()
-        # then
-        self.assertIs(result, rt)
+class CurrentRuntimeTest(unittest.TestCase):
 
     def test_is_created_by_the_runtime(self):
         # given
         rt = Runtime(WList())
-        gcr = rt.builtins_module['get_current_runtime']
         # when
-        result = gcr.call_magic_function()
+        result = rt.builtins_module['__current_runtime__']
         # then
         self.assertIs(result, rt)
 
@@ -29,4 +20,4 @@ class GetCurrentRuntimeTest(unittest.TestCase):
         # when
         bm = create_builtins_module()
         # then
-        self.assertNotIn('get_current_runtime', bm)
+        self.assertNotIn('__current_runtime__', bm)
