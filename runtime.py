@@ -16,11 +16,14 @@ from wtypes.symbol import WSymbol
 
 
 class Runtime(WObject):
-    def __init__(self, argv):
+    def __init__(self, argv=None, evaluator=None):
         super().__init__()
         from macros.import_ import Import
         self.import_ = Import()
         cache = self.import_.module_cache
+        if not evaluator:
+            evaluator = None
+        self.evaluator = evaluator
         self.emit_listeners = []
         self.emit_listener_scopes = {}
         self.builtins_module = create_builtins_module(import_=self.import_,

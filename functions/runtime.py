@@ -2,8 +2,8 @@ from runtime import Runtime
 from wtypes.magic_function import WMagicFunction
 
 
-def w_runtime(argv):
-    return Runtime(argv)
+def w_runtime(argv, evaluator=None):
+    return Runtime(argv, evaluator)
 
 
 def add_emit_listener(runtime, listener, enclosing_scope):

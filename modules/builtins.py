@@ -139,7 +139,8 @@ def create_builtins_module(import_=None, runtime=None):
         'filter': WMagicFunction(w_filter, module, name='filter'),
         'module': WMagicFunction(w_module, module, name='module',
                                  check_args=False),
-        'runtime': WMagicFunction(w_runtime, module, name='runtime'),
+        'runtime': WMagicFunction(w_runtime, module, name='runtime',
+                                  check_args=False),
         'try': Try(),
         'get_message': WMagicFunction(get_message, module),
         'format_stacktrace': WMagicFunction(
