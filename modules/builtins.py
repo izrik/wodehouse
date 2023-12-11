@@ -53,7 +53,6 @@ def create_builtins_module(import_=None, runtime=None):
     from functions.read import parse
     from functions.collections import w_unique, w_add, w_to_list, w_append
     from functions.str import w_starts_with, w_ends_with, w_join, w_split
-    from functions.runtime import GetCurrentRuntime
     from wtypes.set import WSet
     from wtypes.position import Position
     from functions.position import w_filename_from_position
@@ -168,8 +167,5 @@ def create_builtins_module(import_=None, runtime=None):
         'get_stream_index': WMagicFunction(get_stream_index, module),
     })
     if runtime is not None:
-        module.update({
-            'get_current_runtime': GetCurrentRuntime(runtime, module),
-        })
         module.update({'__current_runtime__': runtime})
     return module

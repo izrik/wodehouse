@@ -1,6 +1,5 @@
 import unittest
 
-from functions.runtime import GetCurrentRuntime
 from runtime import Runtime
 from wtypes.list import WList
 
